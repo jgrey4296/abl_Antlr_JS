@@ -1,0 +1,16 @@
+package compiledAbl;
+
+import wm.WorkingMemory;
+import java.lang.*;
+import javaPackage.*;
+
+
+behaving_entity TestEntity {
+    String s = "Hello World";
+
+    initial_tree {
+         mental_act {
+              System.out.println(s);
+         }
+    }
+}

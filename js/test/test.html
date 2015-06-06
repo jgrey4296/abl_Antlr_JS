@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <style>
+    .inputBox {
+    position: fixed;
+    }
+    
+  </style>
+  
+  <title>Test Visualisation</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src='lib/require.js'></script>
+    <script>
+      var antlr4 = require('antlr4/index');
+      console.log("Antlr Setup:",antlr4);
+    </script>
+    <script src='webTestMain.js'></script>
+
+</head>
+<body>
+  <p id="newChildBox" class='inputBox'>
+    <input type='text' id="newChildName">
+  </p>
+  <p id="newParBox" class='inputBox'>
+    <input type='text' id="newParName">
+  </p>
+    
+  
+</body>
+</html>

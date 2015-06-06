@@ -1,0 +1,8 @@
+package blah;
+import something;
+behaving_entity Agent{
+	initial_tree {
+    	fail;
+    }
+}
+

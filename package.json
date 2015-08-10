@@ -1,0 +1,23 @@
+{
+  "name": "abl_antlr_js",
+  "version": "1.0.0",
+  "description": "a web and node abl parser that uses antlr",
+  "main": "nodeMain.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgrey4296/abl_Antlr_JS.git"
+  },
+  "keywords": [
+    "abl",
+    "antlr"
+  ],
+  "author": "John Grey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jgrey4296/abl_Antlr_JS/issues"
+  },
+  "homepage": "https://github.com/jgrey4296/abl_Antlr_JS#readme"
+}

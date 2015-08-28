@@ -38,7 +38,7 @@ initialTree : 'initial_tree' '{'
         '}';
 
 behaviour :
-        (ATOMIC|JOIN|ADAPTIVE)?
+        (ATOMIC|JOINT|ADAPTIVE)?
         (SEQ|PAR|COLL)
         BEH name '(' params  ')'
         '{'

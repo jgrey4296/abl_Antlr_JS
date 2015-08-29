@@ -1,14 +1,14 @@
 var ABLModule = require('../ABLModule');
 
+var startRule = "g_package";
 exports.packageImportTests = {
 
     //Simple Smoke test
     simpleTest : function(test){
         var parseString = "package Blah;";
-        var startRule = "package";
-        var result = ABLModule.parse(parseString,startRule);
-
-        test.ok(result.length === 0);
+        var result = [];
+        result = ABLModule.parse(parseString,startRule);
+        test.ok(result.length === 1);
         test.ok(result[0].type === "package");
         test.ok(result[0].name === "Blah");        
         test.done();
@@ -17,32 +17,48 @@ exports.packageImportTests = {
     //Simple Test to check for failing
     noPackageFail : function(test){
         var parseString = "package;";
-        var startRule = "package";
         test.throws(function(){
             var result = ABLModule.parse(parseString,startRule);
         });
-        
         test.done();
     },
 
-    //Multiple Package declarations should complain
+    //Multiple Package declarations take only the first
     multiplePackageFail : function(test){
         var parseString = "package Blah; package Other;";
-        var startRule = "package";
-        test.throws(function(){
-            var result = ABLModule.parse(parseString, startRule);
-        });
+        var result = ABLModule.parse(parseString, startRule);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].name === "Blah");
+        test.ok(result[0].type === "package");
         
         test.done();
     },
 
     //Test for misspelled package
-    misspelledPackageFail : function(test){
+    //corrects /ignores the misspelling
+    misspelledPackageCorrect : function(test){
         var parseString = "pacage Blah;";
-        var startRule = "package";
-        test.throws(function(){
-            var result = ABLModule.parse(parseString,startRule);
-        });
+        var result = ABLModule.parse(parseString,startRule);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].name === "Blah");
+        test.ok(result[0].type === "package")
+        
+        test.done();
+    },
+
+    //Test of package from prog:
+    progTest : function(test){
+        var parseString = "package Blah;";
+        var startRule = "prog";
+
+        var result = ABLModule.parse(parseString,startRule);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].name === "Blah");
+        test.ok(result[0].type === "package");
+        
         test.done();
     },
     

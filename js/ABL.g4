@@ -6,13 +6,13 @@ import AblTokens;
 prog : g_package? g_import? behavingEntity? EOF;
 
 //g_ = grammar. As antlr will complain of conflicting keywords with target language
-g_package : 'package' name ';';
-g_import : 'import' name ';'; //todo .*?
-constants : 'constants' name ';';
+g_package : 'package' TYPE ';';
+g_import : ('import' TYPE STAR?';')*; //todo .*?
+constants : ('constants' TYPE ';')*;
 
 teamNeeded
-    : 'joint_goal_success_negotiation'
-        ('team_needed_for_success' | 'one_needed_for_success')';';
+    : JOINTNEG (TEAMNEEDED | ONENEEDED)';';
+
 decisionCycle : 'decision_cycle_sm_call' name ';';
 conflictDecl : 'conflict' name+ ';';
 
@@ -161,7 +161,7 @@ param : TYPE name;
 
 
 //NAME
-name : CHAR;
+name : CHARS;
 nameList : name (',' name)*;
 
 //STRING HACK:

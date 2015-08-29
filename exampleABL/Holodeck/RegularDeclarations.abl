@@ -1,0 +1,19 @@
+
+
+	/**
+	 * A WME to control the Greet behavior subtree.
+	 */
+	wme GreetWME {
+		long startTime;
+		String targetName;
+	}
+	
+	
+	/**
+	 * Used for counting other agents the holodeck avatar is facing and are nearby.
+	 */
+	wme FaceGroupWME {
+		String name;
+	}
+	
+	

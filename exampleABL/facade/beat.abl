@@ -1,0 +1,946 @@
+// leader beat.abl
+
+// ############
+sequential behavior TheBeatRoot() {
+
+	WorkingMemory beatMemory;
+
+	mental_act { StringUtil.println("Waiting for animEngine to send player name and gender info"); }
+
+	// wait until the animEngine has given us the player's name and gender
+	with (success_test { StoryMemory (PlayerInfoWME) } ) wait;
+
+	mental_act { StringUtil.println("Type g to start sequencing beats"); }
+
+	// In NLUMain.java typing "g" begins sequencing beats
+	with ( success_test { StoryMemory !(StoryStatusWME currentBeat == eBeatID_NOTABEAT) } ) wait;	
+
+	mental_act { StringUtil.println("starting the beats"); }
+
+	// ## do the beats
+	with (ignore_failure) subgoal TheBeatRoot_Body();
+
+	mental_act { StringUtil.println("Beats finished"); }
+
+	joint subgoal BeatsEndedCleanup();
+
+}
+
+sequential behavior TheBeatRoot_Body() {
+
+	// fixme remove -- for testing amb's
+	//subgoal MakeInitialFakeBeatStatusWMEForTestingAmbs();
+
+	// comment this in for beatloop
+	// with (persistent) subgoal DoTheBeats();
+
+	// ## keep doing beats until there's no more left!
+	// comment this out for beatloop
+	with (persistent when_succeeds) subgoal DoTheBeats();
+}
+
+
+sequential behavior MakeInitialFakeBeatStatusWMEForTestingAmbs() {
+	BeatStatusWME bsw; 
+	WorkingMemory beatMemory;
+	mental_act {				// make a fresh BeatStatusWME
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");	
+		beatMemory.deleteAllWMEClass("BeatStatusWME"); 
+		bsw = new BeatStatusWME(eBeatStatus_ambNextDecisionPoint, false, false);
+		beatMemory.addWME(bsw); 
+		g_reactionDecider.createShadowFact("beatStatus", bsw);
+	}
+}
+
+// ############
+// this will fail when there are no more beats to do
+sequential behavior DoTheBeats() {
+	precondition { StoryMemory	(TensionStoryValueWME value :: tension) 
+								(StoryStatusWME beatCount :: curBeatCtr
+												beatCountOfLastGreetingBeat :: beatCountOfLastGreetingBeat
+												affinity :: affinity) } 
+	BeatStatusWME bsw; 
+	WorkingMemory beatMemory;
+
+	mental_act {				// make a fresh BeatStatusWME
+		StringUtil.println("### Creating a fresh BeatStatusWME"); 
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");	
+		beatMemory.deleteAllWMEClass("BeatStatusWME"); 
+		bsw = new BeatStatusWME(eBeatStatus_running, false, false);
+		beatMemory.addWME(bsw); 
+		g_reactionDecider.createShadowFact("beatStatus", bsw);
+
+		// set this value for CrisisCalculus when we hit the first T2 beat
+		if (CrisisCalculus.firstT2BeatCtr == -1 && tension == 2.0f) {
+			CrisisCalculus.firstT2BeatCtr = curBeatCtr;
+
+			// at the T1->T2 boundary, create additional ReactionInfoWMEs,
+			// to now allow non-push-too-far T2L3 global mixins!
+			g_reactionDecider.createExtraT2ObjectReactionInfoWMEs();
+			g_reactionDecider.createExtraT2SatelliteReactionInfoWMEs();
+			g_reactionDecider.createExtraT2DAReactionInfoWMEs();
+		}
+
+		// If T2, be sure affinity is non-neutral
+		if (tension > 1.0f && affinity == eAffinity_neutral) {
+			assert false : ("Error: affinity is neutral past tension 1"); 
+		}
+	}
+
+	// set bPositiveSpin if first post-greeting beat
+	with (ignore_failure) subgoal DoTheBeats_SetPositiveSpinIfNeeded();
+
+	// update the status of what reactions are allowed (eg, pushtoofar's)
+	// this will modify the new BeatStatusWME
+	with (ignore_failure) subgoal UpdateRxnDeciderMiscWME();
+
+	// by default, turn on the beat DA handlers
+	subgoal SetDAHandlersActive(true);
+
+	// by default, reset the ItRefDefault
+	subgoal SetItRefDefault(eDAMiscParam_NOPARAM);
+	// make the timeout only 5 seconds
+	// note that the next normal call to SetItRefAndDefault() will reset the timeout to the standard value
+	subgoal SetItRefTimeout(5);
+
+	// do the current beat
+	joint subgoal BeatInit();			// custom for each beat
+	subgoal DoTheBeats_Body();
+	mental_act { g_reactionDecider.deleteShadowFact(bsw); }
+}
+
+
+// set bPositiveSpin if first post-greeting beat
+// we do this in a separate behavior because BeatArgumentWME may not exist
+sequential behavior DoTheBeats_SetPositiveSpinIfNeeded() {
+	precondition {	{ StoryMemory	(StoryStatusWME beatCount :: curBeatCtr
+													beatCountOfLastGreetingBeat :: beatCountOfLastGreetingBeat) } 
+					{ BeatMemory beatArgWME = (BeatArgumentWME) } }
+	mental_act {				
+		if (beatCountOfLastGreetingBeat > 0 && curBeatCtr == beatCountOfLastGreetingBeat + 1) {
+			beatArgWME.setBPositiveSpin(true);
+		}
+	}
+}
+
+
+parallel behavior DoTheBeats_Body() {
+	context_condition { BeatMemory (BeatStatusWME status != eBeatStatus_aborted) }	
+	specificity 2;
+
+	subgoal BeatGoals();	
+			
+	with (priority_modifier 1, one_needed_for_success,
+			success_test { BeatMemory (BeatStatusWME status == eBeatStatus_completed) } ) 
+		joint subgoal BeatHandlers();
+}
+
+// catch failure
+parallel behavior DoTheBeats_Body() {
+	precondition { BeatMemory (BeatStatusWME status :: status) }	
+	specificity 1;
+	mental_act { StringUtil.println("### DoTheBeats_Body() FAILED, BeatStatusWME status " + status); }
+}
+
+
+// ############
+// BeatGoals
+// note: if signature changes, fix AbortBeatGoalIntPAndSuspendBeatGoals() and UnsuspendBeatGoals()
+sequential behavior BeatGoals() {
+
+	subgoal BeatGoals_Body();		// custom for each beat
+
+	// set flag that beat is complete, so handlers finish
+	subgoal SetBeatStatus(eBeatStatus_completed);	
+}
+
+
+// ############
+joint parallel behavior BeatHandlers() { teammembers Trip Grace;
+
+	// Custom for each beat - beats don't have to define this if they don't want to
+	with (ignore_failure, priority 39) subgoal CustomBeatHandlers(); 
+
+	with (ignore_failure) subgoal handlerSucceedBeatWhenComplete();
+
+	with (ignore_failure, priority 55) spawngoal handlerBeatCleanup();
+
+	with (ignore_failure) subgoal BeatHandlers_more();
+}
+
+parallel behavior BeatHandlers_more() {
+	precondition { (true) }					// fixme: should be true; make false for tracing diagnostics
+
+	// ## awareness handlers
+	with (persistent, priority 30) subgoal handlerLookAtPlayerIfTyping();
+
+	// ## uncooperative player behavior
+	with (persistent, priority 30) subgoal handlerMonitorUncooperativePlayerBehavior();
+}
+
+// #######
+// handlerSucceedBeatWhenComplete
+// Wait for a TxnOut behavior to appear and then to disappear - this means that a TxnOut has happened and we should succeed the beat.
+sequential behavior handlerSucceedBeatWhenComplete() {
+	with (success_test { (GoalStepWME signature == "LastBeatGoalForThisBeat()") } ) wait; 
+	with (success_test { !(GoalStepWME signature == "LastBeatGoalForThisBeat()") } ) wait; 
+	subgoal handlerSucceedBeatWhenComplete_Body();
+}
+
+sequential behavior handlerSucceedBeatWhenComplete_Body() {
+
+	mental_act { 
+		StringUtil.println("###"); 
+		StringUtil.println("### handlerSucceedBeatWhenComplete succeeding the beat"); 
+		StringUtil.println("###"); 
+	}
+
+	// be sure affinity is non-neutral past T1
+	with (ignore_failure) subgoal CheckThatAffinityIsNonNeutralPastT1();
+	
+	mental_act { 
+		// ## TELL BEAT MANAGER TO SUCCEED CURRENT BEAT, AND CHOOSE A NEW BEAT!
+		DramaManager.getDramaManager().succeedCurrentBeat(); 
+	}
+}
+
+
+// ## be sure affinity is non-neutral past T1
+sequential behavior CheckThatAffinityIsNonNeutralPastT1() {
+	precondition { StoryMemory	(TensionStoryValueWME value > 1) 
+								storyStatusWME = (StoryStatusWME affinity == eAffinity_neutral) } 
+	mental_act { 
+		StringUtil.println("### "); 
+		StringUtil.println("### Error: affinity is neutral past tension 1 -- correcting this error"); 
+		StringUtil.println("### "); 
+
+		// error recovery
+		if (randGen.nextInt(2) == 0) storyStatusWME.setAffinity(eAffinity_grace);
+		else storyStatusWME.setAffinity(eAffinity_trip);
+	}
+}
+
+
+// #######
+// handlerBeatCleanup
+// this behavior is spawned, so that it can stay alive even when the beat that spawned it is gone
+// Wait for the current beat to be gone, and then call its cleanup behavior
+sequential behavior handlerBeatCleanup() {
+	precondition { StoryMemory (StoryStatusWME currentBeat :: curBeat) } 
+	with (success_test { StoryMemory (StoryStatusWME currentBeat != curBeat) } ) wait; 
+	mental_act { StringUtil.println("## handlerBeatCleanup"); }
+	subgoal BeatCleanup(curBeat);	// note we are calling this behavior with the previous beat's ID
+}
+sequential behavior BeatCleanup(int beatID) {
+	specificity 1;
+	mental_act { StringUtil.println("## WARNING: BeatCleanup for beat "+beatID+" did not occur, or failed"); }
+}
+
+sequential behavior BeatCleanup_SetDefaultPostBeatMixin(int which) {
+	precondition { (which >= 0) }
+	mental_act { StringUtil.println("Setting a default postbeatmixin"); }
+	subgoal SetPostBeatMixin(which);
+}
+
+
+// ############
+sequential behavior AbortTheBeat(int beatAbortReason) {						
+	mental_act { StringUtil.println("Aborting the beat"); }
+	subgoal AbortTheBeat_Body(beatAbortReason);
+}
+
+atomic sequential behavior AbortTheBeat_Body(int beatAbortReason) { 
+	precondition { BeatMemory beatStatusWME = (BeatStatusWME gistPointReached :: gistPointReached) }	
+
+	// set abortReason in (the soon-to-be-deleted) BeatStatusWME, to allow ltb's such as FixDrink to respond
+	mental_act { beatStatusWME.setAbortReason(beatAbortReason); }
+	
+	// enforce that affinity is non-neutral past T1
+	with (ignore_failure) subgoal CheckThatAffinityIsNonNeutralPastT1();
+
+	mental_act { 
+		if (gistPointReached) 
+			// If we've reached the gist point of the beat, then succeed instead of abort
+			DramaManager.getDramaManager().succeedCurrentBeat(); 
+		else
+			DramaManager.getDramaManager().failCurrentBeat(beatAbortReason); 
+	}
+
+	// DoTheBeats has a context condition asserting that status != eBeatStatus_aborted. 
+	// Setting the status to eBeatStatus_aborted causes the remaining beat goals and all beat handlers to be removed.
+	// this must be last, it could kill off this behavior!	
+	subgoal SetBeatStatus(eBeatStatus_aborted);	
+}
+
+
+// ############
+atomic sequential behavior SucceedAllBeatGoalsAndSuspendBeatGoals() {
+	with (ignore_failure) subgoal SucceedAllBeatGoals();
+	with (ignore_failure) subgoal AbortHandlerPause();
+	with (ignore_failure) subgoal AbortPauseAfterBeatGoal();
+	with (ignore_failure) subgoal SuspendBeatGoals();
+}
+
+// ############
+atomic sequential behavior SucceedAllBeatGoals() {
+	precondition { beatgoal = (GoalStepWME isBeatGoal != null  valid == true  signature :: sig) }
+	mental_act { 
+		beatgoal.succeed(); 
+		StringUtil.println("SucceedAllBeatGoals " + sig);
+	} 
+	
+	// Wait for the beat goal to actually succeed. May take a moment if it is a joint goal or a non-joint goal
+	// with a joint goal in the subtree.
+	with (success_test { (beatgoal.isValid() == false) } ) wait; 
+
+	// recursively call self until it's all done
+	subgoal SucceedAllBeatGoals();
+}
+
+	
+// ############
+atomic sequential behavior AbortHandlerPause() {
+	precondition { handlerPause = (GoalStepWME signature == "handlerPauseAfterBeatGoal(String, float)") }
+	mental_act { handlerPause.succeed(); }
+}
+
+// #############
+atomic sequential behavior AbortPauseAfterBeatGoal() {
+	precondition { pause = (GoalStepWME signature == "PauseAfterBeatGoal(float)") }
+	mental_act { pause.succeed(); }
+}
+
+// ############
+atomic sequential behavior SuspendBeatGoals() {
+	precondition { beatGoals = (GoalStepWME signature == "BeatGoals()") }
+	mental_act { StringUtil.println("SuspendBeatGoals"); }
+	mental_act { beatGoals.suspend(); } 
+}
+
+// #############
+// AbortBeatGoalIntPAndSuspendBeatGoals
+// aborts the currently running beatgoal, any handlerPauseAfterBeatGoal it may have spawned, 
+// and suspends the beatgoals overall
+atomic sequential behavior AbortBeatGoalIntPAndSuspendBeatGoals() { 
+	with (ignore_failure) subgoal AbortCurrentBeatGoal();
+	with (ignore_failure) subgoal AbortHandlerPause();
+	with (ignore_failure) subgoal AbortPauseAfterBeatGoal();
+	with (ignore_failure) subgoal SuspendBeatGoals();
+
+	// additionally clear the reestablish flag
+	// it is useful to put this here, because this behavior gets called when doing a mixin
+	// this handles the following scenario: let's say the reestablish flag exists, then beatgoal A begins,
+	// does not have a Reestablish alt, and therefore will not clear the flag until the end of the beatgoal,
+	// but beatgoal A then gets interrupted before its end (and had already succeeded, so it won't repeat),
+	// then a mixin occurs which may or may not set the reestablish flag, and then beatgoal B begins,
+	// and the reestablish flag still exists when it shouldn't (because beatgoal A never finished to delete it)
+	subgoal ClearReestablishFlag();		
+}
+
+
+// #############
+atomic sequential behavior AbortCurrentBeatGoal() {
+	precondition {	interruptibleBeatGoal = (GoalStepWME isBeatGoal != null  isSuspended == false  signature :: bgsig) }
+	mental_act { StringUtil.println("AbortCurrentBeatGoal aborting " +bgsig); }	
+	mental_act { interruptibleBeatGoal.fail(); }
+
+	// Wait for the beat goal to actually fail (for any negotiations to finish)
+	with (success_test { (interruptibleBeatGoal.getIsExecuting() == false) } ) wait;
+}
+
+
+atomic sequential behavior PrintIfIsExecutingBeatGoal() {
+	precondition {	(GoalStepWME isBeatGoal != null  isSuspended == false  
+									isExecuting == true  signature :: bgsig) }
+	mental_act { StringUtil.println("!!! PrintIfIsExecutingBeatGoal " +bgsig); }	
+}
+
+
+// #############
+// UnsuspendBeatGoals
+// Unsuspends beatgoals, allowing a previously aborted beatgoal to potentially restart
+atomic sequential behavior UnsuspendBeatGoals() {
+	precondition { beatGoals = (GoalStepWME signature == "BeatGoals()") }
+	specificity 2;
+	mental_act { StringUtil.println("UnsuspendBeatGoals"); }
+	mental_act { beatGoals.unsuspend(); }
+}
+
+// bad precondition
+atomic sequential behavior UnsuspendBeatGoals() { 
+	specificity 1;
+	mental_act { StringUtil.println("## ERROR: UnsuspendBeatGoals preconditions failed"); }
+}
+
+
+
+
+/* currently unused
+// #############
+// DeleteTxnOutBeatGoals
+// deletes all isTxnOutBeatGoal beatgoals out of abt
+atomic sequential behavior DeleteTxnOutBeatGoals() { 
+	precondition { txnOutBeatGoal = (GoalStepWME signature :: sig  isTxnOutBeatGoal != null) }
+	specificity 2;
+	mental_act { StringUtil.println("DeleteTxnOutBeatGoals " + sig); }
+	mental_act { 
+		txnOutBeatGoal.setPersistentWhenFails(false);
+		txnOutBeatGoal.setIgnoreFailure(true);
+		txnOutBeatGoal.fail();			
+	}
+
+	// recursively call self!
+	subgoal DeleteTxnOutBeatGoals();
+}
+
+// succeed when done
+atomic sequential behavior DeleteTxnOutBeatGoals() { 
+	specificity 1;
+	succeed_step;		
+}
+*/
+
+
+
+// ###############
+// ## handlerPauseAfterBeatGoal
+// ## When a beatgoal completes successfully, pauses after the beatgoal
+// ## only the leader can call this!
+// ## if the signature changes, update AbortBeatGoalIntPAndSuspendBeatGoals(), AbortHandlerPause()
+sequential behavior handlerPauseAfterBeatGoal(String beatgoalSig, float numSeconds) {
+	precondition { StoryMemory (StoryStatusWME currentBeat :: curBeat) }
+	context_condition { StoryMemory (StoryStatusWME currentBeat == curBeat) }	// die off if the beat changes
+
+	//mental_act { StringUtil.println("handlerPauseAfterBeatGoal for " + beatgoalSig + " started" ); }
+	with (success_test { (GoalStepWME signature == beatgoalSig) }) wait; // wait for beatgoal to appear in ABT
+	//mental_act { StringUtil.println("handlerPauseAfterBeatGoal waiting for " + beatgoalSig + " to end"); }
+	with (success_test { !(GoalStepWME signature == beatgoalSig) }) wait; // wait for beatgoal to disappear from ABT; this means it's succeeded
+	mental_act { StringUtil.println("### handlerPauseAfterBeatGoal triggered for " + beatgoalSig + " ###"); }
+
+	// note: the reason this pauses this next beatgoal is because of CONFLICTS 
+	subgoal PauseAfterBeatGoal(numSeconds);
+}
+
+
+// ###############
+// ## SetUninterruptibleUntilSecsAfterDialog
+// ## Start by setting this beatgoal uninterruptible
+// ## Wait for the first dialog to start, then wait an additional delay,
+// ## and turn off uninterruptible
+// ## DIE OFF IF THE BEAT OR BEATGOAL CHANGES!
+sequential behavior SetUninterruptibleUntilSecsAfterDialog(int delay, boolean bDoDelay) {
+	precondition {	(bDoDelay == true)
+					{ StoryMemory (StoryStatusWME currentBeat :: curBeat) }
+					(GoalStepWME isBeatGoal != null  isExecuting == true  signature :: curBGSig) }
+	context_condition {	{ StoryMemory (StoryStatusWME currentBeat == curBeat) }	// die off if the beat changes
+						(GoalStepWME signature == curBGSig  isExecuting == true) } // die off if the beatgoal changes
+	specificity 2;
+
+	// txnOut starts off uninterruptible
+	subgoal SetLetBeatGoalFinishFlag(true);	
+	subgoal WaitForSomeoneToStartSpeakingWithTimeout(10);
+	subgoal WaitFor(delay);
+	mental_act { StringUtil.println("### SetUninterruptibleUntilSecsAfterDialog done waiting, turning off uninterruptible"); }
+	subgoal SetLetBeatGoalFinishFlag(false);	
+}
+
+sequential behavior SetUninterruptibleUntilSecsAfterDialog(int delay, boolean bDoDelay) {
+	specificity 1;
+	subgoal SetLetBeatGoalFinishFlag(true);	
+}
+
+
+// ##############
+// SetReestablishFlag
+atomic sequential behavior SetReestablishFlag() {
+	WorkingMemory storyMemory;													
+	mental_act { 
+		StringUtil.println("SetReestablishFlag()");
+		storyMemory = WorkingMemory.lookupRegisteredMemory("StoryMemory");			
+		storyMemory.addWME(new ReestablishBeatGoalStoryContextWME());		
+	}
+}
+
+// ##############
+// ClearReestablishFlag
+atomic sequential behavior ClearReestablishFlag() {
+	WorkingMemory storyMemory;													
+	mental_act { 
+		StringUtil.println("ClearReestablishFlag()");
+		storyMemory = WorkingMemory.lookupRegisteredMemory("StoryMemory");	
+		storyMemory.deleteAllWMEClass("ReestablishBeatGoalStoryContextWME"); 
+	}
+}
+
+
+// #######
+atomic sequential behavior SetCentricCharacter(int character) {
+	mental_act { g_reactionDecider.setCentricChar(character); }
+}
+
+
+// ###############
+// DoDuringBeatMixinContextForJustThisBeatGoal
+// activate the DuringBeatMixin context, as well as a cleanup demon to be sure it gets turned off!
+sequential behavior DoDuringBeatMixinContextForJustThisBeatGoal() {
+	// grab the signature of the current active (mixin) beatgoal
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isMixinBeatGoal != null
+									isExecuting == true) }
+					{ BeatMemory bgstatusWME = (BeatGoalStatusWME bgSig == bgSig) } }
+
+	subgoal ActivateContext(context_DuringBeatMixin, cContextPriority_duringMixIn);	
+
+	//mental_act { StringUtil.println("DoDuringBeatMixinContextForJustThisBeatGoal() waiting on " + bgSig + " to complete"); }
+
+	// wait until this beatgoal is gone
+	with (success_test { TripMemory !(GoalStepWME signature == bgSig) } ) wait;
+
+	// clean up -- deactivate the during beat mixin context
+	mental_act { StringUtil.println("DoDuringBeatMixinContextForJustThisBeatGoal() cleaning up after " + bgSig); }
+	subgoal DeactivateContext(context_DuringBeatMixin);	
+}
+
+
+// ###############
+// EventuallyTurnOffIgnoreThanks
+sequential behavior EventuallyTurnOffIgnoreThanks(int delay) {
+	subgoal WaitFor(delay);
+	subgoal DeactivateContext(context_IgnoreThanks);
+}
+
+// ------------------------------
+// THE BEAT
+
+
+// ############ 
+// SetBeatStatus
+// set status for the beat itself
+atomic sequential behavior SetBeatStatus(int status) {		
+	precondition { BeatMemory statusWME = (BeatStatusWME) }	
+	mental_act { statusWME.setStatus(status); }
+}
+
+// ------------------------------
+// BEATGOALS
+
+
+// ########
+// used by global mixins to dynamically create a beatgoalstatuswme
+atomic sequential behavior CreateBeatGoalStatusWME() {
+	specificity 2;
+	precondition { 	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory !(BeatGoalStatusWME bgSig == bgSig) } }
+	mental_act { WorkingMemory.addWME("BeatMemory", new BeatGoalStatusWME(bgSig, false, false, false)); }
+}
+
+atomic sequential behavior CreateBeatGoalStatusWME() {
+	specificity 1;
+	mental_act { StringUtil.println("### Warning: CreateBeatGoalStatusWME() precondition failed"); }
+}
+
+// ########
+atomic sequential behavior DeleteActiveBeatGoalStatusWME() {
+	specificity 2;
+	precondition { 	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig) } }
+	mental_act { WorkingMemory.deleteWME("BeatMemory", statusWME); }
+}
+
+atomic sequential behavior DeleteActiveBeatGoalStatusWME() {
+	specificity 1;
+	mental_act { StringUtil.println("### Warning: DeleteActiveBeatGoalStatusWME() precondition failed"); }
+}
+
+
+// ########
+atomic sequential behavior DeleteBeatGoalStatusWME(String bgSig) {
+	specificity 2;
+	precondition { BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig) } 
+	mental_act { WorkingMemory.deleteWME("BeatMemory", statusWME); }
+}
+
+atomic sequential behavior DeleteBeatGoalStatusWME(String bgSig) {
+	specificity 1;
+	mental_act { StringUtil.println("### Warning: DeleteBeatGoalStatusWME() precondition failed"); }
+}
+
+
+// ###############
+atomic sequential behavior DeleteAndMakeFreshBeatGoalStatusWME(String sig) {
+	precondition { BeatMemory bgStatusWME = (BeatGoalStatusWME bgSig == sig) }
+	WorkingMemory beatMemory;
+	mental_act { 
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");	
+		beatMemory.deleteWME(bgStatusWME); 
+		beatMemory.addWME(new BeatGoalStatusWME(sig, false, false, false)); 
+	}
+}
+
+// ############
+// demon_setCurBGSig
+// wait for the executing beatgoal to change, set BeatStatusWME value
+sequential behavior demon_setCurBGSig() {
+	with (success_test {
+				(GoalStepWME isBeatGoal != null  isExecuting == true  signature :: curBGSig)
+				{ BeatMemory (BeatStatusWME curBGSig :: prevCurBGSig) }
+				(curBGSig != prevCurBGSig)
+			} ) wait;
+	mental_act { StringUtil.println("demon_setCurBGSig:"); }	// print this here to make sure we catch an endless loop
+	subgoal demon_setCurBGSig_body();
+}
+sequential behavior demon_setCurBGSig_body() {
+	precondition { 
+		{ BeatMemory bsw = (BeatStatusWME) }
+		(GoalStepWME isBeatGoal != null  isExecuting == true  signature :: curBGSig) 
+	}
+
+	mental_act { 
+		StringUtil.println(curBGSig);
+		bsw.setCurBGSig(curBGSig); 
+	}
+}
+
+// ############
+// PauseAfterBeatGoal
+// note: if signature changes, fix AbortPauseAfterBeatGoal()
+sequential behavior PauseAfterBeatGoal(float numSeconds) {
+	mental_act { StringUtil.println("start PauseAfterBeatGoal"); }
+
+	// do the pause
+	subgoal WaitFor(numSeconds);
+
+	// now wait for the keypresses to be over, with timeout
+	subgoal WaitForPlayerKeypressesToBeOverWithTimeout(15.0);
+
+	mental_act { StringUtil.println("end PauseAfterBeatGoal"); }
+}
+
+
+// #############
+sequential behavior WaitUntilCurrentBeatGoalIsDone() {
+	// first we grab the signature of the current active beatgoal
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null isExecuting == true) }
+					{ BeatMemory bgstatusWME = (BeatGoalStatusWME bgSig == bgSig) } }
+
+	// wait until this beatgoal is gone
+	with (success_test { TripMemory !(GoalStepWME signature == bgSig) } ) wait;
+}
+
+
+
+
+
+// #############
+// Trip's version of synchronize Grace & Trip
+sequential behavior SynchronizeGT(String signal) {
+	subgoal SetSignal(signal);
+	with (success_test { GraceMemory (SignalWME name == signal) } ) wait;
+	with (ignore_failure) subgoal SynchronizeGT_Cleanup(signal);
+}
+
+atomic sequential behavior SynchronizeGT_Cleanup(String signal) {
+	precondition { GraceMemory signalWME = (SignalWME name == signal) }
+	WorkingMemory graceMemory;
+	mental_act { 
+		graceMemory = WorkingMemory.lookupRegisteredMemory("GraceMemory");
+		graceMemory.deleteWME(signalWME); 
+	}
+}
+
+
+// #############
+sequential behavior AddDA(int daType, int param) {
+	with (persistent when_fails) subgoal AddDA_Body(daType, param);
+}
+
+// ensure that we don't add a timeout DA while NLP is occurring
+sequential behavior AddDA_Body(int daType, int param) {
+	precondition {	{ StoryMemory (StoryStatusWME NLPProcessingStarted :: NLPProcessingStarted) } 
+					(daType != eDAType_Timeout || NLPProcessingStarted == 0) }
+	specificity 2;
+	mental_act {
+		StringUtil.println("### Adding DA " + PrintUtilities.daType_EnumToString(daType) + " param " + PrintUtilities.daParam1_EnumToString(param));
+		NativeAnimationInterface.addEventInfoToLog("### Adding DA " + PrintUtilities.daType_EnumToString(daType) + " param " + PrintUtilities.daParam1_EnumToString(param));
+		BehavingEntity.getBehavingEntity().addWME(new DAWME(daType, 
+																eSpriteID_NOTASPRITE, 
+																param, eDAMiscParam_NOPARAM, eDAMiscParam_NOPARAM,
+																System.currentTimeMillis())); 
+	}
+}
+
+sequential behavior AddDA_Body(int daType, int param) {
+	specificity 1;
+	mental_act { StringUtil.println("### AddDA " +daType+ " waiting until NLP is done"); }
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+// this allows Grace to add a DA to Trip
+joint sequential behavior AddDA(int daType, int param) { teammembers Trip Grace;
+	mental_act {
+		StringUtil.println("### Adding DA " + daType + " param " + param);
+		BehavingEntity.getBehavingEntity().addWME(new DAWME(daType, 
+																eSpriteID_NOTASPRITE, 
+																param, eDAMiscParam_NOPARAM, eDAMiscParam_NOPARAM, 
+																System.currentTimeMillis())); 
+	}
+}
+
+
+// #############
+joint sequential behavior BeatsEndedCleanup() { teammembers Trip Grace;
+	subgoal SetMood(eMood_neutral, eMoodStrength_low, -1, 999, 0.0f); 
+	mental_act {
+		WorkingMemory beatMemory;
+
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");
+		beatMemory.deleteAllWMEClass("EventWME");
+	}
+}
+
+
+// #####
+// this beat goal purposefully allows for other beat goals (eg, amb mixins) to mixin before the beat is done
+sequential behavior LastBeatGoalForThisBeat() {
+	precondition { StoryMemory	(StoryStatusWME beatCount :: beatCount  affinity :: affinity
+												currentBeat :: currentBeat)
+								(TensionStoryValueWME value :: tensionFloat) }
+	int storyTopicID;
+
+	mental_act { StringUtil.println("LastBeatGoalForThisBeat"); }
+
+	// record affinity at the end of the beat
+	// record beat completion
+	mental_act { 
+		IntermediateContentArchive.archive.AddContent(		
+					eIntermediateContentType_AffinitySnapshot, 
+					beatCount, affinity, -1, noOne); 
+
+		storyTopicID = BeatHelperFxns.mapBeatIDToStoryID(currentBeat);
+		IntermediateContentArchive.archive.AddContent(		
+					eIntermediateContentType_BeatCompletion, 
+					currentBeat, storyTopicID, (int)tensionFloat, noOne); 
+	}
+
+	// a chance for the special short metacommentary amb to mixin if need be
+	subgoal SetBeatStatus(eBeatStatus_ambMetaCommentaryMixinPoint);
+
+	// a few extra no-op steps to be sure amb's get a chance to do their thing
+	succeed_step;
+	succeed_step;
+
+	// a chance for the current amb to mixin if need be
+	subgoal SetBeatStatus(eBeatStatus_ambLastMixinPoint);
+
+	// a few extra no-op steps to be sure amb's get a chance to do their thing
+	succeed_step;
+	succeed_step;
+
+	// time for amb's to decide what to do
+	subgoal SetBeatStatus(eBeatStatus_ambNextDecisionPoint);	
+
+	// a few extra no-op steps to be sure amb's get a chance to do their thing
+	succeed_step;
+	succeed_step;
+}
+
+
+// #####
+sequential behavior PossiblyGoToCrisisP1() {
+	precondition { BeatMemory (BeatArgumentWME txnOutType == eBeatArgument_txnOut_T2ToT3Transition) }	
+	mental_act { StringUtil.println("## PossiblyGoToCrisisP1"); }
+	subgoal GoToCrisisP1();
+}
+
+sequential behavior GoToCrisisP1() {
+	precondition { StoryMemory tensionWME = (TensionStoryValueWME) }
+	mental_act { StringUtil.println("## GoToCrisisP1"); }
+	mental_act { tensionWME.setValue(3.0f); }
+	spawngoal AbortTheBeat(eBeatAbortReason_unspecified);		
+	wait;
+}
+
+
+// #########
+// did the player click on the elevator button?
+sequential behavior MonitorPlayerClickingOnElevatorButton() {
+	with (success_test { (ObjectActivationWME	objectID == eSpriteID_elevatorButton  
+												activationID == eObjectActivation_activated) } ) wait;
+	subgoal EndExperience();
+}
+
+
+
+// #############
+// TurnOffPhysicallyFavorsWithTimeout
+// Given a sprite ID and timeout, turns off physical favoring for that sprite ID for the timeout period.
+// Joint behavior used for safe coordination between Trip and internal state of Player.
+joint sequential behavior TurnOffPhysicallyFavorsWithTimeout(int spriteID, int timeoutInSecs) {
+	teammembers Trip Player;
+	succeed_step;
+}
+
+// #########
+// TurnOnPhysicallyFavors
+// Given a sprite ID, turns on physical favoring csensors and gets rid of the timeout demon it it exists.
+// Joint behavior used for safe coordination between Trip and internal state of Player.
+joint sequential behavior TurnOnPhysicallyFavors(int spriteID_arg) {
+	teammembers Trip Player;
+	succeed_step;
+}
+
+// #############
+// SetOneCharacterVisibleDistance
+// Given a distance (float), sets the lookDistance for the OneCharacterVisibleSensor. 
+// Joint behavior used for safe coordination between Trip and internal state of Player.
+joint sequential behavior SetOneCharacterVisibleDistance(float distance) {
+	teammembers Trip Player;
+	succeed_step;
+}
+
+// #########
+sequential behavior TurnOffLocalPhysicallyFavor(int beatID, int param) {
+	precondition { (beatID == eBeatID_ArtistAdv_N_T1 ||
+					beatID == eBeatID_ArtistAdv_GPA_T1 ||
+					beatID == eBeatID_ArtistAdv_TPA_T1 ||
+					beatID == eBeatID_ArtistAdv_GPA_T2 ||
+					beatID == eBeatID_ArtistAdv_TPA_T2) } 
+	specificity 2;
+	succeed_step; //fixme
+}
+
+
+sequential behavior TurnOffLocalPhysicallyFavor(int beatID, int param) {
+	precondition { (beatID == eBeatID_RockyMarriage_N_T1 ||
+					beatID == eBeatID_RockyMarriage_GPA_T1 ||
+					beatID == eBeatID_RockyMarriage_TPA_T1 ||
+					beatID == eBeatID_RockyMarriage_GPA_T2 ||
+					beatID == eBeatID_RockyMarriage_TPA_T2) } 
+	specificity 2;
+	// only sprites that have physfavor csensors need to be turned off
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_italyPicture, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_bar, 999); 	
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_redwinebottle, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_whitewinebottle, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay1, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay2, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay3, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay4, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_eightball, 999); 
+}
+
+
+sequential behavior TurnOffLocalPhysicallyFavor(int beatID, int param) {
+	precondition { (beatID == eBeatID_Facade_GPA_T1 ||
+					beatID == eBeatID_Facade_NTPA_T1 ||
+					beatID == eBeatID_Facade_GPA_T2 ||
+					beatID == eBeatID_Facade_TPA_T2) } 
+	specificity 2;
+	// only sprites that have physfavor csensors need to be turned off
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_eightball, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_bar, 999); 	
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_redwinebottle, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_whitewinebottle, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay1, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay2, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay3, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay4, 999); 
+}
+
+
+sequential behavior TurnOffLocalPhysicallyFavor(int beatID, int param) {
+	precondition { (beatID == eBeatID_PhoneCall_NGPA_T1 ||
+					beatID == eBeatID_PhoneCall_NTPA_T1) } 
+	specificity 2;
+	// only sprites that have physfavor csensors need to be turned off
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_workTable, 999); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_weddingPicture, 999); 	
+}
+
+
+sequential behavior TurnOffLocalPhysicallyFavor(int beatID, int param) {
+	specificity 1;
+	mental_act { StringUtil.println("## Error: unknown beatID " +beatID+ " in TurnOffLocalPhysicallyFavor()"); }
+}
+
+
+
+// #########
+sequential behavior TurnOnLocalPhysicallyFavorWithTimeout(int beatID, int param) {
+	precondition { (beatID == eBeatID_ArtistAdv_N_T1 ||
+					beatID == eBeatID_ArtistAdv_GPA_T1 ||
+					beatID == eBeatID_ArtistAdv_TPA_T1 ||
+					beatID == eBeatID_ArtistAdv_GPA_T2 ||
+					beatID == eBeatID_ArtistAdv_TPA_T2) } 
+	specificity 2;
+	succeed_step; //fixme
+}
+
+sequential behavior TurnOnLocalPhysicallyFavorWithTimeout(int beatID, int param) {
+	precondition { (beatID == eBeatID_RockyMarriage_N_T1 ||
+					beatID == eBeatID_RockyMarriage_GPA_T1 ||
+					beatID == eBeatID_RockyMarriage_TPA_T1 ||
+					beatID == eBeatID_RockyMarriage_GPA_T2 ||
+					beatID == eBeatID_RockyMarriage_TPA_T2) } 
+	specificity 2;
+	with (success_test { !(GoalStepWME signature == "TurnOffLocalPhysicallyFavorsWithTimeout(int, int)") } ) wait;	// just in case
+	// Turn off with a timeout of 20 - the new timeout value of 20 will override the old large timeout value
+	// causing the physically favor csensors for the picture and bar objects to activate 20 seconds after the beat. 
+	// only sprites that have physfavor csensors need to be turned on
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_italyPicture, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_bar, 20); 	
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_redwinebottle, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_whitewinebottle, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay1, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay2, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay3, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay4, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_eightball, 20); 
+
+}	
+
+sequential behavior TurnOnLocalPhysicallyFavorWithTimeout(int beatID, int param) {
+	precondition { (beatID == eBeatID_Facade_GPA_T1 ||
+					beatID == eBeatID_Facade_NTPA_T1 ||
+					beatID == eBeatID_Facade_GPA_T2 ||
+					beatID == eBeatID_Facade_TPA_T2) } 
+	specificity 2;
+	with (success_test { !(GoalStepWME signature == "TurnOffPhysicallyFavorsWithTimeout(int, int)") } ) wait;	// just in case
+	// Turn off with a timeout of 20 - the new timeout value of 20 will override the old large timeout value
+	// causing the physically favor csensors for the picture and bar objects to activate 20 seconds after the beat. 
+	// only sprites that have physfavor csensors need to be turned on
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_eightball, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_bar, 20); 	
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_redwinebottle, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_whitewinebottle, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay1, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay2, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay3, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_martiniDisplay4, 20); 
+}	
+
+
+sequential behavior TurnOnLocalPhysicallyFavorWithTimeout(int beatID, int param) {
+	precondition { (beatID == eBeatID_PhoneCall_NGPA_T1 ||
+					beatID == eBeatID_PhoneCall_NTPA_T1) } 
+	specificity 2;
+	with (success_test { !(GoalStepWME signature == "TurnOffPhysicallyFavorsWithTimeout(int, int)") } ) wait;	// just in case
+	// Turn off with a timeout of 20 - the new timeout value of 20 will override the old large timeout value
+	// causing the physically favor csensors for the picture and bar objects to activate 20 seconds after the beat. 
+	// only sprites that have physfavor csensors need to be turned on
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_workTable, 20); 
+	joint subgoal TurnOffPhysicallyFavorsWithTimeout(eSpriteID_weddingPicture, 20); 	
+}
+
+sequential behavior TurnOnLocalPhysicallyFavorWithTimeout(int beatID, int param) {
+	specificity 1;
+	mental_act { StringUtil.println("## Error: unknown beatID " +beatID+ " in TurnOnLocalPhysicallyFavorWithTimeout()"); }
+}
+
+
+// #############
+joint sequential behavior EndExperience_team() { teammembers Trip Grace;
+	subgoal EndExperience();
+}
+
+

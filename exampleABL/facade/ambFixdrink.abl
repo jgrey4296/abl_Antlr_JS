@@ -1,0 +1,1141 @@
+// trip's longterm.abl
+
+// ###############
+// LongTermBehavior_FixDrink
+// if this signature changes, update CheckIfHaveDrinkInHand() and bFAskDrinkT1_GoFixDrinkAtBarIf()
+sequential behavior LongTermBehavior_FixDrink() {
+	mental_act { StringUtil.println("** Trip LongTermBehavior_FixDrink"); }
+	subgoal CheckLongTermPriority();				// this will fail ourself if needed
+	subgoal LongTermBehavior_FixDrink_Body();
+}
+
+sequential behavior LongTermBehavior_FixDrink_Body() {
+
+	// this ltb aborts if the beat aborts (except for affinity switches, they're okay)
+	// APS 1.15.05: Leaving room is okay too
+	context_condition { { BeatMemory (BeatStatusWME abortReason :: beatAbortReason)
+							(beatAbortReason == -1 || 
+								beatAbortReason == eBeatAbortReason_affinityChangeTowardsGPA ||
+								beatAbortReason == eBeatAbortReason_affinityChangeTowardsTPA ||
+								beatAbortReason == eBeatAbortReason_ltbRecoverable) }
+						{ StoryMemory !(BeatFlagWME sVal == "EndingExperience") } }
+	specificity 2;
+
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, 60, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, 60, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, 60, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_gazeTorso, 60, eBodyResourceAction_fail);
+
+	// enforce gazeTorso
+	subgoal RefreshGaze();
+
+	// we do persistent when_fails on each step, in case handlers override 
+	// each step has a WaitFor(1) if the staging fails, to give a delay between the next retry
+
+	// Go to bar
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_GoFixDrinkAtBar();
+
+	// At tension2, wait to start fixing drinks -- fixme
+	with (ignore_failure) subgoal LongTermBehavior_FixDrink_FirstPutDownAnyHeldObj();
+
+	// At tension2, wait to start fixing drinks -- fixme
+	with (ignore_failure) subgoal LongTermBehavior_FixDrink_WaitAtT2();
+
+	// Fix drink at bar
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_FixDrinkAtBar();
+
+	// now that fix drink is done, we can turn our torso
+	subgoal ReleaseBodyResource(eBodyResourceID_gazeTorso);
+
+	subgoal SetBeatFlagInStoryMemory("FixedDrinksSuccessful");
+
+	// Bring drink to player
+	// will succeed immediately if player isn't drinking
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_BringDrinkToPlayer();
+
+	// If untaken, put the offered drink back on the bar
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_PutUntakenObjectDownIfNeeded();
+
+	// APS 1.15.05: Lower offer arm if needed
+	with (ignore_failure) subgoal LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded();
+
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink done"); }
+}
+
+
+// lower arm if needed
+sequential behavior LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded() {
+	precondition { !(HeldObjectWME	characterID == me  
+									attachPointID == g_objHand) }
+	specificity 2;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded starting"); }
+
+	// APS 2.11.05: The animEngine has a hack to suppress accidentally dropping objects,
+	// and it blocks the g_armGesture_default script; so call this with an explicit script
+	//subgoal DoGesture(-1, g_objArm, g_armGesture_default, false);	
+	subgoal DoGesture(-1, g_objArm, g_armObjGesture_objectOfferDone, false);	
+
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded done"); }
+}
+sequential behavior LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded() {
+	specificity 1;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded not needed"); }
+}
+
+
+sequential behavior LongTermBehavior_FixDrink_Body() {
+	specificity 1;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink *FAILED*, probably due to beat abort"); }
+
+	// APS 1.15.05: Lower offer arm if needed
+	with (ignore_failure) subgoal LongTermBehavior_FixDrink_Body_lowerOfferArmIfNeeded();
+}
+
+// ##### Go to bar
+sequential behavior LongTermBehavior_FixDrink_GoFixDrinkAtBar() {
+	specificity 2;
+	// these coordinates are hardwired special case coordinates for the bar!
+	// IF YOU CHANGE THESE NUMBERS, change DoLocomotion() in charLocomotion.cpp, etc.
+	Point3D targetPos = new Point3D(-183.0f, 0.0f, -145.0f);
+	
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink start trying to go to bar"); }
+
+	with (ignore_failure) subgoal DoGaze(0, eGazeType_normal, me);	// look forward -- fixme?
+	
+	with (property isStagingGoal true) subgoal StagingWalkToPoint(-1, targetPos, 90.0f, eWalkType_normal);
+}
+sequential behavior LongTermBehavior_FixDrink_GoFixDrinkAtBar() {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+
+
+// ##### Now that we're at the bar, first put down anything we're holding, e.g. eightball
+sequential behavior LongTermBehavior_FixDrink_FirstPutDownAnyHeldObj() {
+	precondition { (HeldObjectWME	characterID == me  
+									attachPointID == g_objHand) }
+	int armGesture;
+	mental_act { 
+		if (g_objArm == eGestureBodyPartIndex_armL) armGesture = g_armLGesture_objectDrop;
+		else armGesture = g_armRGesture_objectDrop;
+	}
+	subgoal DoPutdownObjGesture(-1, g_objArm, armGesture, false,
+								eSpriteID_bar, 0, 0.0f, 0.0f, 0.0f, ePutdownObjParam_none);
+}
+
+
+// ##### At tension2, wait to start fixing drinks -- fixme
+sequential behavior LongTermBehavior_FixDrink_WaitAtT2() {
+	precondition { StoryMemory (TensionStoryValueWME value == 2) } 
+	wait;
+}
+
+
+// ##### Fix drink at bar
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar() {
+	specificity 2;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink fixing drink at bar"); }
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make();
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_done();
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar() {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+// note: if this signature changes, update Amb_Fixdrinkopt_DoItThisBeat_WaitToStart_TryEachAmbSafeBeatGoal_Test()
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make() {
+	specificity 2;
+	long startMillis;
+
+	with (ignore_failure) subgoal DoGaze(0, eGazeType_normal, me);	// look forward
+
+	// ## idle loop until all drinks have been decided
+	mental_act { StringUtil.println("** LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided"); }
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided();
+
+	mental_act { startMillis = System.currentTimeMillis(); }	
+
+	// ## loop fixing drinks
+	// the moment Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal becomes active, the loop dies and we do one of 3 special mixins
+	// otherwise, loop until ambFixDrinkOpt goes away
+	// keep looping until it's been at least 10 seconds since we decided on the drinks
+	mental_act { StringUtil.println("** LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks"); }
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks(startMillis);
+
+	// ## put Grace's drink on bar; will fail if she's not drinking
+	mental_act { StringUtil.println("** LongTermBehavior_FixDrink_FixDrinkAtBar_PutUpGracesDrink"); }
+	with (ignore_failure) subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_PutUpGracesDrink();
+
+	// ## finish fixing drinks -- loop once or twice
+	mental_act { StringUtil.println("** LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks"); }
+	with (persistent when_fails) subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks();
+
+	mental_act { StringUtil.println("** LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks done"); }
+}
+
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make() {
+	specificity 1;
+	succeed_step;
+}
+
+
+// ## make_loopUntilDrinksDecided
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	precondition { StoryMemory (AmbFixdrinkWME 
+								playerDrink != eDrink_UNDECIDED
+								tripDrink != eDrink_UNDECIDED
+								graceDrink != eDrink_UNDECIDED) }
+	specificity 2;
+	succeed_step;
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle1);
+	fail_step;
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+	fail_step;
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	int which; 
+	mental_act { which = etripScript_layer_armsBoth_fixDrink_loop1 + randGen.nextInt(6); }
+	subgoal DoGesture_ArmsBoth(-1, which);
+	fail_step;
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	subgoal DoGesture_ArmsBoth(-1, g_armGesture_default);	// stand back up
+	subgoal WaitFor(2, 3);
+	fail_step;
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_loopUntilDrinksDecided() {
+	subgoal WaitFor(1, 2);
+	fail_step;
+}
+
+
+// ## loop fixing drinks
+// the moment Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal becomes active, 
+//  the loop dies and we do one of 3 special mixins
+// otherwise, loop until ambFixDrinkOpt goes away
+// keep looping until it's been at least 10 seconds since we decided on the drinks
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks(long startMillis) {
+	precondition { !(GoalStepWME signature == "Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal()") }
+	context_condition { !(GoalStepWME signature == "Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal()") }
+	specificity 3;
+
+	// ## LOOP
+	mental_act { StringUtil.println("## LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop"); }
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop();
+
+	// this fails if we still need to loop
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_testIfDone(startMillis);
+}
+
+// if Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal is active, do one of the 3, then fail to allow the looping to continue
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks(long startMillis) {
+	precondition { (GoalStepWME signature == "Amb_Fixdrinkopt_DoItThisBeat_PerformAtThisBeatGoal()") }
+	specificity 2;
+
+	mental_act { StringUtil.println("## LongTermBehavior_FixDrink starting fixDrinkOpt mixin"); }
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_fixDrinkOptMixin();
+
+	// because we SUBGOAL the mixin instead of spawning it into BeatGoals_Body,
+	// there's no need to wait here for it to be done!
+
+	fail_step;
+}
+
+// if the loop fails, wait a sec before fully failing, to avoid persistent pounding
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks(long startMillis) {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+//fixme: do something smarter here!
+//sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle1); }
+//sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop1); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop2); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop3); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop4); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop5); }
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() { subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_loop6); }
+//sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+//	subgoal DoGesture_ArmsBoth(-1, g_armGesture_default);	// stand back up
+//	subgoal WaitFor(1.0, 3.0);
+//}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal WaitFor(0.25f);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoPickupObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkLookAtBottle_in, eSpriteID_bar_redwinebottle, -1);
+	subgoal WaitFor(1);
+	subgoal DoPutdownObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkLookAtBottle_out, 
+										-1, -1, 0.0f, 0.0f, 0.0f, ePutdownObjParam_dontDrawMe);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_openBottlecap);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_pullCork);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoPickupObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkLookAtGlass_in, -1, eSpriteID_tripDrink);	//fixme -- a currently free glass
+	subgoal WaitFor(1);
+	subgoal DoPutdownObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkLookAtGlass_out, 
+										-1, -1, 0.0f, 0.0f, 0.0f, ePutdownObjParam_dontDrawMe);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkStir_hold);
+	subgoal WaitFor(1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkStir_loop1);
+	subgoal WaitFor(3);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkStir_hold);
+	subgoal WaitFor(1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_loop() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkPour_hold);
+	subgoal WaitFor(1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkPour_loop1);
+}
+
+
+// we can stop looping (and succeed!) once Amb_Fixdrinkopt() is gone, 
+//  and once we've been doing this for at least 10 seconds
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_actuallyFixDrinks_testIfDone(long startMillis) {
+	precondition {	!(GoalStepWME signature == "AmbInit_Fixdrinkopt()") 
+					!(GoalStepWME signature == "Amb_Fixdrinkopt()") }
+	boolean bDone;
+
+	mental_act { 
+		if ((System.currentTimeMillis() - startMillis) >= (10*1000)) bDone = true; 
+		else bDone = false; 
+	}
+	subgoal FailIfFalse(bDone);
+}
+
+
+// ## finish fixing drinks -- 1 or 2 more animations
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle1);
+	subgoal LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks_p2();
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks_p2() {
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_finishFixingDrinks_p2() {
+	succeed_step;
+}
+
+
+// we only run out of grace's drink if it's juice, chardonnay or water
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_fixDrinkOptMixin() {
+	precondition { StoryMemory	(AmbFixdrinkoptWME which == 0) 
+								(AmbFixdrinkWME graceDrink :: graceDrink) 
+								(graceDrink == eDrink_sparklingWater || graceDrink == eDrink_plainWater ||
+								 (graceDrink >= eDrink_orangeJuice && graceDrink <= eDrink_cranberryJuice) ||
+								 graceDrink == eDrink_whiteWine) }
+	specificity 2;
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin();	// run out of grace's drink	
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_fixDrinkOptMixin() {
+	precondition { StoryMemory (AmbFixdrinkoptWME which == 1) }
+	specificity 2;
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal LongTermBehavior_FixDrink_BlenderOverGrace_Mixin();		// blender
+}
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_make_fixDrinkOptMixin() {
+	specificity 1;
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin();	// break glass behind bar
+}
+
+
+// ## done 
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_done() {
+	precondition { StoryMemory (AmbFixdrinkWME playerDrink > eDrink_NOTADRINK) }
+	specificity 2;
+	subgoal DoPickupObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_grabGlassesLR, 
+										eSpriteID_playerDrink, eSpriteID_tripDrink);
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_FixDrinkAtBar_done"); }
+}
+
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_done() {
+	precondition { StoryMemory (AmbFixdrinkWME playerDrink <= eDrink_NOTADRINK) }
+	specificity 2;
+	subgoal DoPickupObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_grabGlassR, 
+										eSpriteID_NOTASPRITE, eSpriteID_tripDrink);
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_FixDrinkAtBar_done"); }
+}
+
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_done() {
+	specificity 1;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink_FixDrinkAtBar_done failed"); }
+}
+
+
+sequential behavior LongTermBehavior_FixDrink_FixDrinkAtBar_PutUpGracesDrink() {
+	precondition { StoryMemory (AmbFixdrinkWME graceDrink != eDrink_NOTADRINK) }
+
+	// put drink on bar
+	subgoal DoPickupObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkPutOnBar_in, 
+										-1, eSpriteID_graceDrink);
+	subgoal DoPutdownObjGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkPutOnBar_out, 
+										eSpriteID_bar, 0, 0.0f, 0.0f, 0.0f, ePutdownObjParam_none);
+
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal LongTermBehavior_FixDrink_GraceDrinkReady_Mixin();
+	
+	// wait for spawned beatgoal to disappear from ABT before we continue
+	with (success_test { !(GoalStepWME signature == "Global_bgMixin_LTBFixDrink_GraceDrinkReady()") }) wait; 
+	
+	with (ignore_failure) subgoal DoGaze(0, eGazeType_normal, me);	// look forward again
+}
+
+
+// ##### Bring drink to player
+
+// do nothing (succeed) if player isn't drinking!
+sequential behavior LongTermBehavior_FixDrink_BringDrinkToPlayer() {
+	precondition { StoryMemory (AmbFixdrinkWME playerDrink == eDrink_NOTADRINK) }
+	specificity 3;
+	succeed_step;
+}
+
+sequential behavior LongTermBehavior_FixDrink_BringDrinkToPlayer() {
+	specificity 2;
+
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink bring drink to player"); }
+
+	// Go near to player
+	with (property isStagingGoal true) 
+		subgoal StagingConverse(-1, player, eConverseType_offCenterShared, cConverseDist_near, eWalkType_normal);
+
+	// offer drink
+	with (property isStagingGoal true) subgoal StagingObjectOffer(-1, player, eWalkType_normal);
+}
+sequential behavior LongTermBehavior_FixDrink_BringDrinkToPlayer() {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+
+// ## Put down back on bar if needed
+
+// if we don't have the drink in our hand, this should just succeed (no-op)
+sequential behavior LongTermBehavior_FixDrink_PutUntakenObjectDownIfNeeded() {
+	precondition { !(HeldObjectWME	characterID == me  
+									attachPointID == g_objHand
+									objectCategory == eObjectCategory_drink) }
+	specificity 3;
+	succeed_step;
+}
+sequential behavior LongTermBehavior_FixDrink_PutUntakenObjectDownIfNeeded() {
+	specificity 2;
+	mental_act { StringUtil.println("LongTermBehavior_FixDrink putting untaken drink back on bar"); }
+
+	// get the gaze torso back
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_gazeTorso, 60, eBodyResourceAction_fail);
+
+	// spawn a beatgoal -- each character has their own version of this
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal StagingObjectOfferRetract_Mixin();
+
+	with (property isStagingGoal true) subgoal StagingObjectDrop(-1, g_objArm, eSpriteID_bar, 0, eWalkType_normal);
+}
+sequential behavior LongTermBehavior_FixDrink_PutUntakenObjectDownIfNeeded() {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+
+
+
+// ############
+// LongTermBehavior_FixDrink_GraceDrinkReady_Mixin()
+sequential behavior LongTermBehavior_FixDrink_GraceDrinkReady_Mixin() {
+	precondition { BeatMemory (BeatStatusWME mixInAllowed_ltb == true) }
+	specificity 2;
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal LongTermBehavior_FixDrink_GraceDrinkReady_Mixin_Body();
+}
+sequential behavior LongTermBehavior_FixDrink_GraceDrinkReady_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** LongTermBehavior_FixDrink_GraceDrinkReady_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			//priority 15) spawngoal Global_bgMixin_LTBFixDrink_GraceDrinkReady() at beatGoals_Body; 
+			// we don't spawngoal this into beatGoals_Body, we SUBGOAL IT
+			// that way we don't have to somehow transfer ownership of the arms body resources,
+			// and we know when it's done so we know when to continue looping the fixdrinks stuff
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady();
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior LongTermBehavior_FixDrink_GraceDrinkReady_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady(); 
+}
+*/
+
+// if signature changes, update LongTermBehavior_FixDrink_FixDrinkAtBar_PutUpGracesDrink
+
+// HerOwnChardonnay
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME playerDrink :: playerDrink  graceDrink :: graceDrink) }
+					(graceDrink == eDrink_whiteWine && playerDrink != graceDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff2();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, grace);
+	subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_CONDESCENDING_chardonnay_come_and_get_it);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_CONDESCENDING_heres_your_wine_grace);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_CONDESCENDING_your_chardonnay_is_ready_dear);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnChardonnay_BodyStuff2() { teammembers Trip Grace;
+	succeed_step;
+}
+
+// TripAndPlayersFancy
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME tripDrink :: tripDrink  graceDrink :: graceDrink) }
+					(tripDrink >= eDrink_firstFancyDrink && tripDrink == graceDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff2();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_happy, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, grace);
+	subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_A_BIT_COCKY_here_you_go_grace_you_get_to_be_the_first_to_drink);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_A_BIT_COCKY_here_grace_you_be_the_first_to_try_this);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_TripAndPlayersFancy_BodyStuff2() { teammembers Trip Grace;
+	succeed_step;
+}
+
+// MerlotCompromise
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME tripDrink :: tripDrink  graceDrink :: graceDrink) }
+					(tripDrink == eDrink_merlot && tripDrink == graceDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff2();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_serious, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, grace);
+	subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_here_grace_i_poured_you_the_first_glass);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_grace_im_giving_you_the_first_glass);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_MerlotCompromise_BodyStuff2() { teammembers Trip Grace;
+	succeed_step;
+}
+
+// PlayersNonFancy
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady() {
+	specificity 1;	// default
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff2();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, grace);
+	subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_ANNOYED_alright_grace_yours_is_ready);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_ANNOYED_here_grace_yours_is_ready);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_PlayersNonFancy_BodyStuff2() { teammembers Trip Grace;
+	succeed_step;
+}
+
+// HerOwnNonFancy
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME playerDrink :: playerDrink  graceDrink :: graceDrink) }
+					(graceDrink < eDrink_firstFancyDrink && playerDrink != graceDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff2();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, grace);
+	subgoal Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_ANNOYED_alright_grace_your_drink_is_ready);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_SLIGHTLY_ANNOYED_here_you_are_grace_your_drink_is_ready);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_GraceDrinkReady_HerOwnNonFancy_BodyStuff2() { teammembers Trip Grace;
+	succeed_step;
+}
+
+
+// ############
+// LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin()
+sequential behavior LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin() {
+	specificity 2;
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	// no need! ambFixDrinkOpt has already waited for the right time for us
+	//with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin_Body();
+}
+sequential behavior LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			//priority 15) spawngoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar() at beatGoals_Body; 
+			// we don't spawngoal this into beatGoals_Body, we SUBGOAL IT
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar();
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior LongTermBehavior_FixDrink_BreakGlassBehindBar_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar(); 
+}
+*/
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar() {
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_BreakGlassBehindBar"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_Body();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_BreakGlassBehindBar"); }
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_Body() {
+	joint subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2();
+	joint subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff3();
+	joint subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff4();
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, me, eFEBase_surprised);
+	with (priority_modifier 2) subgoal SetMood(eMood_angry, eMoodStrength_low, -1, 0); 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+	subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff_seq();
+	
+	mental_act {
+		ProvocativeContentArchive.archive.AddContent(eProvocativeContentType_SpecificMediumHotEvent, 
+														eProvocativeContentParam_Trip_breaks_glasses_behind_bar,
+														trip,
+														eBackstoryCategory_Trip_wants_to_be_highclass_to_completely_leave_behind_his_embarrassing_background_F,
+														eBackstoryCategory_Grace_feels_like_their_marriage_is_a_facade_all_for_show_where_is_the_real_feeling__Trip_deep_down_knows_hes_putting_on_a_facade_F,
+														-1);
+	}
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff_seq() {
+	act setAnimEngineInfo(eSetAnimEngineInfo_doBreakingGlassSfx, -1);
+	subgoal WaitFor(1);
+	with (priority_modifier 1, ignore_failure) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_low);
+	subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_ah_shit);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_ah_crap);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, me, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_angry, eMoodStrength_low, -1, 0); 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle1);
+	subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2_seq();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2_seq() {
+	with (priority_modifier 1, ignore_failure) 
+		spawngoal PerformLittleActionAfterDelay(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_low, 3.0f);
+	subgoal Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_ah_i_broke_two_of_my_new_crystal_wine_glasses);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff2_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_ah_two_of_my_new_crystal_wine_glasses_just_broke);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff3() { teammembers Trip Grace;
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_BreakGlassBehindBar_BodyStuff4() { teammembers Trip Grace;
+	subgoal DoDialog(70, true, etripScript_vocalSound_sigh_frustrated);
+}
+
+
+// ############
+// LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin()
+sequential behavior LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin() {
+	specificity 2;
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	// no need! ambFixDrinkOpt has already waited for the right time for us
+	//with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin_Body();
+}
+sequential behavior LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			//priority 15) spawngoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink() at beatGoals_Body; 
+			// we don't spawngoal this into beatGoals_Body, we SUBGOAL IT
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink();
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior LongTermBehavior_FixDrink_RunOutOfGracesDrink_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink(); 
+}
+*/
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink() {
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_Body();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink"); }
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_Body() {
+	joint subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff();
+	subgoal SetFixDrink_GraceDrink(eDrink_NOTADRINK);	// Grace will now not drink
+	joint subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff2();
+	joint subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff3();
+	joint subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff4();
+	joint subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5();
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, me, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_seq();
+	
+	mental_act {
+		ProvocativeContentArchive.archive.AddContent(eProvocativeContentType_SpecificMediumHotEvent, 
+														eProvocativeContentParam_Trip_runs_out_of_Graces_drink,
+														grace,
+														eBackstoryCategory_Trip_wants_to_be_highclass_to_completely_leave_behind_his_embarrassing_background_F,
+														eBackstoryCategory_Grace_feels_like_their_marriage_is_a_facade_all_for_show_where_is_the_real_feeling__Trip_deep_down_knows_hes_putting_on_a_facade_F,
+														-1);
+	}
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_seq() {
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia();
+	subgoal WaitFor(2);
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia2();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_uh_oh_um_grace);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_um_uh_grace);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia2() {
+	specificity 1;
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_im_out_of_your_wine);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia2() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME graceDrink :: graceDrink) }
+					(graceDrink >= eDrink_orangeJuice && graceDrink <= eDrink_cranberryJuice) }
+	specificity 2;
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_im_out_of_your_juice);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff_dia2() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME graceDrink :: graceDrink) }
+					(graceDrink == eDrink_sparklingWater || graceDrink == eDrink_plainWater) }
+	specificity 2;
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_im_out_of_your_water);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff2() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, grace, eFEBase_pleasant);
+	with (priority_modifier 2) subgoal SetMood(eMood_anxious, eMoodStrength_barely, -1, 0); 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle1);
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff2_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff2_dia() {
+	subgoal WaitFor(2);
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_sorry_i_forgot_to_buy_more_on_my_latest_shopping_trip);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff2_dia() {
+	subgoal WaitFor(2);
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_im_sorry_i_forgot_to_buy_some_last_time_i_went_shopping);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff3() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, me, eFEBase_pleasant);
+	with (priority_modifier 2) subgoal SetMood(eMood_anxious, eMoodStrength_barely, -1, 0); 
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff3_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff3_dia() {
+	subgoal WaitFor(2);
+	with (ignore_failure) subgoal DoFullExpressionBase(70, eFEBase_smile);
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_i_know_i_know_im_sorry_what_else_can_i_get_you);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff3_dia() {
+	subgoal WaitFor(2);
+	with (ignore_failure) subgoal DoFullExpressionBase(70, eFEBase_smile);
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_i_know_i_know_im_sorry_can_i_get_you_something_else);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff4() { teammembers Trip Grace;
+	succeed_step;
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, grace, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5_seq();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5_seq() {
+	subgoal Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5_dia();
+	subgoal WaitFor(3);
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_normal, me);
+	subgoal DoDialog(70, true, etripScript_vocalSound_sigh_big);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_what);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RunOutOfGracesDrink_BodyStuff5_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_you_what);
+}
+
+
+// ############
+// LongTermBehavior_FixDrink_BlenderOverGrace_Mixin()
+sequential behavior LongTermBehavior_FixDrink_BlenderOverGrace_Mixin() {
+	specificity 2;
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	// no need! ambFixDrinkOpt has already waited for the right time for us
+	//with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal LongTermBehavior_FixDrink_BlenderOverGrace_Mixin_Body();
+}
+sequential behavior LongTermBehavior_FixDrink_BlenderOverGrace_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** LongTermBehavior_FixDrink_BlenderOverGrace_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			//priority 15) spawngoal Global_bgMixin_LTBFixDrink_BlenderOverGrace() at beatGoals_Body; 
+			// we don't spawngoal this into beatGoals_Body, we SUBGOAL IT
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace();
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior LongTermBehavior_FixDrink_BlenderOverGrace_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, 
+			priority 15) subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace(); 
+}
+*/
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace() {
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_BlenderOverGrace"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_Body();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_BlenderOverGrace"); }
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_Body() {
+	joint subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2();
+	joint subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff3();
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff() { teammembers Trip Grace;
+	subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff_seq();
+	
+	mental_act {
+		ProvocativeContentArchive.archive.AddContent(eProvocativeContentType_SpecificMediumHotEvent, 
+														eProvocativeContentParam_Trip_runs_blender_over_Graces_dialog,
+														grace,
+														eBackstoryCategory_Trip_wants_to_be_highclass_to_completely_leave_behind_his_embarrassing_background_F,
+														eBackstoryCategory_Grace_feels_like_their_marriage_is_a_facade_all_for_show_where_is_the_real_feeling__Trip_deep_down_knows_hes_putting_on_a_facade_F,
+														-1);
+	}
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff_seq() { 
+	subgoal WaitFor(2);
+	act setAnimEngineInfo(eSetAnimEngineInfo_doBlenderSfx, -1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkBlender_hold);
+	subgoal WaitFor(1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkBlender_loop1);
+	subgoal WaitFor(2);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2() { teammembers Trip Grace;
+	subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2_dia();
+	subgoal Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2_seq();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2_seq() { 
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrinkBlender_hold);
+	subgoal WaitFor(1);
+	subgoal DoGesture_ArmsBoth(-1, etripScript_layer_armsBoth_fixDrink_idle2);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_sorry_sorry);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff2_dia() {
+	subgoal DoDialog(70, true, etripScript_dialog_FIXDRINKSLTBT1_sorry_grace_sorry);
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_BlenderOverGrace_BodyStuff3() { teammembers Trip Grace;
+	succeed_step;
+}
+
+
+// ############
+// StagingObjectOffer_Mixin()
+sequential behavior StagingObjectOffer_Mixin() {
+	specificity 2;
+
+	// start ignoring "thanks" from player
+	subgoal ActivateContext(context_IgnoreThanks, cContextPriority_duringMixIn);
+	spawngoal EventuallyTurnOffIgnoreThanks(15);
+
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal StagingObjectOffer_Mixin_Body();
+}
+sequential behavior StagingObjectOffer_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** StagingObjectOffer_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, priority 10) 
+		spawngoal Global_bgMixin_LTBFixDrink_OfferDrink() at beatGoals_Body; 
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior StagingObjectOffer_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, priority 10) 
+		spawngoal Global_bgMixin_LTBFixDrink_OfferDrink(); 
+}
+*/
+
+// TripAndPlayersFancy
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink() {
+	specificity 1;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	with (ignore_failure) joint subgoal Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff() { teammembers Trip Grace;
+	precondition { !(HeldObjectWME characterID == eSpriteID_player) }	// it's possible the player already has the drink, in which case we don't want to speak
+	// don't do any staging, because we're subgoaled from stagingoffer in the first place!
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_happy, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, player);
+	subgoal Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_EXCITED_alright_here_you_go);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_EXCITED_here_we_are_hope_you_like_it);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_EXCITED_heres_your_drink);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_TripAndPlayersFancy_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_EXCITED_here_you_are);
+}
+
+
+// NonFancyWithGrace
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME graceDrink :: graceDrink  playerDrink :: playerDrink) }
+					(graceDrink < eDrink_firstFancyDrink && graceDrink != eDrink_merlot &&
+						graceDrink == playerDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	with (ignore_failure) subgoal Global_bgMixin_LTBFixDrink_OfferDrink_more();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace"); }
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_more() {
+	precondition { !(HeldObjectWME characterID == eSpriteID_player) }	// it's possible the player already has the drink, in which case we don't want to speak
+	joint subgoal Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff();
+	joint subgoal Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff2();
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff() { teammembers Trip Grace;
+	// don't do any staging, because we're subgoaled from stagingoffer in the first place!
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_serious, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, player);
+	subgoal Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_FLAT_heres_yours);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_FLAT_this_is_yours);
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancyWithGrace_BodyStuff2() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, spouse, eFEBase_serious);
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// NonFancySolo
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink() {
+	precondition {	{ StoryMemory (AmbFixdrinkWME graceDrink :: graceDrink  playerDrink :: playerDrink) }
+					(playerDrink < eDrink_firstFancyDrink && graceDrink != playerDrink) }
+	specificity 2;
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	with (ignore_failure) joint subgoal Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo_BodyStuff();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo"); }
+}
+joint parallel behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo_BodyStuff() { teammembers Trip Grace;
+	precondition { !(HeldObjectWME characterID == eSpriteID_player) }	// it's possible the player already has the drink, in which case we don't want to speak
+	// don't do any staging, because we're subgoaled from stagingoffer in the first place!
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_serious, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, player);
+	subgoal Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_FLAT_here_you_go);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_OfferDrink_NonFancySolo_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_FLAT_heres_your_drink);
+}
+
+
+// ############
+// StagingObjectOfferRetract_Mixin()
+sequential behavior StagingObjectOfferRetract_Mixin() {
+	specificity 2;
+	// wait until there is no beatgoal executing (ie, the seam between this beatgoal and next)
+	with (success_test { !(GoalStepWME isBeatGoal != null  isExecuting == true) } ) wait;
+	subgoal StagingObjectOfferRetract_Mixin_Body();
+}
+sequential behavior StagingObjectOfferRetract_Mixin_Body() {
+	precondition {	beatGoals_Body = (ParallelBehaviorWME signature == "BeatGoals_Body()") }
+	mental_act { StringUtil.println("*** StagingObjectOfferRetract_Mixin_Body mixing in"); }
+	with (ignore_failure) subgoal PrintIfIsExecutingBeatGoal(); // test code to try to catch the case of killing off a new mixin
+	subgoal AbortBeatGoalIntPAndSuspendBeatGoals();
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, priority 10) 
+		spawngoal Global_bgMixin_LTBFixDrink_RetractDrink() at beatGoals_Body; 
+	subgoal UnsuspendBeatGoals();
+}
+//fixme: remove this, only for testing when beats aren't running!
+/*
+sequential behavior StagingObjectOfferRetract_Mixin() {
+	specificity 1;
+	with (persistent when_fails, property isMixinBeatGoal true, property isBeatGoal true, post, priority 10) 
+		spawngoal Global_bgMixin_LTBFixDrink_RetractDrink(); 
+}
+*/
+
+sequential behavior Global_bgMixin_LTBFixDrink_RetractDrink() {
+	mental_act { StringUtil.println("*** start Global_bgMixin_LTBFixDrink_RetractDrink"); }
+	subgoal InitGlobalMixinState_BodyStuff(true, eDeflectMode_minimal, eDAMiscParam_NOITREF, false);	// sets us to uninterruptible
+	joint subgoal Global_bgMixin_LTBFixDrink_RetractDrink_BodyStuff();
+	mental_act { StringUtil.println("*** end Global_bgMixin_LTBFixDrink_RetractDrink"); }
+}
+
+joint parallel behavior Global_bgMixin_LTBFixDrink_RetractDrink_BodyStuff() { teammembers Trip Grace;
+	// don't do any staging, because we're subgoaled from stagingoffer in the first place!
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_serious, eLittleActionStrength_barely);
+	with (ignore_failure) subgoal DoGaze(-1, eGazeType_normal, eSpriteID_bar);
+	subgoal Global_bgMixin_LTBFixDrink_RetractDrink_BodyStuff_dia();
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RetractDrink_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_well_ill_just_put_this_on_the_bar_for_you);
+}
+sequential behavior Global_bgMixin_LTBFixDrink_RetractDrink_BodyStuff_dia() {
+	subgoal DoDialog(70, false, etripScript_dialog_FIXDRINKSLTBT1_you_know_what_im_just_going_to_put_this_on_the_bar_for_you);
+}
+
+
+

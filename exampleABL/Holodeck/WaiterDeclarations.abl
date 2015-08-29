@@ -1,0 +1,30 @@
+	
+	
+	//behind bar near exit of bar - 158.143400,217.412500,24.130580
+	double BAR_EXIT_X = 158.143400;
+	double BAR_EXIT_Y = 217.412500;
+	double BAR_EXIT_Z = 24.130580;
+	
+	//center behind bar 157.739800,220.882900,24.130580
+	double BEHIND_BAR_X = 157.739800;
+	double BEHIND_BAR_Y = 220.882900;
+	double BEHIND_BAR_Z = 24.130580;
+	
+	/**
+	 * Subtree management WME for the BehindBar subtree.
+	 */
+	wme BehindBarWME {
+		long startTime;
+	}
+	
+	/**
+	 * Subtree management WME for the ServiceCustomer subtree.
+	 */
+	wme ServiceCustomerWME {
+		String customerName;
+		long startTime;
+	}
+	
+	wme LastCustomerWME {
+		long lastContact;
+	}

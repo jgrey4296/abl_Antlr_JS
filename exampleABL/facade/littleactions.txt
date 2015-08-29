@@ -1,0 +1,1160 @@
+// shared littleactions.abl
+
+
+// ############ 
+// PerformLittleAction
+
+sequential behavior PerformLittleAction(int resourcePriority, int type, int tone, int strength) { 
+	precondition { moodWME = (MoodWME) }
+
+	// if requested, determine tone from our current mood
+	mental_act {
+		if (tone == eLittleActionTone_moodDetermined) {
+			if (moodWME.getType() == eMood_happy)			tone = eLittleActionTone_happy;
+			else if (moodWME.getType() == eMood_angry)		tone = eLittleActionTone_angry;
+			else if (moodWME.getType() == eMood_anxious || 
+					 moodWME.getType() == eMood_rejected)	tone = eLittleActionTone_anxious;
+			else if (moodWME.getType() == eMood_impatient)	tone = eLittleActionTone_impatient;
+			else											tone = eLittleActionTone_serious;
+		}
+	}
+
+	// primarily, LittleActions do "facialMod" type actions, such as eye lookaways, blinking, little head motions
+	// if they do more, they request what they need
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_facialMod, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { StringUtil.println(myName + " PerformLittleAction " + type + " tone " + tone + " strength " + strength); }
+
+	subgoal PerformLittleAction_Body(type, tone, strength);
+}
+
+sequential behavior PerformLittleActionAtDialogCue(int resourcePriority, int dialogCue, int dialogSpriteID, int type, int tone, int strength) { 
+	precondition { (dialogSpriteID == eSpriteID_trip || dialogSpriteID == eSpriteID_grace) }
+	//mental_act { StringUtil.println(myName + " *** PerformLittleActionAtDialogCue waiting for dialog cue " + dialogCue); }
+	subgoal WaitForAnimCueWithTimeout(eAnimLayer_dialog, dialogCue, 7);		// timeout in case the cue is dropped
+	//mental_act { StringUtil.println(myName + " *** PerformLittleActionAtDialogCue got dialog cue " + dialogCue); }
+	subgoal PerformLittleAction(resourcePriority, type, tone, strength);
+}
+sequential behavior PerformLittleActionAtDialogCue(int resourcePriority, int dialogCue, int dialogSpriteID, int type, int tone, int strength) { 
+	precondition { (dialogSpriteID != eSpriteID_trip && dialogSpriteID != eSpriteID_grace) }
+	mental_act { StringUtil.println("### Error: Illegal dialogSpriteID " + dialogSpriteID + " in PerformLittleActionAtDialogCue"); }
+	mental_act { assert(false); }
+}
+
+sequential behavior PerformLittleActionAfterDelay(int resourcePriority, int type, int tone, int strength, float delay) { 
+	subgoal WaitFor(delay);
+	subgoal PerformLittleAction(resourcePriority, type, tone, strength);
+}
+
+
+// ----------
+
+
+// ## think with no tone
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_none) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModNone, eMiscLittleAction_eyeLookAway);
+}
+
+
+// ## think serious barely/low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_serious) 
+						(strength == eLittleActionStrength_barely || strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModSerious, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think serious medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkMedium(eMiscLittleAction_facialModSerious, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think serious high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkHigh(eMiscLittleAction_facialModSerious, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think happy barely/low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_happy) 
+						(strength == eLittleActionStrength_barely || strength == eLittleActionStrength_low) }						
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModHappy, eMiscLittleAction_eyeLookAwayAndUp);
+}
+
+// ## think happy medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkMedium(eMiscLittleAction_facialModHappy, eMiscLittleAction_eyeLookAwayAndUp);
+}
+
+// ## think happy high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkHigh(eMiscLittleAction_facialModHappy, eMiscLittleAction_eyeLookAwayAndUp);
+}
+
+// ## think anxious barely/low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_anxious)
+						(strength == eLittleActionStrength_barely || strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModAnxious, eMiscLittleAction_eyeLookAwayAndDown);
+}
+
+// ## think anxious medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkMedium(eMiscLittleAction_facialModAnxious, eMiscLittleAction_eyeLookAwayAndDown);
+}
+
+// ## think anxious high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkHigh(eMiscLittleAction_facialModAnxious, eMiscLittleAction_eyeLookAwayAndDown);
+}
+
+// ## think angry barely/low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_angry)
+						(strength == eLittleActionStrength_barely || strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModAnnoyed, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think angry medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkMedium(eMiscLittleAction_facialModAnnoyed, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think angry high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkHigh(eMiscLittleAction_facialModAnnoyed, eMiscLittleAction_eyeLookAway);
+}
+
+// ## think impatient barely/low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_impatient)
+						(strength == eLittleActionStrength_barely || strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkBarelyOrLow(eMiscLittleAction_facialModImpatient, eMiscLittleAction_eyeLookUp);
+}
+
+// ## think impatient medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkMedium(eMiscLittleAction_facialModImpatient, eMiscLittleAction_eyeLookUp);
+}
+
+// ## think impatient high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ThinkHigh(eMiscLittleAction_facialModImpatient, eMiscLittleAction_eyeLookUp);
+}
+
+
+// ## react with no tone
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_none) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModNone, false, -1);
+}
+
+// ## react serious barely
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_barely) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModSerious, false, -1);
+}
+
+
+// ## react happy barely
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_barely) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModHappy, false, -1);
+}
+
+
+// ## react anxious barely
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_barely) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModAnxious, false, -1);
+}
+
+
+// ## react angry barely
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_barely) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModAnnoyed, false, -1);
+}
+
+
+// ## react impatient barely
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_barely) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModImpatient, false, eMiscLittleAction_eyeLookUp);
+}
+
+
+// ## react serious low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModSerious, true, -1);
+}
+
+
+// ## react happy low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModHappy, true, -1);
+}
+
+
+// ## react anxious low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModAnxious, true, -1);
+}
+
+
+// ## react angry low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModAnnoyed, true, -1);
+}
+
+
+// ## react impatient low
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_low) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModImpatient, true, eMiscLittleAction_eyeLookUp);
+}
+
+
+// ## react serious medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactSeriousMedium();
+}
+
+// ## react happy medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	//fixme: need to author something new here
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModHappy, true, -1);
+}
+
+// ## react anxious medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactAnxiousMedium();
+}
+
+// ## react angry medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactAngryMedium();
+}
+
+// ## react impatient medium
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModAnnoyed, true, eMiscLittleAction_eyeLookUp);		//fixme
+}
+
+// ## react serious high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactSeriousHigh();
+}
+
+// ## react happy high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_happy) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	//fixme: need to author something new here
+	subgoal PerformLittleAction_ReactBarelyOrLow(eMiscLittleAction_facialModHappy, true, -1);
+}
+
+// ## react anxious high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_anxious) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactAnxiousHigh();
+}
+
+// ## react angry high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_angry) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactAngryHigh();
+}
+
+// ## react impatient high
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_react) (tone == eLittleActionTone_impatient) (strength == eLittleActionStrength_high) }
+	specificity 2;
+	subgoal PerformLittleAction_ReactAngryMedium();	//fixme
+}
+
+// ## fall thru
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	specificity 1;
+	succeed_step;
+}
+
+
+
+// ---------------------
+// SUPPORT BEHAVIORS
+
+
+// ## think low variations
+
+// lookaway for a moment
+sequential behavior PerformLittleAction_ThinkBarelyOrLow(int facialMod, int lookAway) { 
+	float duration;
+	mental_act { duration = 1.0f + (randGen.nextFloat() * 2.0f); }
+	subgoal DoMiscLittleAction(lookAway, 1, duration);
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+}
+
+
+// ## think medium variations
+
+// lookaway for a moment with eyeball quiver, facialMod
+sequential behavior PerformLittleAction_ThinkMedium(int facialMod, int lookAway) { 
+	float duration;
+	mental_act { 
+		duration = 1.5f + (randGen.nextFloat() * 1.5f); 
+
+		// special case: for this behavior, convert serious facialMod to none
+		if (facialMod == eMiscLittleAction_facialModSerious) {
+			facialMod = eMiscLittleAction_facialModNone;
+		}
+	}
+	subgoal DoMiscLittleAction(lookAway, 1, duration);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeQuiver, 20, duration);
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+}
+
+// lookaway several times, facialMod
+sequential behavior PerformLittleAction_ThinkMedium(int facialMod, int lookAway) { 
+	float duration;
+	int num;
+	mental_act { 
+		duration = 0.45f + (randGen.nextFloat() * 0.15f); 
+		num = 3 + randGen.nextInt(2); 
+	}
+	subgoal DoMiscLittleAction(lookAway, num, duration);
+	mental_act { duration = 1.5f + (randGen.nextFloat() * 1.5f); }
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+}
+
+// lookaway, turnaway, facialMod
+sequential behavior PerformLittleAction_ThinkMedium(int facialMod, int lookAway) { 
+	float duration;
+	int turnAmount;
+	mental_act { duration = 1.5f + (randGen.nextFloat() * 1.5f); }
+	mental_act { turnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) turnAmount = -turnAmount; }
+	subgoal DoMiscLittleAction(lookAway, 1, duration);
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, turnAmount, 1.5f);
+}
+
+// ## think high variations
+
+// lookaway and turnaway, eyeball quiver, head quiver, facialMod, blink change
+sequential behavior PerformLittleAction_ThinkHigh(int facialMod, int lookAway) { 
+	float duration;
+	int turnAmount;
+	mental_act { duration = 1.5f + (randGen.nextFloat() * 1.5f); }
+	mental_act { turnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) turnAmount = -turnAmount; }
+	subgoal PerformLittleAction_BlinkFastOrFlutter();
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, turnAmount, 2.0f);
+	subgoal DoMiscLittleAction(lookAway, 1, duration);
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeQuiver, 20, duration);
+	subgoal PerformLittleAction_PossibleHeadQuiver();	// may do a WaitFor
+}
+
+// lookaway several times, turnaway, facialMod, head quiver, blink change
+sequential behavior PerformLittleAction_ThinkHigh(int facialMod, int lookAway) { 
+	float duration;
+	int num;
+	int turnAmount;
+	mental_act { 
+		duration = 0.45f + (randGen.nextFloat() * 0.15f); 
+		num = 3 + randGen.nextInt(2); 
+		turnAmount = 15 + randGen.nextInt(11);
+		if (randGen.nextInt(2) == 0) turnAmount = -turnAmount;
+	}
+	subgoal PerformLittleAction_BlinkFastOrFlutter();
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, turnAmount, 2.0f);
+	subgoal DoMiscLittleAction(lookAway, num, duration);
+	mental_act { duration = 1.5f + (randGen.nextFloat() * 1.5f); }
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+	subgoal PerformLittleAction_PossibleHeadQuiver();	// may do a WaitFor
+}
+
+// lookaway, turnaway, facialMod, head quiver, blink change
+sequential behavior PerformLittleAction_ThinkHigh(int facialMod, int lookAway) { 
+	float duration;
+	int turnAmount;
+	mental_act { duration = 1.5f + (randGen.nextFloat() * 1.5f); }
+	mental_act { turnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) turnAmount = -turnAmount; }
+	subgoal PerformLittleAction_BlinkFastOrFlutter();
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, turnAmount, 2.0f);
+	subgoal DoMiscLittleAction(lookAway, 1, duration);
+	subgoal PerformLittleAction_FacialMod(facialMod, duration);
+	subgoal PerformLittleAction_PossibleHeadQuiver();	// may do a WaitFor
+}
+
+
+// ## react low variations
+
+// turn/cock head, possible blink twice, possible raise eyebrows
+
+sequential behavior PerformLittleAction_ReactBarelyOrLow(int facialMod, boolean bMoreThanBarely, 
+															int additionalEyeLook) { 
+	int alt1;
+	int alt2;
+	float duration1;
+	float duration2;
+	float facialModDuration;
+	int iTurnAmount;
+	mental_act { 
+
+		// pick 2 alts to do		
+		alt1 = randGen.nextInt(4);
+		alt2 = randGen.nextInt(4);
+		if (alt2 == alt1) {
+			if (alt2 == 0) alt2 = 1 + randGen.nextInt(3); 
+			else if (alt2 == 1) alt2 = 2 + randGen.nextInt(2); 
+			else if (alt2 == 2) alt2 = randGen.nextInt(2); 
+			else if (alt2 == 3) alt2 = randGen.nextInt(3); 
+			assert(alt1 != alt2); 
+		}
+
+		duration1 = 2.0f + (randGen.nextFloat() * 3.0f); 
+		duration2 = 2.0f + (randGen.nextFloat() * 3.0f); 
+		facialModDuration = 4.0f + (randGen.nextFloat() * 2.0f); 
+
+		if (bMoreThanBarely) {
+			iTurnAmount = 25 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		} else {
+			iTurnAmount = 5 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		}
+	}
+
+	subgoal PerformLittleAction_ReactBarelyOrLow_TwoAlts(alt1, duration1, 
+															alt2, duration2,
+															facialMod, facialModDuration,
+															iTurnAmount,
+															additionalEyeLook);
+}
+
+
+parallel behavior PerformLittleAction_ReactBarelyOrLow_TwoAlts(int alt1, float duration1, 
+														int alt2, float duration2,
+														int facialMod, float facialModDuration,
+														int iTurnAmount,
+														int additionalEyeLook) {
+	subgoal PerformLittleAction_ReactBarelyOrLow_Stuff(alt1, duration1);
+	subgoal PerformLittleAction_ReactBarelyOrLow_Stuff(alt2, duration2);
+	subgoal PerformLittleAction_FacialMod(facialMod, facialModDuration);
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 1.5f);
+	with (ignore_failure) subgoal PerformLittleAction_PossiblyDoAdditionalEyeLook(additionalEyeLook);
+}
+
+sequential behavior PerformLittleAction_ReactBarelyOrLow_Stuff(int alt, float duration) {
+	precondition { (alt == 0) }
+	//mental_act { StringUtil.println(myName + " PerformLittleAction_ReactBarelyOrLow_Stuff alt " + alt); }
+	subgoal DoMiscLittleAction(eMiscLittleAction_blinkTwice, 0, 0.0f);
+}
+sequential behavior PerformLittleAction_ReactBarelyOrLow_Stuff(int alt, float duration) {
+	precondition { (alt == 1) }
+	int turnAmount;
+	mental_act { turnAmount = 6 + randGen.nextInt(6); if (randGen.nextInt(2) == 0) turnAmount = -turnAmount; }
+	//mental_act { StringUtil.println(myName + " PerformLittleAction_ReactBarelyOrLow_Stuff alt " + alt); }
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHead, turnAmount, duration);
+}
+sequential behavior PerformLittleAction_ReactBarelyOrLow_Stuff(int alt, float duration) {
+	precondition { (alt == 2) }
+	int cockAmount;
+	mental_act { cockAmount = 6 + randGen.nextInt(6); }
+	//mental_act { StringUtil.println(myName + " PerformLittleAction_ReactBarelyOrLow_Stuff alt " + alt); }
+	subgoal DoMiscLittleAction(eMiscLittleAction_cockHead, cockAmount, duration);
+}
+sequential behavior PerformLittleAction_ReactBarelyOrLow_Stuff(int alt, float duration) {
+	precondition { (alt == 3) }
+	//mental_act { StringUtil.println(myName + " PerformLittleAction_ReactBarelyOrLow_Stuff alt " + alt); }
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, 0, 0.0f);
+}
+
+sequential behavior PerformLittleAction_PossiblyDoAdditionalEyeLook(int additionalEyeLook) {
+	precondition { (additionalEyeLook >= 0) }
+	subgoal DoMiscLittleAction(additionalEyeLook, 1, 2.0f);
+}
+
+
+// ################
+// ReactSeriousMedium alt1
+sequential behavior PerformLittleAction_ReactSeriousMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = -5 - randGen.nextInt(5);
+	}
+	subgoal PerformLittleAction_ReactSeriousMedium1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal PerformLittleAction_ReactSeriousMedium1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+
+// serious, tilt back, eyes widen, breathe med, hold
+parallel behavior PerformLittleAction_ReactSeriousMedium1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// tilt back, hold
+parallel behavior PerformLittleAction_ReactSeriousMedium1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactSeriousMedium alt2
+sequential behavior PerformLittleAction_ReactSeriousMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsMinus2;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 4.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsMinus2 = fDurationSecs - 2.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = -5 - randGen.nextInt(5);
+	}
+	subgoal PerformLittleAction_ReactSeriousMedium2_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal PerformLittleAction_ReactSeriousMedium2_p1b(fDurationSecsMinus2);
+	subgoal PerformLittleAction_ReactSeriousMedium2_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// serious, tilt back, eyes widen, breathe med, hold
+parallel behavior PerformLittleAction_ReactSeriousMedium2_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(1);
+}
+// look away for a moment
+parallel behavior PerformLittleAction_ReactSeriousMedium2_p1b(float fDurationSecsMinus2) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAway, 1, 0.75f);
+	subgoal WaitFor(fDurationSecsMinus2);
+}
+// tilt back, hold
+parallel behavior PerformLittleAction_ReactSeriousMedium2_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactAnxiousMedium alt1
+sequential behavior PerformLittleAction_ReactAnxiousMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	int iTiltAmount;
+	int eyeslookaway;
+	int numeyedarts;
+	mental_act {
+		fDurationSecs = 5.0f + (randGen.nextFloat() * 2.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 25 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		if (randGen.nextInt(2) == 0) iTiltAmount = -3 - randGen.nextInt(6);
+		else iTiltAmount = 3 + randGen.nextInt(4);
+		if (randGen.nextInt(2) == 0) eyeslookaway = eMiscLittleAction_eyeLookAway;
+		else eyeslookaway = eMiscLittleAction_eyeLookAwayAndDown;
+		numeyedarts = 6;	// a lot is needed because some are the same as the previous, so we only see ~3
+	}
+	subgoal PerformLittleAction_ReactAnxiousMedium1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount, eyeslookaway, numeyedarts);
+	subgoal PerformLittleAction_ReactAnxiousMedium1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn away quick (down tilt optional), eyes dart a bit, eyes widen, breathe medhi, anxious expression, hold
+parallel behavior PerformLittleAction_ReactAnxiousMedium1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount, int eyeslookaway, int numeyedarts) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndVeryLongHold, iTurnAmount, 1.5f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 2.0f);
+	subgoal DoMiscLittleAction(eyeslookaway, numeyedarts, 0.5f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeQuiver, 30, fDurationSecsMinus1);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 90, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAnxiousMed, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn back, hold
+parallel behavior PerformLittleAction_ReactAnxiousMedium1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFrames, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAnxious, 0, fDurationSecs);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 90, fDurationSecsMinus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactAngryMedium alt1
+sequential behavior PerformLittleAction_ReactAngryMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	int eyeslookaway;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		if (randGen.nextInt(2) == 0) eyeslookaway = eMiscLittleAction_eyeLookAwayAndUp;
+		else eyeslookaway = eMiscLittleAction_eyeLookAwayAndWayUp;
+	}
+	subgoal PerformLittleAction_ReactAngryMedium1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, eyeslookaway);
+	subgoal PerformLittleAction_ReactAngryMedium1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn away grimace, hold it
+parallel behavior PerformLittleAction_ReactAngryMedium1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int eyeslookaway) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 3.0f);
+	subgoal DoMiscLittleAction(eyeslookaway, 1, fDurationSecs);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn back, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryMedium1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+// ################
+// ReactAngryMedium alt2
+sequential behavior PerformLittleAction_ReactAngryMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = 4 + randGen.nextInt(3);
+	}
+	subgoal PerformLittleAction_ReactAngryMedium2_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal PerformLittleAction_ReactAngryMedium2_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// tilt grimace, hold it
+parallel behavior PerformLittleAction_ReactAngryMedium2_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 3.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_blinkTwice, 0, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAwayAndWayUp, 1, fDurationSecs);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// end tilt, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryMedium2_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_blinkTwice, 0, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsMinus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+// ################
+// ReactAngryMedium alt3
+sequential behavior PerformLittleAction_ReactAngryMedium() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		iTiltAmount = 4 + randGen.nextInt(3);
+	}
+	subgoal PerformLittleAction_ReactAngryMedium3_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	mental_act { iTurnAmount = -iTurnAmount; }
+	subgoal PerformLittleAction_ReactAngryMedium3_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	subgoal PerformLittleAction_ReactAngryMedium3_p3(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn and tilt grimace, hold it a bit
+parallel behavior PerformLittleAction_ReactAngryMedium3_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 3.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 3.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAwayAndWayUp, 1, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal WaitFor(2);
+}
+// turn other direction, hold it a bit
+parallel behavior PerformLittleAction_ReactAngryMedium3_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 3.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAwayAndWayUp, 1, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn and tilt back, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryMedium3_p3(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+
+// ################
+// ReactSeriousHigh alt1
+sequential behavior PerformLittleAction_ReactSeriousHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	int blinkTwiceOrFlutter;
+	mental_act {
+		fDurationSecs = 5.0f + (randGen.nextFloat() * 2.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = -7 - randGen.nextInt(6);
+		if (me == grace) blinkTwiceOrFlutter = eMiscLittleAction_blinkFlutter;
+		else blinkTwiceOrFlutter = eMiscLittleAction_blinkTwice;
+	}
+	subgoal PerformLittleAction_ReactSeriousHigh1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount, blinkTwiceOrFlutter);
+	subgoal PerformLittleAction_ReactSeriousHigh1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// serious, tilt back, eyes widen, breathe med, hold
+parallel behavior PerformLittleAction_ReactSeriousHigh1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount, int blinkTwiceOrFlutter) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSurprised, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal DoMiscLittleAction(blinkTwiceOrFlutter, 0, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// tilt back, hold
+parallel behavior PerformLittleAction_ReactSeriousHigh1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactSeriousHigh alt2
+sequential behavior PerformLittleAction_ReactSeriousHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsMinus2;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	int blinkTwiceOrFlutter;
+	mental_act {
+		fDurationSecs = 6.0f + (randGen.nextFloat() * 2.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsMinus2 = fDurationSecs - 2.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = -7 - randGen.nextInt(6);
+		if (me == grace) blinkTwiceOrFlutter = eMiscLittleAction_blinkFlutter;
+		else blinkTwiceOrFlutter = eMiscLittleAction_blinkTwice;
+	}
+	subgoal PerformLittleAction_ReactSeriousHigh2_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount, blinkTwiceOrFlutter);
+	subgoal PerformLittleAction_ReactSeriousHigh2_p1b(fDurationSecsMinus1, fDurationSecsMinus2);
+	subgoal PerformLittleAction_ReactSeriousHigh2_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// serious, tilt back, eyes widen, breathe med, hold
+parallel behavior PerformLittleAction_ReactSeriousHigh2_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount, int blinkTwiceOrFlutter) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSurprised, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheMedHi, 0.0f);
+	subgoal DoMiscLittleAction(blinkTwiceOrFlutter, 0, 0.0f);
+	subgoal WaitFor(1);
+}
+// look away for a moment
+parallel behavior PerformLittleAction_ReactSeriousHigh2_p1b(float fDurationSecsMinus1, float fDurationSecsMinus2) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAway, 2, 0.75f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsMinus1);
+	subgoal WaitFor(fDurationSecsMinus2);
+}
+// tilt back, hold
+parallel behavior PerformLittleAction_ReactSeriousHigh2_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModSerious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactAnxiousHigh alt1
+sequential behavior PerformLittleAction_ReactAnxiousHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	int iTiltAmount;
+	int eyeslookaway;
+	int numeyedarts;
+	mental_act {
+		fDurationSecs = 5.0f + (randGen.nextFloat() * 2.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 25 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		iTiltAmount = -6 - randGen.nextInt(3);
+		if (randGen.nextInt(2) == 0) eyeslookaway = eMiscLittleAction_eyeLookAway;
+		else eyeslookaway = eMiscLittleAction_eyeLookAwayAndDown;
+		numeyedarts = 6;	// a lot is needed because some are the same as the previous, so we only see ~3
+	}
+	subgoal PerformLittleAction_ReactAnxiousHigh1_p1a(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount, eyeslookaway, numeyedarts);
+	subgoal PerformLittleAction_ReactAnxiousHigh1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount, eyeslookaway, numeyedarts);
+	subgoal PerformLittleAction_ReactAnxiousHigh1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn away quick (down tilt optional), eyes dart a bit, eyes widen, breathe medhi, anxious expression, hold
+parallel behavior PerformLittleAction_ReactAnxiousHigh1_p1a(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount, int eyeslookaway, int numeyedarts) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 0.75f);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 100, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAnxiousHigh, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheHeavy, 0.0f);
+	subgoal WaitFor(2);
+}
+// turn away quick (down tilt optional), eyes dart a bit, eyes widen, anxious expression, hold
+parallel behavior PerformLittleAction_ReactAnxiousHigh1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount, int eyeslookaway, int numeyedarts) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndVeryLongHold, iTurnAmount, 1.0f);
+	subgoal DoMiscLittleAction(eyeslookaway, numeyedarts, 0.5f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeQuiver, 30, fDurationSecsMinus1);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 90, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAnxiousMed, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn back, hold
+parallel behavior PerformLittleAction_ReactAnxiousHigh1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_raiseEyebrows, iDurationFrames, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAnxious, 0, fDurationSecs);
+	with (priority_modifier 1) subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 90, fDurationSecsMinus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactAngryHigh alt1
+sequential behavior PerformLittleAction_ReactAngryHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+	}
+	subgoal PerformLittleAction_ReactAngryHigh1_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount);
+	subgoal PerformLittleAction_ReactAngryHigh1_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn away grimace, hold it
+parallel behavior PerformLittleAction_ReactAngryHigh1_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 0, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModFurious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheHeavy, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn back, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryHigh1_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+// ################
+// ReactAngryHigh alt2
+sequential behavior PerformLittleAction_ReactAngryHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTiltAmount = 4 + randGen.nextInt(3);
+	}
+	subgoal PerformLittleAction_ReactAngryHigh2_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal PerformLittleAction_ReactAngryHigh2_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// tilt grimace, hold it
+parallel behavior PerformLittleAction_ReactAngryHigh2_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 0, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModFurious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheHeavy, 0.0f);
+	subgoal WaitFor(fDurationSecs);
+}
+// end tilt, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryHigh2_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsMinus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+// ################
+// ReactAngryHigh alt3
+sequential behavior PerformLittleAction_ReactAngryHigh() {
+	float fDurationSecs;
+	float fDurationSecsMinus1;
+	float fDurationSecsPlus1;
+	int iDurationFrames;
+	int iDurationFramesPlus2Secs;
+	int iTurnAmount;
+	int iTiltAmount;
+	mental_act {
+		fDurationSecs = 3.0f + (randGen.nextFloat() * 1.0f);
+		fDurationSecsMinus1 = fDurationSecs - 1.0f;
+		fDurationSecsPlus1 = fDurationSecs + 1.0f;
+		iDurationFrames = (int)((float)fDurationSecs * 30.0f);
+		iDurationFramesPlus2Secs = iDurationFrames + 2*30;
+		iTurnAmount = 15 + randGen.nextInt(11); if (randGen.nextInt(2) == 0) iTurnAmount = -iTurnAmount;	
+		iTiltAmount = 4 + randGen.nextInt(3);
+	}
+	subgoal PerformLittleAction_ReactAngryHigh3_p1(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	mental_act { iTurnAmount = -iTurnAmount; }
+	subgoal PerformLittleAction_ReactAngryHigh3_p2(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	subgoal PerformLittleAction_ReactAngryHigh3_p3(fDurationSecs, fDurationSecsMinus1, fDurationSecsPlus1, iDurationFrames, iDurationFramesPlus2Secs, iTurnAmount, iTiltAmount);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breathe, 0.0f);	// restore breathing
+}
+// turn and tilt grimace, hold it a bit
+parallel behavior PerformLittleAction_ReactAngryHigh3_p1(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_tiltHeadAndBriefHold, iTiltAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModFurious, 0, fDurationSecsPlus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_breathe, eBreatheType_breatheHeavy, 0.0f);
+	subgoal WaitFor(2);
+}
+// turn other direction, hold it a bit
+parallel behavior PerformLittleAction_ReactAngryHigh3_p2(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_turnHeadAndBriefHold, iTurnAmount, 1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 0, fDurationSecsMinus1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModFurious, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+// turn and tilt back, hold grimace a bit
+parallel behavior PerformLittleAction_ReactAngryHigh3_p3(float fDurationSecs, float fDurationSecsMinus1, float fDurationSecsPlus1, int iDurationFrames, int iDurationFramesPlus2Secs, int iTurnAmount, int iTiltAmount) {
+	subgoal DoMiscLittleAction(eMiscLittleAction_lowerEyebrows, iDurationFramesPlus2Secs, 0.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_facialModAngry, 0, fDurationSecsPlus1);
+	subgoal WaitFor(fDurationSecs);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------
+
+sequential behavior PerformLittleAction_FacialMod(int facialMod, float duration) {
+	precondition { (facialMod != -1) }
+	specificity 2; 
+	subgoal DoMiscLittleAction(facialMod, 0, duration);
+}
+sequential behavior PerformLittleAction_FacialMod(int facialMod, float duration) {
+	specificity 1; 
+	succeed_step;
+}
+
+sequential behavior PerformLittleAction_BlinkFastOrFlutter() {
+	subgoal DoMiscLittleAction(eMiscLittleAction_blinkFlutter, 0, 0.0f);
+}
+sequential behavior PerformLittleAction_BlinkFastOrFlutter() {
+	subgoal DoMiscLittleAction(eMiscLittleAction_blinkFaster, 0, 0.0f);
+}
+
+sequential behavior PerformLittleAction_PossibleHeadQuiver() {
+	subgoal WaitFor(1.0f);
+	subgoal DoMiscLittleAction(eMiscLittleAction_headQuiver, 5, 0.5f);
+}
+sequential behavior PerformLittleAction_PossibleHeadQuiver() {
+	succeed_step;
+}
+
+
+// ---------------------
+
+// note: even though this act performs over time, we do NOT wait for a callback!
+// this act returns immediately!
+sequential behavior DoMiscLittleAction(int actionID, int iParam, float fParam) {
+	act miscLittleAction(actionID, iParam, fParam);
+}
+
+sequential behavior DoMiscLittleActionAfterDelay(int actionID, int iParam, float fParam, float delay) {
+	subgoal WaitFor(delay);
+	act miscLittleAction(actionID, iParam, fParam);
+}
+
+
+
+
+
+
+
+
+
+
+/*
+sequential behavior PerformLittleAction_Body(int type, int tone, int strength) { 
+	precondition {	(type == eLittleActionType_think) (tone == eLittleActionTone_serious) (strength == eLittleActionStrength_medium) }
+	specificity 2;
+	long timeout;
+	mental_act { timeout = System.currentTimeMillis() + (long)((2.0f + (randGen.nextFloat() * 3.0f)) * 1000.0f); }
+	with (ignore_failure) subgoal PerformLittleAction_Body_LookAwayLoop(timeout);
+}
+sequential behavior PerformLittleAction_Body_LookAwayLoop(long timeout) {
+	context_condition { (System.currentTimeMillis() < timeout) }
+	with (persistent) subgoal PerformLittleAction_Body_LookAwayLoop_Stuff();
+}
+parallel behavior PerformLittleAction_Body_LookAwayLoop_Stuff() {
+	float actDuration;
+	float waitDuration;
+	with (priority_modifier 1) mental_act { 
+		waitDuration = 0.3f + (randGen.nextFloat() * 0.3f); 
+		actDuration = waitDuration * 2.0f;
+	}
+	subgoal DoMiscLittleAction(eMiscLittleAction_eyeLookAway, 1, actDuration);
+	subgoal WaitFor(waitDuration);
+}
+*/
+
+

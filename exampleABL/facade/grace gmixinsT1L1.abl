@@ -1,0 +1,35 @@
+
+// ####################
+// ### gmT1L1_Satl_Marriage_GPA
+joint parallel behavior gmT1L1_Satl_Marriage_GPA_BodyStuff() { teammembers Trip Grace;
+	with (priority_modifier 3) subgoal DoNoticePlayerInteractionLittleAction();
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious,
+			eDcue_DialogUnderway, spouse, eGazeType_normal, spouse,	 eFEBase_surprised);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (ignore_failure) subgoal DoGazeAfterDelay(70, eGazeType_normal, spouse, 2.0f);
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior gmT1L1_Satl_Marriage_GPA_BodyStuff2() { teammembers Trip Grace;
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal gmT1L1_Satl_Marriage_GPA_BodyStuff2_seq();
+}
+sequential behavior gmT1L1_Satl_Marriage_GPA_BodyStuff2_seq() {
+	subgoal WaitFor(1);
+	subgoal DoMiscLittleAction(eMiscLittleAction_briefEyelidHeight, 0, 1.5f);
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_avert, spouse);
+	with (priority_modifier 2) subgoal SetMood(eMood_angry, eMoodStrength_barely, -1, 0); 
+	with (ignore_failure) subgoal DoFullExpressionBase(70, eFEBase_pleasant);
+	subgoal DoDialog(70, true, egraceScript_dialog_T1L1SATLMARRIAGE_GPA_CONFIDENT_JOKING_BUT_ANNOYED_oh_trip_god_thats_not_funny_sheesh);
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_normal, player);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal WaitFor(1);
+	with (ignore_failure) subgoal DoFullExpressionBase(70, eFEBase_serious);
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_eyesOnly, spouse);
+}

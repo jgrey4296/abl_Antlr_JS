@@ -19,7 +19,7 @@ exports.teamNeededForSuccessTests = {
     //simple one needed test
     simpleOneNeeded : function(test){
         var parseString = "one_needed_for_success;";
-        var startRule = "teamNeededForSuccessDeclaration";
+        var startRule = "teamNeeded";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);

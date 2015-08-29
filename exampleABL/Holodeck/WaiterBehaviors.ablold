@@ -1,0 +1,787 @@
+	/**************************************************************************
+	 *  Subtree transitions.
+	 *
+	 *************************************************************************/
+	sequential behavior TransitionToBehindBar() {
+		specificity 2;
+		mental_act {
+			BehindBarWME bbWME = new BehindBarWME(System.currentTimeMillis());
+			BehavingEntity.getBehavingEntity().addWME(bbWME);
+			System.out.printf("TransitionToBehindBar(): SUBTREE TRANSITION: BehindBar%n");
+		
+			Object[] wmes;
+			
+			//last state WMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("LastStateWME").toArray();
+			if (wmes.length > 0)  
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((LastStateWME)wmes[i]);
+			
+			//subtree WMEs
+			
+			//clean RoamWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("RoamWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((RoamWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("Roam"));
+			}
+			
+			//clean ServiceCustomerWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("ServiceCustomerWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((ServiceCustomerWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("ServiceCustomer"));
+			}
+		}
+	}
+	 
+	 
+	 sequential behavior TransitionToRoam() {
+		specificity 2;
+		mental_act {
+			RoamWME rWME = new RoamWME(System.currentTimeMillis());
+			BehavingEntity.getBehavingEntity().addWME(rWME);
+			System.out.printf("TransitionToRoam(): SUBTREE TRANSITION: Roam%n");
+		
+			Object[] wmes;
+			
+			//last state WMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("LastStateWME").toArray();
+			if (wmes.length > 0)  
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((LastStateWME)wmes[i]);
+			
+			//subtree WMEs
+			
+			//clean BehindBarWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("BehindBarWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((BehindBarWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("BehindBar"));
+			}
+			
+			//clean ServiceCustomerWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("ServiceCustomerWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((ServiceCustomerWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("ServiceCustomer"));
+			}
+		}
+	}
+	
+	sequential behavior TransitionToServiceCustomer(String customerName) {
+		specificity 2;
+		mental_act {
+			ServiceCustomerWME scWME = new ServiceCustomerWME(customerName, System.currentTimeMillis());
+			BehavingEntity.getBehavingEntity().addWME(scWME);
+			System.out.printf("TransitionToServiceCustomer(): SUBTREE TRANSITION: ServiceCustomer %s%n", customerName);
+		
+			Object[] wmes;
+			
+			//last state WMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("LastStateWME").toArray();
+			if (wmes.length > 0)  
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((LastStateWME)wmes[i]);
+			
+			//subtree WMEs
+			
+			//clean RoamWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("RoamWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((RoamWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("Roam"));
+			}
+			
+			//clean BehindBarWMEs
+			wmes = BehavingEntity.getBehavingEntity().lookupWME("BehindBarWME").toArray();
+			if (wmes.length > 0)  {
+				for(int i = 0; i < wmes.length; ++i)
+					BehavingEntity.getBehavingEntity().deleteWME((BehindBarWME)wmes[i]);
+				BehavingEntity.getBehavingEntity().addWME(new LastStateWME("BehindBar"));
+			}
+		}
+	}
+	 
+	 /*************************************************************************
+	  * Determine next subtree from curent state.
+	  *
+	  ************************************************************************/
+	 /**
+	 * Stochastically chooses a subtree to perform next that was not the most recently-performend subtree.
+	 */
+	sequential behavior DetermineNextSubtree() {
+		specificity 3;
+		precondition { (LastStateWME stateName::lastSubtree) }
+		int next;
+		mental_act {
+			next = randomNumGen.nextInt(2); //the number of subtrees  - 1
+			if(lastSubtree.equals("BehindBar"))
+				++next; //1 or 2
+			if(lastSubtree.equals("Roam"))
+				next = (next==1)?2:0; //0 or 2
+		}
+		subgoal DetermineNextSubtreeByNumber(next);
+	}
+	
+	sequential behavior DetermineNextSubtree() {
+		specificity 2;
+		int next;
+		mental_act {
+			next = randomNumGen.nextInt(3); //the number of subtrees  - 1
+		}
+		subgoal DetermineNextSubtreeByNumber(next);
+	}
+	
+	sequential behavior DetermineNextSubtreeByNumber(int n) {
+		precondition {(n == 0)}
+		subgoal TransitionToBehindBar();			
+	}
+	sequential behavior DetermineNextSubtreeByNumber(int n) {
+		precondition {(n == 1)}
+		subgoal TransitionToRoam();			
+	}
+	sequential behavior DetermineNextSubtreeByNumber(int n) {
+		precondition {
+			(n == 2)
+			(AvatarWME isWaiter==false name::avName)
+		}
+		subgoal TransitionToServiceCustomer(avName);			
+	}
+	/**************************************************************************
+	 *  BehindBar Subtree.
+	 *
+	 *************************************************************************/
+	sequential behavior EnterBehindBar () {
+		with (success_test { (BehindBarWME) }) wait;
+	}
+	
+	parallel behavior BehindBarMaster() {
+		context_condition { (BehindBarWME) }
+		
+		with (priority 10, ignore_failure) subgoal BBGotoTransitionPoint();
+		with (priority 1, persistent) subgoal BBPerform();
+		with (priority 1) subgoal BBBoredTimeOut();
+		with (priority 1, persistent) subgoal HumanLocationAdjustment(); 
+		with (priority 1, persistent) subgoal MaintainMinSocialDistance();
+	}
+	
+	//every so many seconds, do something
+	sequential behavior BBPerform() {
+		long startTime;
+		
+		mental_act {
+			startTime = System.currentTimeMillis();
+		}
+		
+		with( success_test {
+			((System.currentTimeMillis() - startTime) > 5000)
+		}) wait;
+		
+		//shuffle avatar state to make selection more random
+		subgoal ShuffleWME("AvatarWME");
+		with (ignore_failure) subgoal BBDoPerform();
+	
+	}
+	
+	
+	
+	//Turn and wave at somebody close by
+	sequential behavior BBDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			self = (SelfWME)
+			targetAvatar = (AvatarWME name::avName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+			
+		} 
+		String waveGesture;
+		mental_act {
+			waveGesture = AnimationWME.Gestures.WAVE;
+		}
+		
+		subgoal TurnAndWait(avName);
+		subgoal PlayGesture(waveGesture);
+
+		
+	}
+	
+	
+	//Turn towards somebody close
+	sequential behavior BBDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			self = (SelfWME)
+			targetAvatar = (AvatarWME name::avName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+			
+		} 
+	
+		subgoal TurnAndWait(avName);
+
+	}
+	
+	
+	//Play bored gesture
+	sequential behavior BBDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			self = (SelfWME)
+		} 
+		String boredGesture;
+		mental_act {
+			boredGesture = AnimationWME.Gestures.BORED;
+		}
+		
+	
+		subgoal PlayGesture(boredGesture);
+
+		
+	}
+	
+	//Move around in bar area
+	sequential behavior BBDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.15)
+			
+
+		} 
+		
+		subgoal BBDoPerform_MoveAround();
+
+	}
+	
+	//If far from bar exit location, go to that location
+	sequential behavior BBDoPerform_MoveAround() {
+		precondition {
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+			(SensorUtilities.DistanceBetween(selfX, selfY, selfZ, BAR_EXIT_X, BAR_EXIT_Y, BAR_EXIT_Z) > 1.5d)
+		}
+		
+		double randomBuffer;
+		mental_act {
+		
+			randomBuffer = randomNumGen.nextDouble(); //0->1 range
+		
+		}
+		
+		subgoal WalkAndWait(BAR_EXIT_X, BAR_EXIT_Y, BAR_EXIT_Z, randomBuffer);
+	
+	}
+	
+	//If far from behind bar location, go to that location
+	sequential behavior BBDoPerform_MoveAround() {
+		precondition {
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+			(SensorUtilities.DistanceBetween(selfX, selfY, selfZ, BEHIND_BAR_X, BEHIND_BAR_Y, BEHIND_BAR_Z) > 1.5d)
+		}
+		
+		double randomBuffer;
+		mental_act {
+		
+			randomBuffer = randomNumGen.nextDouble(); //0->1 range
+		
+		}
+		
+		subgoal WalkAndWait(BEHIND_BAR_X, BEHIND_BAR_Y, BEHIND_BAR_Z, randomBuffer);
+	
+	}
+	
+	
+	
+	sequential behavior BBGotoTransitionPoint() {
+	
+		//If far from behind bar location, then transition into the bar location
+		precondition {
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+			(SensorUtilities.DistanceBetween(selfX, selfY, selfZ, BAR_EXIT_X, BAR_EXIT_Y, BAR_EXIT_Z) > 1.5d)
+		}
+		
+		double transX, transY, transZ;
+		
+		mental_act {
+			Point3d targetPoint;
+			targetPoint = RoamWME.ROAM_TRANSITION_POINT;
+			
+			transX = targetPoint.x;
+			transY = targetPoint.y;
+			transZ = targetPoint.z;
+		
+		}
+		
+		subgoal TurnAndWait(transX, transY);
+		subgoal WalkAndWait(transX, transY, transZ);
+		subgoal TurnAndWait(BAR_EXIT_X, BAR_EXIT_Y);
+		subgoal WalkAndWait(BAR_EXIT_X, BAR_EXIT_Y, BAR_EXIT_Z);
+		subgoal WalkAndWait(BEHIND_BAR_X, BEHIND_BAR_Y, BEHIND_BAR_Z);
+		
+		
+	}
+
+	sequential behavior BBGotoTransitionPoint() {
+	
+		//If close to behind bar, then just go to behind bar
+		precondition {
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+			(SensorUtilities.DistanceBetween(selfX, selfY, selfZ, BAR_EXIT_X, BAR_EXIT_Y, BAR_EXIT_Z) < 1.5d)
+		}
+		
+		double transX, transY, transZ;
+		
+		mental_act {
+			Point3d targetPoint;
+			targetPoint = RoamWME.ROAM_TRANSITION_POINT;
+			
+			transX = targetPoint.x;
+			transY = targetPoint.y;
+			transZ = targetPoint.z;
+		
+		}
+		
+
+		subgoal WalkAndWait(BEHIND_BAR_X, BEHIND_BAR_Y, BEHIND_BAR_Z);
+		
+		
+	}
+	
+
+	
+	sequential behavior BBBoredTimeOut() {
+	
+
+		with (success_test {
+			(RoamWME startTime::startT)
+			(System.currentTimeMillis() - startT > 60000)
+		} ) wait;
+		
+		mental_act {
+		
+			System.out.println("Bored with Behind Bar standing, transitioning to roaming");
+		}
+		subgoal TransitionToRoam();
+		
+		
+	}
+	
+	
+	/**************************************************************************
+	 *  Roam Subtree.
+	 *
+	 *************************************************************************/
+	sequential behavior EnterRoam() {
+		with (success_test { (RoamWME) }) wait;
+	}
+	parallel behavior RoamMaster() {
+		context_condition { (RoamWME) }
+		
+		with (priority 10, ignore_failure) subgoal RGotoTransitionPoint();
+		with (priority 1, persistent) subgoal RPerform();
+		with (priority 1) subgoal RBoredTimeOut();
+		with (priority 1, persistent) subgoal HumanLocationAdjustment(); 
+		with (priority 1, persistent) subgoal MaintainMinSocialDistance();
+	}
+	
+	//every so many seconds, do something
+	sequential behavior RPerform() {
+		long startTime;
+		
+		mental_act {
+			startTime = System.currentTimeMillis();
+		}
+		
+		with( success_test {
+			((System.currentTimeMillis() - startTime) > 5000)
+		}) wait;
+		
+		//shuffle avatar state to make selection more random
+		subgoal ShuffleWME("AvatarWME");
+		with (ignore_failure) subgoal RDoPerform();
+	
+	}
+	
+	//Clap at a dance
+	sequential behavior RDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			danceAnim = (AnimationWME avatarName::avName isDance==true)
+			targetAvatar = (AvatarWME name == avName)
+			self = (SelfWME)
+		} 
+		String clapGesture;
+		mental_act {
+			clapGesture = AnimationWME.Gestures.CLAP;
+			//Consume event
+			BehavingEntity.getBehavingEntity().deleteWME(danceAnim);
+		}
+		
+		subgoal TurnAndWait(avName);
+		subgoal PlayGesture(clapGesture);
+
+		
+	}
+	
+	//Turn and wave at somebody close by
+	sequential behavior RDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.2)
+			self = (SelfWME)
+			targetAvatar = (AvatarWME name::avName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+			
+		} 
+		String waveGesture;
+		mental_act {
+			waveGesture = AnimationWME.Gestures.WAVE;
+		}
+		
+		subgoal TurnAndWait(avName);
+		subgoal PlayGesture(waveGesture);
+
+		
+	}
+	
+	
+	//Turn towards somebody close by
+	sequential behavior RDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			self = (SelfWME)
+			targetAvatar = (AvatarWME name::avName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+			
+		} 
+		
+		
+		subgoal TurnAndWait(avName);
+
+		
+	}
+	
+	//Turn towards stage, nudge towards
+	sequential behavior RDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.3)
+			
+		} 
+		
+		String direction;
+		mental_act {	
+			direction = NudgeMove.FORWARD;
+
+		}
+		
+		
+		subgoal TurnAndWait(stageX, stageY);
+		subgoal Wait(2000);
+		act nudgeMove(direction);
+
+	}
+	
+	//Move to random waypoint
+	sequential behavior RDoPerform() {
+		precondition {
+			(randomNumGen.nextDouble() < 0.5)
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+
+		} 
+		
+		double targetX, targetY, targetZ;
+		mental_act {	
+			Point3d targetPoint;
+			targetPoint = RoamWME.getRandomNewWaypoint(selfX, selfY, selfZ);
+			
+			targetX = targetPoint.x;
+			targetY = targetPoint.y;
+			targetZ = targetPoint.z;
+
+		}
+		
+		
+		subgoal TurnAndWait(targetX, targetY);
+		subgoal WalkAndWait(targetX, targetY, targetZ, 0.75d);
+		subgoal Wait(1000);
+
+	}
+	
+	
+	
+	
+	sequential behavior RGotoTransitionPoint() {
+	
+		//If close to behind bar location, then transition out of bar
+		precondition {
+			self = (SelfWME x::selfX y::selfY z::selfZ)
+			(SensorUtilities.DistanceBetween(selfX, selfY, selfZ, BEHIND_BAR_X, BEHIND_BAR_Y, BEHIND_BAR_Z) < 3.0d)
+		}
+		
+		double targetX, targetY, targetZ;
+		
+		mental_act {
+			Point3d targetPoint;
+			targetPoint = RoamWME.ROAM_TRANSITION_POINT;
+			
+			targetX = targetPoint.x;
+			targetY = targetPoint.y;
+			targetZ = targetPoint.z;
+		
+		}
+		
+		subgoal TurnAndWait(targetX, targetY);
+		subgoal WalkAndWait(targetX, targetY, targetZ);
+		
+	}
+	
+	
+	sequential behavior RBoredTimeOut() {
+	
+
+		with (success_test {
+			(RoamWME startTime::startT)
+			(System.currentTimeMillis() - startT > 120000)
+		} ) wait;
+		
+		
+		subgoal RBoredPerform();
+		
+		
+	}
+	
+	sequential behavior RBoredPerform() {
+		specificity 2;
+		precondition {
+			(randomNumGen.nextDouble() < 0.4)
+			(AvatarWME isRegular==false isWaiter==false name::avName)
+		}
+		
+		mental_act {
+		
+			System.out.println("Bored with Roaming, transitioning to service customer " + avName);
+		}
+		
+		subgoal TransitionToServiceCustomer(avName);
+	}
+	
+	sequential behavior RBoredPerform() {
+		specificity 2;
+		precondition {
+			(randomNumGen.nextDouble() < 0.2)
+			(AvatarWME isRegular==true name::avName)
+		}
+		
+		mental_act {
+		
+			System.out.println("Bored with Roaming, transitioning to service regular " + avName);
+		}
+		
+		subgoal TransitionToServiceCustomer(avName);
+	}
+	
+	sequential behavior RBoredPerform() {
+		specificity 1;
+		
+		mental_act {
+		
+			System.out.println("Bored with Roaming, transitioning to behind bar subtree...");
+		}
+		
+		subgoal TransitionToBehindBar();
+	}
+	
+	
+
+	/**************************************************************************
+	 *  ServiceCustomer Subtree.
+	 *
+	 *************************************************************************/
+	sequential behavior EnterServiceCustomer() {
+		with (success_test { (ServiceCustomerWME) }) wait;
+		subgoal ServiceCustomerMaster();
+	}
+	parallel behavior ServiceCustomerMaster() {
+		context_condition { (ServiceCustomerWME) }
+		precondition {
+			(ServiceCustomerWME customerName::name)
+		}
+		with (priority 10) subgoal WalkAndWait(name, 1.0d);
+		
+		with (priority 1, persistent) subgoal HumanLocationAdjustment(); 
+		with (priority 1, persistent) subgoal MaintainMinSocialDistance();
+		with (priority 1) subgoal SCOfferDrink();
+	}
+
+	/**
+	 * Offers a drink to the customer. This will either be the waiter giving a drink directly to the
+	 * customer or by standing there and waiting for a few seconds for them to take a drink from
+	 * the menu.
+	 */
+	sequential behavior SCOfferDrink() {
+		precondition {	(ServiceCustomerWME customerName::name) }
+		
+		double giveDrink;
+		String gesture;
+		mental_act{ 
+			giveDrink = randomNumGen.nextDouble(); 
+			gesture = AnimationWME.Gestures.YES;
+			System.out.printf("SCOfferDrink(): customer is %s.%n", name);
+		}
+		
+		subgoal Wait(3000);
+		subgoal TurnAndWait(name);
+		subgoal PlayGesture(gesture);
+		subgoal SCWaitOrGiveDrink(giveDrink);
+	}
+	
+	
+	/**
+	 * Faces the target and gives a drink.
+	 */
+	sequential behavior SCWaitOrGiveDrink(double r) {
+		specificity 0;
+		String gesture;
+		mental_act {
+			gesture = AnimationWME.Gestures.WAVE;
+			System.out.printf("SCWaitOrGiveDrink():0 Waiting on customer to select drink.%n");
+		}
+		
+		subgoal Wait(15000);
+		subgoal PlayGesture(gesture);
+		subgoal Wait(2000);
+		subgoal DetermineNextSubtree();
+	}
+	
+	/**
+	 * Gives the target a drink directly.
+	 */
+	sequential behavior SCWaitOrGiveDrink(double r) {
+		specificity 1;
+		precondition { 
+			(ServiceCustomerWME customerName::name) 
+			(r < 0.25d)
+		}
+		String drinkName;
+		String gesture;
+		mental_act {
+			drinkName = DRINK_ITEMS[randomNumGen.nextInt(DRINK_ITEMS.length)];
+			gesture = AnimationWME.Gestures.WAVE;
+			System.out.printf("SCWaitOrGiveDrink():1 Directly giving customer a %s.%n", drinkName);
+		}
+		
+		subgoal Wait(3000);
+		act giveItem(drinkName, name) ;
+		subgoal PlayGesture(gesture);
+		subgoal Wait(5000);
+		subgoal DetermineNextSubtree();
+	}
+	
+	/**************************************************************************
+	 * Non-subtree reactive behaviors.
+	 *
+	 *************************************************************************/
+	sequential behavior WavedAt() {
+		//waved at by a non-waiter
+		SelfWME self;
+		AvatarWME newAvatar;
+		AnimationWME greetingAnim;
+		String newAvatarName;
+		with( success_test {
+			!(ServiceCustomerWME)
+			self=(SelfWME)
+			newAvatar=(AvatarWME name::newAvatarName isWaiter == false)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, newAvatar, self))
+			greetingAnim=(AnimationWME avatarName==newAvatarName otherGazeAngle < 15.0)
+			(greetingAnim.gestureName().equals(AnimationWME.Gestures.WAVE))
+		} ) wait;
+		
+		mental_act { BehavingEntity.getBehavingEntity().deleteWME(greetingAnim); }
+		
+		subgoal Wait(1500);
+		subgoal TurnAndWait(newAvatarName);
+		//maybe wave, maybe nothing
+		subgoal RespondToWave(newAvatarName);
+		subgoal TransitionToServiceCustomer(newAvatarName);
+	}
+	
+	sequential behavior RespondToWave(String avatarName) {
+		specificity 1;
+		precondition {
+			(SelfWME sitting == false)
+			(randomNumGen.nextDouble() < 0.2)
+		}
+		String gesture;
+		mental_act { gesture = AnimationWME.Gestures.WAVE; }
+		subgoal PlayGesture(gesture);
+	}
+	
+	//default
+	sequential behavior RespondToWave(String avatarName) {
+		succeed_step;
+	}
+	
+	sequential behavior ApproachedByCustomer() {
+		// a non-waiter getst close and has direct gaze
+		SelfWME self;
+		AvatarWME newAvatar;
+		AnimationWME greetingAnim;
+		String newAvatarName;
+		with( success_test {
+			!(ServiceCustomerWME)
+			self = (SelfWME)
+			newAvatar = (AvatarWME name::newAvatarName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, newAvatar, self))
+			(AvatarWME.gazeAngleBetween(newAvatar, self) < 15.0)
+		} ) wait;
+		
+		subgoal Wait(1500);
+		subgoal TurnAndWait(newAvatarName);
+		subgoal TransitionToServiceCustomer(newAvatarName);
+	}
+	
+	//Approached by waiter while roaming
+	sequential behavior ApproachedByWaiter() {
+		// a waiter getst close and has direct gaze
+		SelfWME self;
+		AvatarWME newAvatar;
+		AnimationWME greetingAnim;
+		String newAvatarName;
+		String yesGesture;
+		with( success_test {
+			(RoamWME)
+			self = (SelfWME)
+			newAvatar = (AvatarWME name::newAvatarName isWaiter==true)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, newAvatar, self))
+			(AvatarWME.gazeAngleBetween(newAvatar, self) < 15.0)
+		} ) wait;
+		
+		mental_act {
+			yesGesture = AnimationWME.Gestures.YES;
+		
+		}
+		subgoal Wait(1500);
+		subgoal TurnAndWait(newAvatarName);
+		subgoal Wait(2000);
+		subgoal PlayGesture(yesGesture);
+		subgoal TransitionToBehindBar();
+		
+	}
+	
+	initial_tree {
+		
+		with (priority 1) subgoal TransitionToRoam();
+		
+		//behavior subtree entry points
+		with(priority 10, persistent) subgoal EnterBehindBar();
+		with(priority 10, persistent) subgoal EnterRoam();
+		with(priority 10, persistent) subgoal EnterServiceCustomer();
+		
+		//global transitions
+		with(priority 10, persistent) subgoal WavedAt();
+		with(priority 10, persistent) subgoal ApproachedByCustomer();
+		with(priority 10, persistent) subgoal ApproachedByWaiter();
+		// with(persistent) subgoal
+	}
+}

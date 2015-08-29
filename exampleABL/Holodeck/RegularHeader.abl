@@ -1,0 +1,13 @@
+package eis.ablsl.agents;
+import eis.ablsl.*;
+import eis.ablsl.structs.*;
+import eis.ablsl.actions.*;
+import eis.ablsl.sensors.*;
+import eis.ablsl.wmes.*;
+import java.lang.*; // so the ABL compiler can resolve String (in act invocations)
+import java.util.Random;
+import java.util.ArrayList;
+
+
+behaving_entity Regular 
+{

@@ -1,0 +1,19 @@
+	
+	/**
+	 * A WME to control the Greet behavior subtree.
+	 */
+	wme GreetWME {
+		long startTime;
+		String targetName;
+	}
+	
+	
+	wme LastTargetWME {
+		String name;
+		long startTime;
+	}
+	
+	wme FindDancePartnerWME {
+		String name;
+		long startTime;
+	}

@@ -1,0 +1,190 @@
+    //CONFLICTS 
+    conflict walkTo walkTo;
+    conflict turnTowards turnTowards;
+    conflict playGesture playGesture;
+	conflict sitOn sitOn;
+	conflict stand stand;
+	conflict nudgeMove nudgeMove;
+	conflict walkTo turnTowards playGesture;
+	conflict walkToObject turnTowards playGesture;
+	conflict walkToObjectById turnTowards playGesture;
+	conflict nudgeRotate nudgeRotate;
+	conflict wearItem wearItem;
+	conflict removeItem removeItem;
+	conflict giveItem giveItem;
+	conflict walkToObject walkTo;
+	conflict walkToObjectById walkTo;
+	conflict walkToObject walkToObjectById;
+	conflict touchObject touchObject;
+	conflict touchObject touchObjectById;
+	conflict touchObjectById touchObjectById;
+	conflict lookAtObject lookAtObject;
+	conflict lookAtObjectById lookAtObject;
+	conflict lookAtObjectById lookAtObjectById;
+	conflict PlayGesture PlayGesture;
+	
+	//conflict DoWalkAndWait MaintainMinSocialDistance;
+	
+	//Goal conflicts? uses priorities on subgoal action
+	
+    //ACTIONS 
+	//NOTE: action method signatures cannot combine Objects with primitives, like: doSomething(double, String);
+    register action walkTo(double, double, double) with WalkTo; //walkTo(someLocX, someLocY)
+	register action walkTo(String) with WalkTo; //walkTo("someAvatarName")
+    register action turnTowards(String) with TurnTowards; //turnTowards("someAvatarName")
+	register action turnTowards(double, double) with TurnTowards; //turnTowards(someLocx, someLocy) -- seems to always put the agent facing a bit to far their right.
+    register action turnTowards(double, double, double) with TurnTowards; //turnTowards(x, y, overshootDegrees)
+	register action turnTowards(String, Double) with TurnTowards; //turnTowards("name", overshootDegrees)
+	register action playGesture(String) with PlayGesture; //playGesture("gesturename")
+	register action debugPrint(String) with DebugPrint; //sends string output to log window in C#
+	register action sitOn(String) with SitOn; //sitOn("someObjectName")
+	register action sitOnById(String) with SitOnById; //sitOn("objectID")
+	register action stand() with Stand;
+	register action stopMovement() with Stop;
+
+	//Nudge direction options: Nudge.LEFT, Nudge.RIGHT, Nudge.FORWARD, Nudge.BACKWARD
+	register action nudgeMove(String) with NudgeMove;  //default nudge move - looks the best, but no distance control
+	//nudge(string direction, double distance, SelfWME self) - uses current rotation of self as reference for directions
+	register action nudgeMove(String, Double, SelfWME) with NudgeMove;  
+	//Same as above, but this uses the direction from self to other as reference instead of self rotation
+	//This version only works with Nudge.FORWARD and Nudge.BACKWARD currently
+	register action nudgeMove(String, Double, SelfWME, AvatarWME) with NudgeMove;  
+	
+	register action nudgeRotate(double) with NudgeRotate; //rotate body positive or negative around the z-axis (vertical) - positive is left, negative is right
+	
+	//rotate chosen body partpositive or negative around the z-axis (vertical) - positive is left, negative is right
+	//Body part options: NudgeRotate.TARGET_HEAD and NudgeRotate.TARGET_BODY -- currently head rotation doesn't seem to work
+	register action nudgeRotate(Double, String) with NudgeRotate; 
+														
+	register action walkToObject(String) with WalkToObject; //walkToObject("someObjectName")
+	register action walkToObjectById(String) with WalkToObjectById; //walkToObjectById("someObjectId")
+	register action wearItem(String) with WearItem; //wearItem("someItemName") - wear item (replacing any existing ones) - used for attaching drinks, etc
+    register action removeItem(String) with RemoveItem; //removeItem("someItemName") - detach item from avatar
+	register action giveItem(String, String) with GiveItem; //giveItem("itemName","avatarName") - give an item to an avatar
+	register action touchObject(String) with TouchObject; //touchObject("objectName") - do touch animation 
+	register action touchObject(String, Boolean) with TouchObject; //touchObject("objectId", stopTouch) - do touch animation and whether to stop it or not
+    register action touchObject() with TouchObject; //Stops touching action
+	register action touchObjectById(String) with TouchObjectById; //touchObject("objectId") - do touch animation 
+	register action touchObjectById(String, Boolean) with TouchObjectById; //touchObject("objectId", stopTouch) - do touch animation and whether to stop it or not
+    register action touchObjectById() with TouchObjectById; //Stops touching action
+	register action lookAtObject(String) with LookAtObject; //lookAtObject("objectName")
+	register action lookAtObjectById(String) with LookAtObjectById; //lookAtObject("objectId")
+	//assuming the head rotation works, this will reset the head rotation to the body rotation
+	register action resetHead() with ResetHead;
+	
+	register wme AnimationWME with AnimationSensor; //x, y, z, animationName, avatarName 
+    register wme AvatarWME with AvatarSensor; //x, y, z, rotx, roty, rotz, name
+    register wme SelfWME with SelfSensor; //x, y, z, rotx, roty, rotz, name
+	register wme ObjectWME with ObjectSensor; //contains x, y, z location variables, objectname (string)
+	register wme ItemReceivedWME with ItemReceivedSensor; //contains itemName, and avatarName of offerer (these are items in "Objects" folder - typically drinks)
+
+	/* Objects with automatic timeouts after a certain timespan has passed:
+	 * AnimationWME - 5 seconds
+	 * ItemReceivedWME - 8 seconds
+	 * NOTE: This timeout/stale removal window can be changed in the respective WME files for each type
+	 */
+	
+	double PERSONAL_BUFFER = 1.5;
+
+	Random randomNumGen = new Random(System.currentTimeMillis());
+	
+	Boolean TrueObject = new Boolean(true);
+	Boolean FalseObject = new Boolean(false);
+
+	String[] DRINK_ITEMS = new String[] {"Straw-Banana Daiquiri", "Margarita", "MANHATTAN", "Bloody Mary", 
+											"Pina Colada", "Cabernet", "Key Lime Colada", "Draft Beer", 
+											"Long Island Ice Tea", "Frosty Mug", "Tropical Paradise", "Blue Raspberry Colada"};
+		
+	
+	/**
+	 * Some locations of useful bar regions.
+	 */
+	double barFrontX = 161.42;
+	double barFrontY = 221.60;
+	double barFrontZ = 23.82;
+	double barBehindX = 157.67;
+	double barBehindY = 222.76;
+	double barBehindZ = 24.2;
+	double stageX = 166.103;
+	double stageY = 233.183;
+	double stageZ = 24.312;
+	double faceBarFromStageX = 165.976;
+	double faceBarFromStageY = 231.348;
+	double faceBarFromStageZ = 24.29;
+	
+
+	
+	/**
+	*
+	*  Used to keep track of anger when somebody bumps into us
+	**/
+	wme AngryWME {
+		String name;
+		double strength;
+		long lastIncident;
+	}
+	
+	
+	/**
+	 * Keeps the type of previous behavior subtree around when transitioning to a new 
+	 * subtree. This is used for subtrees like GetDrink that may execute then go back to
+	 * the previous subtree.
+	 */
+	wme LastStateWME {
+		String stateName;
+	}
+	
+	/**
+	 * A WME used by behavior trees to trigger animations to play. Used when the
+	 * conversation monitoring and response logic is in a different behavior than the
+	 * performance logic.
+	 */
+	wme PerformGestureWME {
+		String gestureName;
+		String targetName;
+		boolean isResponse;
+	}
+	
+	/**
+	 * A WME to control the GetDrink behavior subtree.
+	 */
+	wme GetDrinkWME {
+		String name;
+	}
+	
+	/**
+	 * A WME to control the StageDance behavior subtree.
+	 */
+	wme StageDanceWME {
+		long startTime;
+	}
+	
+	/**
+	 * A WME to control the SoloDance behavior subtree.
+	 */
+	wme SoloDanceWME {
+		long startTime;
+		long lastDanceTime;
+		boolean performer;
+		String target;
+	}
+	
+	/**
+	 * A WME to flag that we are autopiloting currently
+	 */
+
+	wme AutoPilotWME {
+		double x;
+		double y;
+		double z;
+	}
+	
+	/**
+	 * A WME to flag that we are currently have a drink in hand
+	 */
+	wme HaveDrinkWME {
+		String name;
+		long startTime;
+	}
+	
+

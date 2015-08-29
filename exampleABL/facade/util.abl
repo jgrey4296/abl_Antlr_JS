@@ -1,0 +1,4687 @@
+// shared util.abl
+
+// fixme: fix WaitForDialogCommitCue once cues are working correctly
+
+// ------------------------------
+// THE BEAT
+
+// ############ 
+// SetBeatCommitPointReached
+// set commit for the beat itself
+atomic sequential behavior SetBeatCommitPointReached(boolean bCommit) {		
+	precondition { BeatMemory statusWME = (BeatStatusWME) }	
+	boolean bOldValue;
+	mental_act { 
+		bOldValue = statusWME.getCommitPointReached();
+		statusWME.setCommitPointReached(bCommit); 
+		if (bOldValue == false && bCommit == true) StringUtil.println("### SetBeatCommitPointReached"); 
+	}
+}
+
+// ############ 
+// SetBeatGistPointReached
+// set gist for the beat itself
+atomic sequential behavior SetBeatGistPointReached(boolean bGist) {		
+	precondition { BeatMemory statusWME = (BeatStatusWME) }	
+	mental_act { statusWME.setGistPointReached(bGist); }
+	mental_act { if (bGist == true) StringUtil.println("### SetBeatGistPointReached"); }
+}
+
+atomic sequential behavior SetBeatGistPointReached_ifTrue(boolean bHasBeatGist) {
+	precondition { (bHasBeatGist == true) }
+	subgoal SetBeatGistPointReached(true);
+}
+
+
+// ############ 
+// SetBeatTxningOut
+atomic sequential behavior SetBeatTxningOut() {		
+	precondition { BeatMemory statusWME = (BeatStatusWME) }	
+	mental_act { 
+		statusWME.setTxningOut(true); 
+		StringUtil.println("### SetBeatTxningOut");
+	}
+}
+
+
+// #############
+// SetBeatGoalCommitPointReached
+// if we hit the current beatgoal's commit point, set it to be attempted
+atomic sequential behavior SetBeatGoalCommitPointReached() {
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig) } } 
+	specificity 2;
+	//mental_act { StringUtil.println("SetBeatGoalCommitPointReached for beatgoal " + bgSig); }
+	mental_act { statusWME.setBCommitPointReached(true); }
+}
+
+// catch bad parameter
+atomic sequential behavior SetBeatGoalCommitPointReached() {
+	specificity 1;
+	mental_act { StringUtil.println("### Warning: SetBeatGoalCommitPointReached precondition failed"); }
+}
+
+
+
+// #############
+// SetBeatGoalGistPointReached
+// once we hit the current beatgoal's gist point, the current beatgoal is satisfied
+atomic sequential behavior SetBeatGoalGistPointReached() {
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig) } } 
+	specificity 2;
+	mental_act { statusWME.setBGistPointReached(true); }	
+	mental_act { StringUtil.println("SetBeatGoalGistPointReached satisfying beatgoal " + bgSig); }
+	//mental_act { BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); }	
+	subgoal SetBeatGoalSatisfied(bgSig, true);
+}
+
+// catch bad parameter
+atomic sequential behavior SetBeatGoalGistPointReached() {
+	specificity 1;
+	mental_act { StringUtil.println("### "); }
+	mental_act { StringUtil.println("### WARNING: SetBeatGoalGistPointReached precondition failed -- could mean a sig_ bug"); }
+	mental_act { StringUtil.println("### "); }
+
+	// ## if you hit this breakpoint, 
+	// it's probably because the sig string in shared\bgdefs.abl doesn't match the actual signature 
+	// (check if there are params!)
+	//mental_act { StringUtil.println("### HITTING BREAKPOINT IN SetBeatGoalGistPointReached()"); }
+	//mental_act { BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); }	
+	succeed_step;
+}
+
+
+// #############
+// SetLetBeatGoalFinishFlag_opt
+// don't allow this flag to be set to true if called as _opt!
+atomic sequential behavior SetLetBeatGoalFinishFlag_opt(boolean bLetBeatGoalFinish) {
+	precondition { (gDeflectReestablish == true && bLetBeatGoalFinish == true) }
+	specificity 2;
+	succeed_step;	
+}
+
+// but if gDeflectReestablish == false, revert to old original behavior
+atomic sequential behavior SetLetBeatGoalFinishFlag_opt(boolean bLetBeatGoalFinish) {
+	specificity 1;
+	subgoal SetLetBeatGoalFinishFlag(bLetBeatGoalFinish);
+}
+
+
+// #############
+// SetLetBeatGoalFinishFlag
+
+atomic sequential behavior SetLetBeatGoalFinishFlag(boolean bLetBeatGoalFinish) {
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig) } } 
+	specificity 4;
+	mental_act { 
+		//StringUtil.println("SetLetBeatGoalFinishFlag " + bLetBeatGoalFinish); 
+		statusWME.setBLetBeatGoalFinish(bLetBeatGoalFinish); 
+		//if (bLetBeatGoalFinish == true) BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); 
+	}
+}
+
+// catch bad precondition
+atomic sequential behavior SetLetBeatGoalFinishFlag(boolean bLetBeatGoalFinish) {
+	precondition { TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+	specificity 3;
+	mental_act { StringUtil.println("### Warning: SetLetBeatGoalFinishFlag precondition failed for bgSig " + bgSig); }
+}
+
+// allow this behavior to be called even if we are not in a beat (for development purposes)
+atomic sequential behavior SetLetBeatGoalFinishFlag(boolean bLetBeatGoalFinish) {
+	precondition { BeatMemory !(BeatGoalStatusWME) }
+	specificity 2;
+	mental_act { StringUtil.println("SetLetBeatGoalFinishFlag ignored, not in a beatgoal"); }
+	//succeed_step;
+}
+
+// catch bad precondition
+atomic sequential behavior SetLetBeatGoalFinishFlag(boolean bLetBeatGoalFinish) {
+	specificity 1;
+	mental_act { StringUtil.println("### Warning: SetLetBeatGoalFinishFlag precondition failed"); }
+}
+
+
+sequential behavior SetLetBeatGoalFinishFlagAfterDelay(boolean bLetBeatGoalFinish, float delay) {
+	subgoal WaitFor(delay);
+	subgoal SetLetBeatGoalFinishFlag(bLetBeatGoalFinish);
+}
+
+
+// #############
+// SetBeatGoalSatisfied
+
+// Given a beatgoal signature and a satisfied flag, modifies the beatgoal such that it will succeed 
+//  whether it succeeds or fails (if the satisfied flag is true), 
+//  or will be persistently pursued on failure (if the satisfied flag is false).
+atomic sequential behavior SetBeatGoalSatisfied(String sig, boolean bSatisfied) {
+	precondition { TripMemory beatGoal = (GoalStepWME signature == sig   isExpanded == true) }
+	specificity 3;
+	mental_act { StringUtil.println("SetBeatGoalSatisfied 3 " + sig); }
+	mental_act {
+		if (bSatisfied) {
+			beatGoal.setPersistentWhenFails(false);
+			beatGoal.setIgnoreFailure(true);
+		}
+		else {
+			beatGoal.setPersistentWhenFails(true);
+			beatGoal.setIgnoreFailure(false);
+		}
+	}
+}
+
+// The goal is not currently expanded; we can go ahead and succeed it
+atomic sequential behavior SetBeatGoalSatisfied(String sig, boolean bSatisfied) {
+	precondition { TripMemory beatGoal = (GoalStepWME signature == sig) }
+	specificity 2;
+	mental_act { if (bSatisfied) StringUtil.println("SetBeatGoalSatisfied 2 " + sig); }
+	mental_act { if (bSatisfied) beatGoal.succeed(); } // does nothing if bSatisfied == false
+}
+
+// No goal with the passed signature exists in the tree; print warning
+atomic sequential behavior SetBeatGoalSatisfied(String sig, boolean bSatisfied) {
+	specificity 1;
+	mental_act { StringUtil.println("### WARNING: SetBeatGoalSatisfied cannot find GoalStep == " + sig); }
+}
+
+// ############
+sequential behavior WaitABitLongerIfPlayerIsTyping(float extraWait) {
+	precondition { PlayerMemory (PlayerRecentlyTypedTextWME b == true) }
+	subgoal WaitForPlayerKeypressesToBeOverWithTimeout(extraWait);
+}
+
+// ############
+sequential behavior WaitForPlayerKeypressesToBeOverWithTimeout(float numSeconds) {
+	subgoal WaitForPlayerKeypressesToBeOverWithTimeout_body(numSeconds);
+	//subgoal WaitForPlayerKeypressesToBeOverWithTimeout_body2();
+}
+
+parallel behavior WaitForPlayerKeypressesToBeOverWithTimeout_body(float numSeconds) {
+	number_needed_for_success 1;
+	subgoal WaitFor(numSeconds);
+	with (success_test { PlayerMemory (PlayerRecentlyTypedTextWME b == false) } ) wait;
+}
+
+// APS 8.6.03: also wait for NLP Processing to finish, if it had started
+parallel behavior WaitForPlayerKeypressesToBeOverWithTimeout_body2() {
+	precondition { StoryMemory storyStatusWME = (StoryStatusWME) } 
+	number_needed_for_success 1;
+	subgoal WaitFor(8);
+	with (success_test { (storyStatusWME.getNLPProcessingStarted() == 0) } ) wait;
+}
+
+
+// ############
+atomic sequential behavior SetBeatFlagInStoryMemory(String flagString) {
+	WorkingMemory storyMemory;
+	mental_act { 
+		storyMemory = WorkingMemory.lookupRegisteredMemory("StoryMemory");			
+		storyMemory.addWME(new BeatFlagWME(flagString));		
+		StringUtil.println("*** " +myName+ " SetBeatFlagInStoryMemory " +flagString); 
+	}
+}
+
+// ############
+atomic sequential behavior SetDeflectMode(int mode) {
+	precondition { StoryMemory modeWME = (DeflectModeWME) }
+	mental_act { modeWME.setMode(mode); }
+}
+
+// ############
+atomic sequential behavior SetDeflectModeReest(int reestWho,
+													int reestPlayer,
+													int reestDialogBase,
+													int reestFEBase1,
+													int reestMood1,
+													int reestFEBase2,
+													int reestMood2,
+													int reestFEBase3,
+													int reestMood3,
+													int reestOtherFinalSigh,
+													boolean reestBSetReest) {
+	int reestDialog1;
+	int reestDialog2;
+	int reestDialog3;
+	mental_act {
+		reestDialog1 = reestDialogBase + 0;
+		reestDialog2 = reestDialogBase + 1;
+		reestDialog3 = reestDialogBase + 2;
+	}
+	subgoal SetDeflectModeReest(reestWho,
+								reestPlayer,
+								reestDialog1,
+								reestFEBase1,
+								reestMood1,
+								reestDialog2,
+								reestFEBase2,
+								reestMood2,
+								reestDialog3,
+								reestFEBase3,
+								reestMood3,
+								reestOtherFinalSigh,
+								reestBSetReest);
+}
+
+
+atomic sequential behavior SetDeflectModeReest(int reestWho,
+													int reestPlayer,
+													int reestDialog1,
+													int reestFEBase1,
+													int reestMood1,
+													int reestDialog2,
+													int reestFEBase2,
+													int reestMood2,
+													int reestDialog3,
+													int reestFEBase3,
+													int reestMood3,
+													int reestOtherFinalSigh,
+													boolean reestBSetReest) {
+	precondition {	(gDeflectReestablish == true)
+					{ StoryMemory modeWME = (DeflectModeWME) } }
+	specificity 2;
+
+	mental_act { 
+		modeWME.setMode(eDeflectMode_reestablish); 
+		modeWME.setReestWho(reestWho);
+		modeWME.setReestPlayer(reestPlayer);
+		modeWME.setReestDialog1(reestDialog1);
+		modeWME.setReestFEBase1(reestFEBase1);
+		modeWME.setReestMood1(reestMood1);
+		modeWME.setReestDialog2(reestDialog2);
+		modeWME.setReestFEBase2(reestFEBase2);
+		modeWME.setReestMood2(reestMood2);
+		modeWME.setReestDialog3(reestDialog3);
+		modeWME.setReestFEBase3(reestFEBase3);
+		modeWME.setReestMood3(reestMood3);
+		modeWME.setReestOtherFinalSigh(reestOtherFinalSigh);
+		modeWME.setReestBSetReest(reestBSetReest);
+	}
+
+	// make this beatgoal interruptible and not required to repeat
+	//subgoal SetBeatGoalCommitPointReached(); // can't do this, or it will cause repeat lines to happen
+	subgoal SetBeatGoalGistPointReached(); 
+	subgoal SetLetBeatGoalFinishFlag(false);
+}
+
+// if gDeflectReestablish == false, revert to old original behavior
+atomic sequential behavior SetDeflectModeReest(int reestWho,
+													int reestPlayer,
+													int reestDialog1,
+													int reestFEBase1,
+													int reestMood1,
+													int reestDialog2,
+													int reestFEBase2,
+													int reestMood2,
+													int reestDialog3,
+													int reestFEBase3,
+													int reestMood3,
+													int reestOtherFinalSigh,
+													boolean reestBSetReest) {
+	specificity 1;
+	subgoal SetDeflectMode(eDeflectMode_minimal);
+}
+
+
+
+
+// ############
+sequential behavior CustomBeatHandlers() {
+	specificity 1;
+	succeed_step;
+}
+
+// ######
+// FailIfOtherAmbIsAlreadyRunning
+// succeed if we are the only amb running
+sequential behavior FailIfOtherAmbIsAlreadyRunning(String mySig) {
+	precondition {	(GoalStepWME isAmb != null  isExecuting == true  signature :: sig)
+					!(GoalStepWME isAmb != null  isExecuting == true  signature != sig) }
+	specificity 2;
+	succeed_step;
+}
+// otherwise fail
+sequential behavior FailIfOtherAmbIsAlreadyRunning(String mySig) {
+	specificity 1;
+	mental_act { StringUtil.println(mySig+ " killed itself off, other amb is already running"); }
+	fail_step;
+}
+
+
+//	precondition {	(GoalStepWME isAmb != null  isExecuting == true  signature :: signature)
+//					(signature.equals(mySig) == false) }
+
+
+
+// ## PollForBeatGoalGistReached
+// we poll instead of success-test-wait, so as not to pound on checking GoalStepWME
+// it also adds a bit of lifelike variability 
+parallel behavior PollForBeatGoalGistReached(int timeout) {
+	number_needed_for_success 1;
+	subgoal PollForBeatGoalGistReached_body(timeout);
+	subgoal WaitFor(timeout);
+}
+sequential behavior PollForBeatGoalGistReached_body(int timeout) {
+	mental_act { StringUtil.println("PollForBeatGoalGistReached waiting, timeout" +timeout); }
+	with (persistent when_fails) subgoal PollForBeatGoalGistReached_test();
+	mental_act { StringUtil.println("PollForBeatGoalGistReached test succeeded"); }
+}
+sequential behavior PollForBeatGoalGistReached_test() {
+	precondition {	{ TripMemory (GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+					{ BeatMemory statusWME = (BeatGoalStatusWME bgSig == bgSig  bGistPointReached == true) } } 
+	specificity 2;
+	succeed_step;
+}
+sequential behavior PollForBeatGoalGistReached_test() {
+	specificity 1;
+	subgoal WaitFor(1);
+	fail_step;
+}
+
+
+// ---------------------------------------------
+// DA HANDLERS
+
+// ############ 
+// SetDAHandlersActive
+// set are da handlers active
+atomic sequential behavior SetDAHandlersActive(boolean bActive) {		
+	precondition { BeatMemory dAMiscStatusWME = (DAMiscStatusWME) }	
+	mental_act { dAMiscStatusWME.setBHandlersActive(bActive); }
+	mental_act { StringUtil.println("### SetDAHandlersActive " + bActive); }
+}
+
+
+
+// ---------------------------------------------
+// DIALOG
+
+// ###############
+// DoDialog
+
+sequential behavior DoDialog(int resourcePriority, boolean bCurrentSignificantSpeaker, int dialogScript) {
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript, NOTASCRIPT, NOTASCRIPT, NOTASCRIPT, false);
+}
+
+sequential behavior DoDialog(int resourcePriority, boolean bCurrentSignificantSpeaker, int dialogScript1, int dialogScript2) {
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript1, dialogScript2, NOTASCRIPT, NOTASCRIPT, false);
+}
+
+sequential behavior DoDialog(int resourcePriority, boolean bCurrentSignificantSpeaker, int dialogScript1, int dialogScript2, 
+								int dialogScript3) {
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript1, dialogScript2, dialogScript3, NOTASCRIPT, false);
+}
+
+sequential behavior DoDialog(int resourcePriority, boolean bCurrentSignificantSpeaker, int dialogScript1, int dialogScript2, 
+								int dialogScript3, int dialogScript4) {
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript1, dialogScript2, dialogScript3, dialogScript4, false);
+}
+
+sequential behavior DoDialog(int resourcePriority, boolean bCurrentSignificantSpeaker, int dialogScript, boolean bHasBeatGist) {
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript, NOTASCRIPT, NOTASCRIPT, NOTASCRIPT, bHasBeatGist);
+}
+
+sequential behavior DoDialogAfterDelay(int resourcePriority, boolean bCurrentSignificantSpeaker, 
+										int dialogScript, float delay) {
+	subgoal WaitFor(delay);
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript, NOTASCRIPT, NOTASCRIPT, NOTASCRIPT, false);
+}
+sequential behavior DoDialogAfterDelay(int resourcePriority, boolean bCurrentSignificantSpeaker, 
+										int dialogScript, int dialogScript2, float delay) {
+	subgoal WaitFor(delay);
+	subgoal DoDialog(resourcePriority, bCurrentSignificantSpeaker, 
+						dialogScript, dialogScript2, NOTASCRIPT, NOTASCRIPT, false);
+}
+
+sequential behavior DoDialog(int resourcePriority, 
+								boolean bCurrentSignificantSpeaker, 
+								int dialogScript1, 
+								int dialogScript2, 
+								int dialogScript3, 
+								int dialogScript4,
+								boolean bHasBeatGist) {
+
+	// grab or confirm the dialog resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_voice, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	// ## SET ANAPHORIC "you" (CURRENT SIGNIFICANT SPEAKER), if requested
+	with (ignore_failure) subgoal DoDialog_SetYouRef(bCurrentSignificantSpeaker);
+
+
+	// DO THE DIALOG
+	with (property isDoDialogBody true)
+		subgoal DoDialog_Body(dialogScript1, dialogScript2, dialogScript3, dialogScript4, bHasBeatGist);
+
+
+	// set the beat gist if needed, in case the beatgoal didn't actually have a gist cue
+	with (ignore_failure) subgoal SetBeatGistPointReached_ifTrue(bHasBeatGist);
+}
+
+// Just sets the you ref if Handler_OneCharacterVisible is not active. 
+sequential behavior DoDialog_SetYouRef(boolean bCurrentSignificantSpeaker) {
+	precondition { 
+		(bCurrentSignificantSpeaker == true) 
+		{ TripMemory !(GoalStepWME isOneCharacterVisibleYouRefHandler != null) }
+	}
+	subgoal SetYouRef(me);	// ## ANAPHORIC REFERENCE
+}
+
+// Handler_OneCharacterVisible is active. Multiple characters or no characters are visible. Set the youRef normally. 
+sequential behavior DoDialog_SetYouRef(boolean bCurrentSignificantSpeaker) {
+	precondition { 
+                (bCurrentSignificantSpeaker == true) 
+		{ BeatMemory !(OneCharacterVisibleWME) } 
+		{ TripMemory (GoalStepWME isOneCharacterVisibleYouRefHandler != null) }
+	}
+
+	subgoal SetYouRef(me);	// ## ANAPHORIC REFERENCE
+}
+
+// Handler_OneCharacterVisible is active. Only one character is visible. Store the dialog youRef in youRefNoOverride since the 
+// youRef is currently set to to the one visible character. 
+sequential behavior DoDialog_SetYouRef(boolean bCurrentSignificantSpeaker) {
+	precondition { 
+                (bCurrentSignificantSpeaker == true) 
+		{ BeatMemory (OneCharacterVisibleWME) } 
+		{ TripMemory (GoalStepWME isOneCharacterVisibleYouRefHandler != null) }
+	} 
+
+	subgoal SetYouRefNoOverride(me);	// ## ANAPHORIC REFERENCE
+}
+
+parallel behavior DoDialog_Body(int dialogScript1, 
+								int dialogScript2, 
+								int dialogScript3, 
+								int dialogScript4,
+								boolean bHasBeatGist) {
+
+	subgoal DoDialog_Body2(dialogScript1, dialogScript2, dialogScript3, dialogScript4);
+
+	// wait for the dialog commit cue
+	with (ignore_failure, effect_only, priority_modifier 1) subgoal WaitForDialogCommitCue();		
+
+	// wait for a dialog gist cue, if any
+	// if bHasBeatGist is true, it will also set the beat gist point
+	with (ignore_failure, effect_only, priority_modifier 1) subgoal WaitForDialogGistCue(bHasBeatGist);		
+
+	// wait for turnoffletbeatgoalfinish, if any
+	// we SPAWN this, because it needs to live a bit beyond the end of the dialog,
+	// to ensure we catch the cue which tends to be right at the end of the dialog
+	// without waiting a bit extra, we tend to miss the cue
+	with (ignore_failure, priority_modifier 1) 
+		spawngoal WaitForDialogGistDoneTurnOffLetDialogFinishCue(bHasBeatGist);
+
+	// new: 1.20.03
+	with (ignore_failure, priority_modifier 1) 
+		spawngoal WaitForDialogTurnOffLetDialogFinishCue(bHasBeatGist);
+}
+
+sequential behavior DoDialog_Body2(int dialogScript1, 
+									int dialogScript2, 
+									int dialogScript3, 
+									int dialogScript4) {
+
+	// if the beat commit point has not been set yet, prepare to do so
+	with (ignore_failure) subgoal SetBeatCommitPointSoonIfNeeded();
+
+	act dialog(dialogScript1, dialogScript2, dialogScript3, dialogScript4);
+
+	mental_act { 
+		// write the enum names of character dialog to the console and AI log file. 
+		StringUtil.println("");
+		StringUtil.println(myName.toUpperCase());
+		StringUtil.println(PrintUtilities.dialogScript_EnumToString(me, dialogScript1) + " " + 
+				   PrintUtilities.dialogScript_EnumToString(me, dialogScript2) + " " + 
+				   PrintUtilities.dialogScript_EnumToString(me, dialogScript3) + " " + 
+				   PrintUtilities.dialogScript_EnumToString(me, dialogScript4));
+		StringUtil.println("");
+	}
+}
+
+
+// ###############
+// SetBeatCommitPointSoonIfNeeded
+// if we haven't yet set the beat commit point, prepare to do in 2 seconds from now
+sequential behavior SetBeatCommitPointSoonIfNeeded() {
+	precondition { BeatMemory (BeatStatusWME commitPointReached == false) }	
+	spawngoal SetBeatCommitPointSoonIfNeeded_Body();					// we SPAWN this goal!
+}
+
+// after 3 seconds, if the beat is still running, set the beat commit point
+sequential behavior SetBeatCommitPointSoonIfNeeded_Body() {
+	context_condition { BeatMemory (BeatStatusWME status == eBeatStatus_running) }	
+	subgoal WaitFor(2);
+	subgoal SetBeatCommitPointReached(true);
+}
+
+
+// #############
+// WaitForAnimCueWithTimeout
+parallel behavior WaitForAnimCueWithTimeout(int animLayerIndex, int cueIndex, int timeout) { 
+	number_needed_for_success 1;
+	with (success_test { (AnimationCueWME layerIndex == animLayerIndex   cue == cueIndex) } ) wait;
+	subgoal WaitFor(timeout);
+}
+
+
+// #############
+// WaitForDialogCommitCue
+// wait for a dialog commit cue, if any
+parallel behavior WaitForDialogCommitCue() {
+	number_needed_for_success 1;
+	subgoal WaitForDialogCommitCue_Stuff();
+	subgoal WaitForDialogCommitCue_TimeoutAssert();
+}
+
+// timeout below handles dropped cue 
+sequential behavior WaitForDialogCommitCue_Stuff() {
+	with (success_test { (AnimationCueWME layerIndex == eAnimLayer_dialog   cue == eDcue_CommitDone) } ) wait;
+	subgoal SetBeatGoalCommitPointReached();
+	//mental_act { StringUtil.println("!!!!!" + myName + " GOT THE COMMIT CUE!"); }
+}
+
+// in case the cue is dropped
+sequential behavior WaitForDialogCommitCue_TimeoutAssert() {
+	subgoal WaitFor(2);
+	mental_act { 
+		StringUtil.println("!!!!!");
+		StringUtil.println("!!!!!" + myName + " MISSED THE DIALOG COMMIT CUE!");
+		StringUtil.println("!!!!!");
+		//BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); 
+	}
+	subgoal SetBeatGoalCommitPointReached();
+}
+
+// #############
+// WaitForDialogGistCue
+// wait for a dialog gist cue, if any
+// it will set the beatgoal gist point
+// if bHasBeatGist is also true, it will also set the beat gist point
+// THIS IS ALWAYS CALLED effect_only, SO NO NEED TO HANDLE THE DROPPED CUE CASE
+sequential behavior WaitForDialogGistCue(boolean bHasBeatGist) {
+	with (success_test { (AnimationCueWME layerIndex == eAnimLayer_dialog   cue == eDcue_GistDone) } ) wait;
+	subgoal SetBeatGoalGistPointReached();
+	with (ignore_failure) subgoal SetBeatGistPointReached_ifTrue(bHasBeatGist); 
+}
+
+// #############
+// WaitForDialogGistDoneTurnOffLetDialogFinishCue
+// a variation on the above, that also turns off LetBeatGoalFinish
+// note we are SPAWNED from DoDialog_Body()
+parallel behavior WaitForDialogGistDoneTurnOffLetDialogFinishCue(boolean bHasBeatGist) {
+	number_needed_for_success 1;
+	subgoal WaitForDialogGistDoneTurnOffLetDialogFinishCue_CueWait(bHasBeatGist);
+	subgoal WaitForDialogGistDoneTurnOffLetDialogFinishCue_Timeout();
+}
+
+// wait for the turnoffletbeatgoalfinish cue 
+// note that WaitForDialogGistDoneTurnOffLetDialogFinishCue() is SPAWNED from DoDialog_Body()
+// if we get the cue, we will only perform our effects if
+// the current beatgoal sig matches the original sig when we started the cue wait
+// (this is needed because we could get the cue late, after the beatgoal is completely done;
+//  we wouldn't want to affect the next beatgoal!)
+sequential behavior WaitForDialogGistDoneTurnOffLetDialogFinishCue_CueWait(boolean bHasBeatGist) {
+	precondition { TripMemory (GoalStepWME signature :: origSig   isBeatGoal != null  isExecuting == true) }
+	//mental_act { 
+	//		StringUtil.println("!!!!!");
+	//		StringUtil.println("!!!!!" + myName + " ### WaitForDialogGistDoneTurnOffLetDialogFinishCue WAITING " + origSig);
+	//		StringUtil.println("!!!!!");
+	//}
+	// dropped cue case handled by WaitForDialogGistDoneTurnOffLetDialogFinishCue_Timeout()
+	with (success_test { (AnimationCueWME layerIndex == eAnimLayer_dialog   cue == eDcue_GistDoneTurnOffLetDialogFinish) } ) wait;
+	with (ignore_failure) subgoal WaitForDialogGistDoneTurnOffLetDialogFinishCue_Stuff(bHasBeatGist, origSig);
+}
+atomic sequential behavior WaitForDialogGistDoneTurnOffLetDialogFinishCue_Stuff(boolean bHasBeatGist, String origSig) {
+	precondition { TripMemory	(GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) 
+								//(origSig == bgSig) }	//fixme! compiler error/issue -- doesn't work when it should!
+								(origSig.equals(bgSig)) }
+	specificity 2;
+	mental_act { StringUtil.println(myName + " ### WaitForDialogGistDoneTurnOffLetDialogFinishCue GOT THE CUE"); }
+	subgoal SetBeatGoalGistPointReached();
+	with (ignore_failure) subgoal SetBeatGistPointReached_ifTrue(bHasBeatGist); 
+	subgoal SetLetBeatGoalFinishFlag(false);
+}
+atomic sequential behavior WaitForDialogGistDoneTurnOffLetDialogFinishCue_Stuff(boolean bHasBeatGist, String origSig) {
+	precondition { TripMemory	(GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+	specificity 1;
+	mental_act { StringUtil.println(myName + " ### WaitForDialogGistDoneTurnOffLetDialogFinishCue GOT THE CUE, but beatgoal already done " + bgSig); }
+	succeed_step;
+}
+
+// timeout waiting for this cue -- 1 additional second after the dialog finishes
+sequential behavior WaitForDialogGistDoneTurnOffLetDialogFinishCue_Timeout() {
+	with (success_test { !(GoalStepWME isDoDialogBody != null) } ) wait;
+	//mental_act { StringUtil.println("!!!!!" + myName + " ### WaitForDialogGistDoneTurnOffLetDialogFinishCue WAITING PAST DIALOG"); }
+	subgoal WaitFor(1);
+	//mental_act { StringUtil.println("!!!!!" + myName + " ### WaitForDialogGistDoneTurnOffLetDialogFinishCue TIMED OUT"); }
+}
+
+
+// #############
+// WaitForDialogTurnOffLetDialogFinishCue
+// a variation on the above, that only turns off LetBeatGoalFinish
+// note we are is SPAWNED from DoDialog_Body()
+parallel behavior WaitForDialogTurnOffLetDialogFinishCue(boolean bHasBeatGist) {
+	number_needed_for_success 1;
+	subgoal WaitForDialogTurnOffLetDialogFinishCue_CueWait(bHasBeatGist);
+	subgoal WaitForDialogTurnOffLetDialogFinishCue_Timeout();
+}
+
+sequential behavior WaitForDialogTurnOffLetDialogFinishCue_CueWait(boolean bHasBeatGist) {
+	precondition { TripMemory (GoalStepWME signature :: origSig   isBeatGoal != null  isExecuting == true) }
+	//cueprint	mental_act { StringUtil.println(myName + " ### WaitForDialogTurnOffLetDialogFinishCue WAITING " + origSig); }
+	// dropped cue case handled by WaitForDialogTurnOffLetDialogFinishCue_Timeout()
+	with (success_test { (AnimationCueWME layerIndex == eAnimLayer_dialog   cue == eDcue_TurnOffLetDialogFinish) } ) wait;
+	with (ignore_failure) subgoal WaitForDialogTurnOffLetDialogFinishCue_Stuff(bHasBeatGist, origSig);
+}
+atomic sequential behavior WaitForDialogTurnOffLetDialogFinishCue_Stuff(boolean bHasBeatGist, String origSig) {
+	precondition { TripMemory	(GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) 
+								//(origSig == bgSig) }	//fixme! compiler error/issue -- doesn't work when it should!
+								(origSig.equals(bgSig)) }
+	specificity 2;
+	mental_act { StringUtil.println(myName + " ### WaitForDialogTurnOffLetDialogFinishCue GOT THE CUE"); }
+	subgoal SetLetBeatGoalFinishFlag(false);
+}
+atomic sequential behavior WaitForDialogTurnOffLetDialogFinishCue_Stuff(boolean bHasBeatGist, String origSig) {
+	precondition { TripMemory	(GoalStepWME signature :: bgSig   isBeatGoal != null  isExecuting == true) }
+	specificity 1;
+	mental_act { StringUtil.println(myName + " ### WaitForDialogTurnOffLetDialogFinishCue GOT THE CUE, but beatgoal already done " + bgSig); }
+	succeed_step;
+}
+// timeout waiting for this cue -- 1 additional second after the dialog finishes
+sequential behavior WaitForDialogTurnOffLetDialogFinishCue_Timeout() {
+	with (success_test { !(GoalStepWME isDoDialogBody != null) } ) wait;
+	//cueprint	mental_act { StringUtil.println(myName + " ### WaitForDialogTurnOffLetDialogFinishCue WAITING PAST DIALOG"); }
+	subgoal WaitFor(1);
+	//cueprint	mental_act { StringUtil.println(myName + " ### WaitForDialogTurnOffLetDialogFinishCue TIMED OUT"); }
+}
+
+
+
+// #############
+parallel behavior WaitForDialogCueWithTimeout(int cue, int who) {
+	precondition { (who == grace || who == trip) }
+	specificity 2;
+	number_needed_for_success 1;
+	subgoal WaitForDialogCueWithTimeout_cueWait(cue, who);
+	subgoal WaitForDialogToStartAndStop(who);
+	subgoal WaitForDialog_timeout(10);
+}
+parallel behavior WaitForDialogCueWithTimeout(int cue, int who) {
+	specificity 1;
+	mental_act { 
+		StringUtil.println("### ERROR: unknown who in WaitForDialogCueWithTimeout"); 
+		assert(false); 
+	}
+}
+// dropped cues handled by WaitForDialog_timeout()
+sequential behavior WaitForDialogCueWithTimeout_cueWait(int cue, int who) {
+	precondition { (who == grace) }
+	with (success_test { GraceMemory (AnimationCueWME layerIndex == eAnimLayer_dialog  cue == cue) } ) wait;
+}
+sequential behavior WaitForDialogCueWithTimeout_cueWait(int cue, int who) {
+	precondition { (who == trip) }
+	with (success_test { TripMemory (AnimationCueWME layerIndex == eAnimLayer_dialog  cue == cue) } ) wait;
+}
+sequential behavior WaitForDialog_timeout(int timeout) {
+	subgoal WaitFor(timeout);
+	mental_act { StringUtil.println("### WARNING: WaitForDialog_timeout timed out!"); }
+}
+
+
+// #############
+parallel behavior WaitForDialogToStartAndStopWithTimeout(int who) {
+	subgoal WaitForDialogToStartAndStopWithTimeout(who, 2);
+}
+parallel behavior WaitForDialogToStartAndStopWithTimeout(int who, int initialTimeout) {
+	precondition { (who == grace || who == trip) }
+	specificity 2;
+	number_needed_for_success 1;
+	subgoal WaitForDialogToStartAndStop(who, initialTimeout);
+	subgoal WaitForDialog_timeout(10);
+}
+parallel behavior WaitForDialogToStartAndStopWithTimeout(int who, int initialTimeout) {
+	specificity 1;
+	mental_act { 
+		StringUtil.println("### ERROR: unknown who in WaitForDialogToStartAndStopWithTimeout"); 
+		assert(false); 
+	}
+}
+
+// ##
+sequential behavior WaitForDialogToStartAndStop(int who) {
+	subgoal WaitUntilStartsSpeakingWithTimeout(who, 2);
+	subgoal WaitUntilStopsSpeaking(who);
+}
+sequential behavior WaitForDialogToStartAndStop(int who, int initialTimeout) {
+	subgoal WaitUntilStartsSpeakingWithTimeout(who, initialTimeout);
+	subgoal WaitUntilStopsSpeaking(who);
+}
+
+// ##
+parallel behavior WaitUntilStartsSpeakingWithTimeout(int who) {
+	precondition { (who == grace) }
+	number_needed_for_success 1;
+	with (success_test { GraceMemory (GoalStepWME isDoDialogBody != null) } ) wait;
+	subgoal WaitFor(2);	// needed in case the speaking starts and stops really quickly
+}
+parallel behavior WaitUntilStartsSpeakingWithTimeout(int who, int timeout) {
+	precondition { (who == grace) }
+	number_needed_for_success 1;
+	with (success_test { GraceMemory (GoalStepWME isDoDialogBody != null) } ) wait;
+	subgoal WaitFor(timeout);
+}
+
+// ##
+parallel behavior WaitUntilStartsSpeakingWithTimeout(int who) {
+	precondition { (who == trip) }
+	number_needed_for_success 1;
+	with (success_test { TripMemory (GoalStepWME isDoDialogBody != null) } ) wait;
+	subgoal WaitFor(2);	// needed in case the speaking starts and stops really quickly
+}
+parallel behavior WaitUntilStartsSpeakingWithTimeout(int who, int timeout) {
+	precondition { (who == trip) }
+	number_needed_for_success 1;
+	with (success_test { TripMemory (GoalStepWME isDoDialogBody != null) } ) wait;
+	subgoal WaitFor(timeout);
+}
+
+// ##
+sequential behavior WaitUntilStopsSpeaking(int who) {
+	precondition { (who == grace) }
+	with (success_test { GraceMemory !(GoalStepWME isDoDialogBody != null) } ) wait;
+}
+sequential behavior WaitUntilStopsSpeaking(int who) {
+	precondition { (who == trip) }
+	with (success_test { TripMemory !(GoalStepWME isDoDialogBody != null) } ) wait;
+}
+
+
+// ##
+parallel behavior WaitForSomeoneToStartSpeakingWithTimeout(int timeout) {
+	number_needed_for_success 1;
+	subgoal WaitUntilStartsSpeakingWithTimeout(me, timeout);		
+	subgoal WaitUntilStartsSpeakingWithTimeout(spouse, timeout);		
+}
+
+// ###############
+
+// ---------------------------------------------
+// GAZE
+
+
+// ###############
+// DoGaze
+
+sequential behavior DoGaze(int resourcePriority, int gazeType, int spriteIDForGaze) {
+	subgoal DoGaze(resourcePriority, gazeType, spriteIDForGaze, eGazeSpeed_med);
+}
+
+sequential behavior DoGaze(int resourcePriority, int gazeType, int spriteIDForGaze, int gazeSpeed) {
+	precondition {	(gazeType != -1)
+					gazeWME = (GazeWME) }
+
+	int rand0or1;
+
+	// grab or confirm the gaze resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_gaze, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	mental_act { 
+
+		// map coy (abl only) into coyL or coyR
+		if (gazeType == eGazeType_coy) {
+			if (randGen.nextInt(2) == 0) gazeType = eGazeType_coyL;
+			else gazeType = eGazeType_coyR;
+		}
+
+		gazeWME.setObjectID(spriteIDForGaze);
+		gazeWME.setSpeed(gazeSpeed);
+		gazeWME.setType(gazeType);
+		gazeWME.setAlterHeadCock(eGazeAlterHeadCock_subtle);
+	}
+
+	subgoal DoGaze_Body(gazeType, spriteIDForGaze, gazeSpeed);
+}
+
+// redo the gaze act, without bothering to get the resource
+// useful for enforcing gazeTorso mapping
+sequential behavior RefreshGaze() {
+	precondition { (GazeWME objectID :: spriteIDForGaze  type :: gazeType  speed :: gazeSpeed) }
+	subgoal DoGaze_Body(gazeType, spriteIDForGaze, gazeSpeed);
+}
+
+sequential behavior DoGaze_Body(int gazeType, int spriteIDForGaze, int gazeSpeed) {
+	precondition { gazeTorsoResourceWME = (BodyResourceWME resourceID == eBodyResourceID_gazeTorso) }
+	mental_act { 
+		// if the gazeTorsoResource is already owned, map normal gaze to headAndEyesOnly
+		// this is akin to mapping gestures when arm is holding something
+		if (gazeTorsoResourceWME.getResourcePriority() != eBodyResourcePriority_NOTAPRIORITY &&
+				(gazeType == eGazeType_normal || gazeType == eGazeType_avert)) {
+			//StringUtil.println(myName+ " DoGaze mapping normal to headAndEyesOnly");
+			gazeType = eGazeType_headAndEyesOnly;
+		}
+	}
+
+	act gaze(spriteIDForGaze, gazeSpeed, gazeType, eGazeAlterHeadCock_subtle);
+}
+
+// clear the GazeWME if type == -1
+sequential behavior DoGaze(int resourcePriority, int gazeType, int spriteIDForGaze, int gazeSpeed) {
+	precondition {	(gazeType == -1)
+					gazeWME = (GazeWME) }
+	mental_act { 
+		gazeWME.setObjectID(spriteIDForGaze);
+		gazeWME.setSpeed(-1);
+		gazeWME.setType(-1);
+		gazeWME.setAlterHeadCock(-1);
+	}
+}
+
+sequential behavior DoGazeAfterDelay(int resourcePriority, int gazeType, int spriteIDForGaze, float waitTime) {
+	subgoal WaitFor(waitTime);
+	subgoal DoGaze(resourcePriority, gazeType, spriteIDForGaze);
+}
+sequential behavior DoGazeAfterDelay(int resourcePriority, int gazeType, int spriteIDForGaze, int speed, float waitTime) {
+	subgoal WaitFor(waitTime);
+	subgoal DoGaze(resourcePriority, gazeType, spriteIDForGaze, speed);
+}
+
+
+
+
+// ---------------------------------------------
+// STAGING
+
+
+// ###############
+// set the current staging info (deleting any other existing info)
+atomic sequential behavior SetStagingInfoWME(int resourcePriority, int stagingObjectID, 
+												Point3D walkToPt, float walkToAngle, int walkType) {
+	precondition { prevStagingInfoWME = (PrevStagingInfoWME) }
+	mental_act { 
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("StagingInfoWME"); 
+		BehavingEntity.getBehavingEntity().addWME(new StagingInfoWME(
+			resourcePriority, stagingObjectID, walkToPt.x, walkToPt.z, walkToAngle, walkType));
+
+		// also store these values in PrevStagingInfoWME
+		prevStagingInfoWME.setResourcePriority(resourcePriority);
+		prevStagingInfoWME.setTargetObjectID(stagingObjectID);
+		prevStagingInfoWME.setTargetX(walkToPt.x);
+		prevStagingInfoWME.setTargetZ(walkToPt.z);
+		prevStagingInfoWME.setTargetRot(walkToAngle);
+		prevStagingInfoWME.setTargetRot(walkType);
+	}
+}
+
+
+
+// ###############
+// delete the current staging info 
+atomic sequential behavior DeleteStagingInfoWME() {
+	precondition { StoryMemory converseStagingWME = (ConverseStagingWME) }
+
+	//mental_act { StringUtil.println("## DeleteStagingInfoWME"); }
+
+	mental_act { 
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("StagingInfoWME"); 
+
+		// APS 4.23.02: clear staging flag in ConverseStagingWME
+		synchronized (converseStagingWME) {
+
+			if (me == eSpriteID_grace) {
+				converseStagingWME.setBIsGraceConverseStaging(false);
+				//stg StringUtil.println("setBIsGraceConverseStaging(false)");
+
+			} else if (me == eSpriteID_trip) {
+				converseStagingWME.setBIsTripConverseStaging(false);
+				//stg StringUtil.println("setBIsTripConverseStaging(false)");
+			}
+		}
+	}
+}
+
+
+
+// ###############
+// restart the staging BODY, in order to recompute our target and recreate a StagingInfoWME
+atomic sequential behavior RestartStagingBody() {
+	precondition { stagingGoal = (GoalStepWME isStagingBodyGoal != null) }
+	mental_act { 
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("StagingInfoWME"); 
+		stagingGoal.resetStep(); 
+		//StringUtil.println(myName + " resetting step in " + stagingGoal.getSignature()); 
+	}
+}
+
+// ###############
+// uses reflection to find goal that has been tagged as a staging goal and fail it
+atomic sequential behavior StopStaging() {
+	precondition { stagingGoal = (GoalStepWME isStagingGoal != null) }
+	specificity 2;
+	mental_act { 
+		stagingGoal.fail(); 
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("StagingInfoWME"); 
+	}
+}
+
+// fall-thru if now staging goal exists
+atomic sequential behavior StopStaging() {
+	specificity 1;
+	succeed_step;
+}
+
+// ###############
+// STAGING ENTRY POINT: StagingWalkToPoint
+// StagingWalkToPoint is also using for TURNING IN PLACE
+sequential behavior StagingWalkToPoint(int resourcePriority, Point3D targetPos, float targetAngle, int walkType) {
+	with (property isStagingBodyGoal true) 
+		subgoal StagingWalkToPoint_Body(resourcePriority, targetPos, targetAngle, eSpriteID_NOTASPRITE, walkType);
+	//stagingprint mental_act { StringUtil.println("Finished WALK TO POINT / TURN IN PLACE"); }
+}
+
+sequential behavior StagingWalkToPoint(int resourcePriority, Point3D targetPos, int spriteToFace, int walkType) {
+	with (property isStagingBodyGoal true) 
+		subgoal StagingWalkToPoint_Body(resourcePriority, targetPos, DONTCAREANGLE, spriteToFace, walkType);
+	//stagingprint mental_act { StringUtil.println("Finished WALK TO POINT / TURN IN PLACE"); }
+}
+
+// if we are to face a sprite at the end
+sequential behavior StagingWalkToPoint_Body(int resourcePriority, Point3D targetPos, float targetAngle, int spriteToFace, int walkType) {
+	precondition {	(spriteToFace != eSpriteID_NOTASPRITE) 
+					(ObjectPositionWME objectID == spriteToFace  x :: objXPos   z :: objZPos) }
+	specificity 2;
+	mental_act { targetAngle = Staging.getXZAngleBetweenPoints(targetPos, new Point3D(objXPos, 0.0f, objZPos)); }
+	subgoal StagingWalkToPoint_BodyStuff(resourcePriority, targetPos, targetAngle, walkType);
+}
+
+// else if no sprite is supplied, face given the angle
+sequential behavior StagingWalkToPoint_Body(int resourcePriority, Point3D targetPos, float targetAngle, int spriteToFace, int walkType) {
+	specificity 1;
+	subgoal StagingWalkToPoint_BodyStuff(resourcePriority, targetPos, targetAngle, walkType);
+}
+
+sequential behavior StagingWalkToPoint_BodyStuff(int resourcePriority, 
+						Point3D targetPos, float targetAngle, int walkType) {
+
+	mental_act { StringUtil.println(myName + " starting a staging request WALKTOPOINT"); }
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the legsBody resource at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, eSpriteID_NOTASPRITE, targetPos, targetAngle, walkType);
+
+	subgoal WalkToPoint();
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingConverse
+sequential behavior StagingConverse(int resourcePriority, int stagingObjectID, int positionType, int walkType) {	
+	// -1 for dist means this behavior should determine the best dist	
+	subgoal StagingConverse(resourcePriority, stagingObjectID, positionType, -1.0f, walkType, 0.0f);
+}
+
+sequential behavior StagingConverse(int resourcePriority, int stagingObjectID, int positionType, float dist, int walkType) {
+	// if it fails (ie, it does not match because it does not need to perform), that's okay
+	with (property isStagingBodyGoal true) 
+		subgoal StagingConverse_Body(resourcePriority, stagingObjectID, positionType, dist, walkType, 0.0f);
+}
+
+sequential behavior StagingConverse(int resourcePriority, int stagingObjectID, int positionType, float dist, int walkType, float extraAngleOffset) {
+	with (property isStagingBodyGoal true) 
+		subgoal StagingConverse_Body(resourcePriority, stagingObjectID, positionType, dist, walkType, extraAngleOffset);
+}
+
+sequential behavior StagingConverse_Body(int resourcePriority, int stagingObjectID, int positionType, float dist,
+											int walkType, float extraAngleOffset) {		
+	precondition {	myPosWME = (ObjectPositionWME objectID == me  x :: myX  z :: myZ)
+					myRotWME = (ObjectRotationWME objectID == me  y :: myAngle)
+					stagingObjectPosWME = (ObjectPositionWME objectID == stagingObjectID  x :: objX   z :: objZ) 
+
+					//old stagingObjectRotWME = (ObjectStagingRotationWME objectID == stagingObjectID  y :: objRot) 
+					// APS 7.11.03: new solution implemented in Staging.java; use normal rotation values
+					stagingObjectRotWME = (ObjectRotationWME objectID == stagingObjectID  y :: objRot) 
+
+					(ObjectPositionWME objectID == spouse  x :: otherCharX  z :: otherCharZ) 
+					{ StoryMemory converseStagingWME = (ConverseStagingWME) }
+					{ PlayerMemory	playerSettledWME = (IsPlayerSettledWME) }
+					prevStagingInfoWME = (PrevStagingInfoWME)					// we need PrevStagingInfoWME instead of StagingInfoWME, because PrevStagingInfoWME never gets deleted! we wouldn't want this precondition to fail
+					moodWME = (MoodWME) 
+	}
+
+	// values passed to getConversationPosition
+	Point3D myPt = new Point3D();
+	Point3D objPt = new Point3D();
+	Point3D otherCharPt = new Point3D();
+	boolean bOffCenterShared;
+
+	// values that get returned by getConversationPosition
+	Point3D myWalkToPt = new Point3D();
+	FloatRef myWalkToAngleRef = new FloatRef();
+	float myWalkToAngle;
+	Point3D otherWalkToPt = new Point3D();
+	FloatRef otherWalkToAngleRef = new FloatRef();
+	float otherWalkToAngle;
+	BooleanRef bGraceOnLeftRef = new BooleanRef();
+	boolean bGraceOnLeft;
+
+	Point3D myUpdatedWalkToPt = new Point3D();
+	Point3D myPrevWalkToPt = new Point3D();
+	float myPrevWalkToAngle;
+
+	boolean bAmIGrace;
+	boolean bIAmConverseStaging;
+	boolean bOtherIsConverseStaging;
+	boolean bINeedToStage;
+	float delayBeforeWalking;
+
+	boolean bTooRecentForMood;
+	float outwardAngleOffset;
+
+	WorkingMemory beatMemory;
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the legsBody resource at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");
+
+		// do this whole mental act SYNCHRONOUSLY to the shared converseStagingWME
+		synchronized(converseStagingWME) {
+
+			if (me == eSpriteID_grace) bAmIGrace = true;
+			else bAmIGrace = false;
+
+			delayBeforeWalking = 0.0f;
+			outwardAngleOffset = 0.0f;
+
+			// values passed to getConversationPosition
+			myPt.x = myX; myPt.y = 0.0f; myPt.z = myZ; 
+			objPt.x = objX; objPt.y = 0.0f; objPt.z = objZ; 
+			otherCharPt.x = otherCharX; otherCharPt.y = 0.0f; otherCharPt.z = otherCharZ; 
+			bOffCenterShared = (positionType == eConverseType_offCenterShared);
+
+			// get values for if other character is converse staging or not, and current value for graceOnLeft
+			if (bAmIGrace) {
+				bIAmConverseStaging = converseStagingWME.getBIsGraceConverseStaging();
+				bOtherIsConverseStaging = converseStagingWME.getBIsTripConverseStaging();
+			} else {
+				bIAmConverseStaging = converseStagingWME.getBIsTripConverseStaging();
+				bOtherIsConverseStaging = converseStagingWME.getBIsGraceConverseStaging();
+			}
+			bGraceOnLeft = converseStagingWME.getBGraceOnLeft();
+
+			// if the dist is not given, use the mood's value
+			if (dist == -1.0f) {
+				dist = moodWME.getStagingConverseDist();
+				outwardAngleOffset = moodWME.getStagingConverseOutwardAngleOffset();
+			}
+
+			// calculate where to walk to and angle to face
+			if (bAmIGrace) {
+				Staging.getConversationPosition(
+					bAmIGrace,	
+					bGraceOnLeft, bGraceOnLeftRef,
+					dist, bOffCenterShared, outwardAngleOffset,
+					objPt, objRot, 
+					myPt, myWalkToPt, myWalkToAngleRef,	bIAmConverseStaging,					// i am grace
+					otherCharPt, otherWalkToPt, otherWalkToAngleRef, bOtherIsConverseStaging);	// other is trip
+
+			} else {
+				Staging.getConversationPosition(
+					bAmIGrace,	
+					bGraceOnLeft, bGraceOnLeftRef,
+					dist, bOffCenterShared, outwardAngleOffset,
+					objPt, objRot, 
+					otherCharPt, otherWalkToPt, otherWalkToAngleRef, bOtherIsConverseStaging,	// other is grace
+					myPt, myWalkToPt, myWalkToAngleRef,	bIAmConverseStaging);					// i am trip
+			}
+
+			// get the filled-in values out of the ref variables
+			myWalkToAngle = myWalkToAngleRef.f + extraAngleOffset;
+			otherWalkToAngle = otherWalkToAngleRef.f;
+			bGraceOnLeft = bGraceOnLeftRef.b;
+
+			// previous values; these are only useful when bIAmConverseStaging is already true!
+			myPrevWalkToPt.x = prevStagingInfoWME.getTargetX();
+			myPrevWalkToPt.z = prevStagingInfoWME.getTargetZ();
+			myPrevWalkToAngle = prevStagingInfoWME.getTargetRot();
+
+			// if we're already staging to this target,
+			// because the latest call to getConversationPosition adds a bit of randomness to its target,
+			// we actually want to use the original target, if it's virtually the same as the newly computed target
+			// this will prevent subtle unnecessary moving around when we almost reach the target
+			if (bIAmConverseStaging && stagingObjectID == prevStagingInfoWME.getTargetObjectID() &&
+					Staging.getXZDistanceBetweenPoints(myPrevWalkToPt, myWalkToPt) <= 10 &&
+					Math.abs(Staging.normalizeNeg180to180(myPrevWalkToAngle - myWalkToAngle)) < 5) {
+				myWalkToPt.x = myPrevWalkToPt.x;
+				myWalkToPt.z = myPrevWalkToPt.z;
+				myWalkToAngle = myPrevWalkToAngle;
+				//stg StringUtil.println(myName + " keeping original walk target");
+			}
+
+			// assume we need to stage
+			bINeedToStage = true;
+
+			// if we're just starting, put a little delay on it, which helps when both Grace and Trip start walking simultaneously
+			if (!bIAmConverseStaging) {
+				delayBeforeWalking = randGen.nextFloat()*1.0f;
+			}
+
+			// if player is NOT SETTLED and we're close to the player, don't stage -- we're done!
+			if (stagingObjectID == player && playerSettledWME.getB() == false && bINeedToStage &&
+					Staging.getXZDistanceBetweenPoints(myPt, objPt) <= cConverseDist_distant) {
+
+				bINeedToStage = false;
+				//stg StringUtil.println(myName + " not close-staging because player isn't settled");
+			}
+
+			// if we haven't started walking yet, don't bother if we don't really need to go anywhere
+			if (/* !bIAmConverseStaging && */
+					Staging.getXZDistanceBetweenPoints(myPt, myWalkToPt) <= 10 &&
+					Math.abs(Staging.normalizeNeg180to180(myAngle - myWalkToAngle)) < 5) {
+				bINeedToStage = false;
+				//stagingprint StringUtil.println("Converse staging unnecessary for " + myName);
+			}
+
+
+			// if we really are going to stage
+			if (bINeedToStage) {
+
+				// store the values in the shared converseStagingWME
+
+				converseStagingWME.setBGraceOnLeft(bGraceOnLeft);
+
+				if (bAmIGrace) {
+					converseStagingWME.setGraceWalkToX(myWalkToPt.x);
+					converseStagingWME.setGraceWalkToY(myWalkToPt.y);
+					converseStagingWME.setGraceWalkToZ(myWalkToPt.z);
+					converseStagingWME.setGraceWalkToRotY(myWalkToAngle);
+
+					// IMPORTANT: set that we are converse staging, so that bGraceOnLeft won't change under our feet!
+					converseStagingWME.setBIsGraceConverseStaging(true);
+					//stg StringUtil.println("setBIsGraceConverseStaging(true)");
+
+				} else {
+					converseStagingWME.setTripWalkToX(myWalkToPt.x);
+					converseStagingWME.setTripWalkToY(myWalkToPt.y);
+					converseStagingWME.setTripWalkToZ(myWalkToPt.z);
+					converseStagingWME.setTripWalkToRotY(myWalkToAngle);
+
+					// IMPORTANT: set that we are converse staging, so that bGraceOnLeft won't change under our feet!
+					converseStagingWME.setBIsTripConverseStaging(true);
+					//stg StringUtil.println("setBIsTripConverseStaging(true)");
+				}
+			}
+		}
+
+		if (bINeedToStage) {
+			//stagingprint StringUtil.println(myName + " converse myWalkToPt " + myWalkToPt.x + " " + myWalkToPt.z + " angle " + myWalkToAngle + " dist " + Staging.getXZDistanceBetweenPoints(myPt, myWalkToPt) + " anglediff " + Math.abs(Staging.normalizeNeg180to180(myAngle - myWalkToAngle)));
+		}
+	}	
+
+	// fail if we don't need to do this staging
+	// also delete the staging info wme
+	subgoal StopWalkingAndFailIfNeeded(bINeedToStage); 
+
+	mental_act { 
+		assert(bINeedToStage); 
+		StringUtil.println(myName + " starting a staging request CONVERSE objID " + stagingObjectID);
+	}
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, stagingObjectID, myWalkToPt, myWalkToAngle, walkType);
+
+	// walk there!
+	subgoal WalkToPoint(delayBeforeWalking);
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	// record this event in episodic memory
+	subgoal AddEventWME(eEventType_stagingConverse, me, stagingObjectID, 
+						eObjectActivation_none, false, 0, 0, 0.0f);
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request CONVERSE objID " + stagingObjectID); }
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingFace
+// if a FACE staging is requested towards an OBJECT or ROTATION
+// Two staging entry points.
+
+// staging entry point for facing a sprite
+sequential behavior StagingFace(int resourcePriority, int stagingObjectID) {
+	with (property isStagingBodyGoal true) subgoal StagingFace_Body(resourcePriority, stagingObjectID, 0.0f);
+}
+sequential behavior StagingFace(int resourcePriority, int stagingObjectID, float extraAngleOffset) {
+	with (property isStagingBodyGoal true) subgoal StagingFace_Body(resourcePriority, stagingObjectID, extraAngleOffset);
+}
+
+// staging entry point for facing an angle
+sequential behavior StagingFace(int resourcePriority, float targetYRot) {
+	with (property isStagingBodyGoal true) subgoal StagingFace_Body(resourcePriority, targetYRot);
+}
+
+// facing a sprite
+sequential behavior StagingFace_Body(int resourcePriority, int stagingObjectID, float extraAngleOffset) {
+	precondition {	(ObjectPositionWME objectID == stagingObjectID  x :: objXPos   z :: objZPos) 
+					(ObjectPositionWME objectID == me  x :: myXPos   z :: myZPos) 
+					(ObjectRotationWME objectID == me  y :: myYRot) }
+
+	Point3D walkToPt = new Point3D();
+	float targetYRot;
+	float offset;
+	float diff;
+	boolean bINeedToStage;
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the legsBody resource at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+
+		// for turning in place, we walk to our current position, but with a different angle
+		walkToPt.x = myXPos; 
+		walkToPt.y = 0.0f; 
+		walkToPt.z = myZPos;
+
+		// set the angle
+		targetYRot = Staging.getXZAngleBetweenPoints(new Point3D(objXPos, 0.0f, objZPos), walkToPt); 
+		targetYRot += 180.0f;  
+		targetYRot += extraAngleOffset;
+
+		// do we need to bother?
+		diff = Math.abs(Staging.normalizeNeg180to180(targetYRot - myYRot));
+		//StringUtil.println("targetYRot "+targetYRot+" myYRot "+myYRot+" diff "+diff);
+		if (diff <= 30.0f) bINeedToStage = false;	// the diff can be large, because torso tracking tends to compenstate
+		else bINeedToStage = true;
+
+		// add random offset between -10 and 10
+		offset = (randGen.nextFloat()*20.0f) - 10.0f;	
+		targetYRot += offset;  
+
+		StringUtil.println("Starting a staging request FACE objID " + stagingObjectID + " to rot " + targetYRot);
+		//stagingprint if (!bINeedToStage) StringUtil.println("IGNORING staging face -- unnecessary, already close enough");
+	}
+
+	// fail if we don't need to do this staging
+	// also delete the staging info wme
+	subgoal StopWalkingAndFailIfNeeded(bINeedToStage); 
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, stagingObjectID, walkToPt, targetYRot, eWalkType_normal);
+
+	// perform the face staging behavior
+	// for turning in place, we walk to our current position, but with a different angle
+	subgoal WalkToPoint();
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request FACE rot " + targetYRot); }
+}
+
+
+// facing an angle
+sequential behavior StagingFace_Body(int resourcePriority, float targetYRot) {
+	precondition {	(ObjectPositionWME objectID == me  x :: myXPos   z :: myZPos) 
+					(ObjectRotationWME objectID == me  y :: myYRot) }
+
+	Point3D walkToPt = new Point3D();
+	float diff;
+	boolean bINeedToStage;
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the legsBody resource at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+
+		// for turning in place, we walk to our current position, but with a different angle
+		walkToPt.x = myXPos; 
+		walkToPt.y = 0.0f; 
+		walkToPt.z = myZPos;
+
+		// do we need to bother?
+		diff = Math.abs(Staging.normalizeNeg180to180(targetYRot - myYRot));
+		//StringUtil.println("targetYRot "+targetYRot+" myYRot "+myYRot+" diff "+diff);
+		if (diff <= 30.0f) bINeedToStage = false;	// the diff can be large, because torso tracking tends to compenstate
+		else bINeedToStage = true;
+
+		StringUtil.println("Starting a staging request FACE rot " + targetYRot);
+		//stagingprint if (!bINeedToStage) StringUtil.println("IGNORING staging face -- unnecessary, already close enough");
+	}
+
+	// fail if we don't need to do this staging
+	// also delete the staging info wme
+	subgoal StopWalkingAndFailIfNeeded(bINeedToStage); 
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, eSpriteID_NOTASPRITE, walkToPt, targetYRot, eWalkType_normal);
+
+	// perform the face staging behavior
+	// for turning in place, we walk to our current position, but with a different angle
+	subgoal WalkToPoint();
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request FACE rot " + targetYRot); }
+}
+
+
+// ###############
+sequential behavior TryToKeepFacingSprite(int resourcePriority, int spriteID) {
+
+	// wait a bit
+	subgoal WaitFor(1.0f, 2.0f);	
+
+	// face the sprite if we need to
+	with (ignore_failure) subgoal TryToKeepFacingSprite_Body(resourcePriority, spriteID);
+}
+
+// do this if the staging object is not within 45 degrees
+sequential behavior TryToKeepFacingSprite_Body(int resourcePriority, int spriteID) {
+	precondition {	myPosWME = (ObjectPositionWME objectID == me  x :: myX  z :: myZ)		
+					myRotWME = (ObjectRotationWME objectID == me  y :: myRot)
+					stagingObjectPosWME = (ObjectPositionWME objectID == spriteID  x :: objX  z :: objZ) 
+					(Staging.isPointWithinCharCone(
+									objX, objZ, 
+									myX, myZ, 
+									myRot,
+									45.0f, 0.0f, 9999.0f) == false) }
+
+	//mental_act { StringUtil.println(myName + " TryToKeepFacingSprite"); }
+
+	// face the sprite
+	with (ignore_failure, property isStagingGoal true) spawngoal StagingFace(resourcePriority, spriteID);
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingObjectPickup
+sequential behavior StagingObjectPickup(int resourcePriority, int stagingObjectID, int whichArm, int walkType) {		
+	mental_act { StringUtil.println("StagingObjectPickup " + resourcePriority + " " + stagingObjectID + " " + whichArm + " " + walkType); }
+	with (property isStagingBodyGoal true) 
+		subgoal StagingObjectPickup_Body(resourcePriority, stagingObjectID, whichArm, walkType);
+}
+
+// do nothing if already holding an object in the requested hand
+sequential behavior StagingObjectPickup_Body(int resourcePriority, int stagingObjectID, int whichArm, int walkType) {		
+	precondition {	(whichArm == eGestureBodyPartIndex_armL)
+					(HeldObjectWME	characterID == me  attachPointID == g_leftHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Already holding an object -- ignoring staging request OBJECTPICKUP arm " + whichArm); }
+}
+sequential behavior StagingObjectPickup_Body(int resourcePriority, int stagingObjectID, int whichArm, int walkType) {		
+	precondition {	(whichArm == eGestureBodyPartIndex_armR)
+					(HeldObjectWME	characterID == me  attachPointID == g_rightHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Already holding an object -- ignoring staging request OBJECTPICKUP arm " + whichArm); }
+}
+
+sequential behavior StagingObjectPickup_Body(int resourcePriority, int stagingObjectID, int whichArm, int walkType) {		
+	precondition {	(ObjectPickupPositionWME objectID == stagingObjectID  x :: walkToX  y :: walkToY  z :: walkToZ)
+					(ObjectPickupRotationWME objectID == stagingObjectID  y :: walkToAngle) }
+	specificity 1;
+
+	Point3D walkToPt = new Point3D();
+	int pickupArmGesture;
+	int holdArmGesture;
+	int armResourceID;
+
+	// for debugging
+	subgoal StagingObjectPickup_Body_failIfIllegalCoordinates(stagingObjectID, walkToX, walkToZ);
+
+	mental_act { 
+		StringUtil.println("Starting a staging request OBJECTPICKUP objID " + stagingObjectID);
+	
+		walkToPt.x = walkToX;
+		walkToPt.y = walkToY;
+		walkToPt.z = walkToZ;
+
+		if (whichArm == eGestureBodyPartIndex_armL) {
+			pickupArmGesture = g_armLGesture_objectGrab;
+			holdArmGesture = g_armLGesture_objectHold;
+			armResourceID = eBodyResourceID_armL;
+		} else if (whichArm == eGestureBodyPartIndex_armR) {
+			pickupArmGesture = g_armRGesture_objectGrab;
+			holdArmGesture = g_armRGesture_objectHold;
+			armResourceID = eBodyResourceID_armR;
+ 		} else {
+			assert false : ("bad whichArm in StagingObjectPickup_Body()"); 
+		}
+	} 
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(armResourceID, resourcePriority, eBodyResourceAction_fail);
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, stagingObjectID, walkToPt, walkToAngle, walkType);
+
+	// 1. walk to the object
+	subgoal StagingObjectPickup_Body_WithContextCondition(resourcePriority, stagingObjectID, walkToPt, walkToAngle, walkType);
+
+	// 2. pickup the object, and hold it
+	with (ignore_failure) subgoal DoGaze(resourcePriority, eGazeType_normal, stagingObjectID);
+	subgoal DoPickupObjGesture(-1, whichArm, pickupArmGesture, true, 
+								stagingObjectID);
+
+	// 3. either do holdarm gesture, or drop arm, depending on success of pickup
+	subgoal DoHoldObjGesture(whichArm, holdArmGesture, stagingObjectID);
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request OBJECTPICKUP objID " + stagingObjectID); }
+}
+
+
+
+
+// ######
+// for debugging
+sequential behavior StagingObjectPickup_Body_failIfIllegalCoordinates(int objID, float walkToX, float walkToZ) {
+	precondition { (walkToX < -1000.0f || walkToX > 1000.0f || 
+					walkToZ < -1000.0f || walkToZ > 1000.0f) }
+	specificity 2;
+	mental_act { StringUtil.println("########"); }
+	mental_act { StringUtil.println(myName + " StagingObjectPickup_Body_failIfIllegalCoordinates objID" +objID+ " x " +walkToX+ " z " +walkToZ); }
+	mental_act { StringUtil.println("########"); }
+	fail_step;
+}
+sequential behavior StagingObjectPickup_Body_failIfIllegalCoordinates(int objID, float walkToX, float walkToZ) {
+	specificity 1;
+	succeed_step;
+}
+
+// ###############
+// in case a bad parameter is passed to StagingObjectPickup, let's assert fail instead of behavior fail
+// cannot just do specificity2/1 solution, because if a step fails in the above, we don't want this assert to happen
+sequential behavior StagingObjectPickup_Body(int resourcePriority, int stagingObjectID) {		
+	precondition {	!(ObjectPickupPositionWME objectID == stagingObjectID) }
+	mental_act { StringUtil.println("### ERROR: StagingObjectPickup cannot find stagingObjectID == " + stagingObjectID); }
+	mental_act { assert(false); }
+}
+sequential behavior StagingObjectPickup_Body(int resourcePriority, int stagingObjectID) {		
+	precondition {	!(ObjectPickupRotationWME objectID == stagingObjectID) }
+	mental_act { StringUtil.println("### ERROR: StagingObjectPickup cannot find stagingObjectID == " + stagingObjectID); }
+	mental_act { assert(false); }
+}
+
+// we need a separate behavior for this, for a context condition
+sequential behavior StagingObjectPickup_Body_WithContextCondition(int resourcePriority, int stagingObjectID, Point3D walkToPt, float walkToAngle, int walkType) {
+	context_condition { (ObjectPickupPositionWME objectID == stagingObjectID  x == walkToPt.x  z == walkToPt.z) }
+	subgoal WalkToPoint();
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingObjectDrop
+// if sig changes, update PutDownHeldObject_Body()
+sequential behavior StagingObjectDrop(int resourcePriority, int whichArm, int dropOnObjectID, int surfaceID, int walkType) {		
+	with (property isStagingBodyGoal true) 
+		subgoal StagingObjectDrop_Body(resourcePriority, whichArm, dropOnObjectID, surfaceID, walkType);
+}
+
+// do nothing if not holding an object in the requested hand
+sequential behavior StagingObjectDrop_Body(int resourcePriority, int whichArm, int dropOnObjectID, int surfaceID, int walkType) {		
+	precondition {	(whichArm == eGestureBodyPartIndex_armL)
+					!(HeldObjectWME	characterID == me  attachPointID == g_leftHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Not holding an object -- ignoring staging request OBJECTDROP arm " + whichArm); }
+}
+sequential behavior StagingObjectDrop_Body(int resourcePriority, int whichArm, int dropOnObjectID, int surfaceID, int walkType) {		
+	precondition {	(whichArm == eGestureBodyPartIndex_armR)
+					!(HeldObjectWME	characterID == me  attachPointID == g_rightHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Not holding an object -- ignoring staging request OBJECTDROP arm " + whichArm); }
+}
+
+sequential behavior StagingObjectDrop_Body(int resourcePriority, int whichArm, int dropOnObjectID, int surfaceID, int walkType) {		
+	precondition {	(ObjectPickupPositionWME objectID == dropOnObjectID  x :: xDropPos  y :: yDropPos  z :: zDropPos)
+					dropOnObjectRotWME = (ObjectPickupRotationWME objectID == dropOnObjectID  y :: walkToAngle)	}
+	specificity 1;
+
+	Point3D walkToPt = new Point3D();
+	int armResourceID;
+	int armGesture;
+
+	mental_act { 
+		if (whichArm == eGestureBodyPartIndex_armL) {
+			armResourceID = eBodyResourceID_armL;
+			armGesture = g_armLGesture_objectDrop;
+		} else if (whichArm == eGestureBodyPartIndex_armR) {
+			armResourceID = eBodyResourceID_armR;
+			armGesture = g_armRGesture_objectDrop;
+ 		} else {
+			assert false : ("bad whichArm in StagingObjectDrop_Body()"); 
+		}
+	}
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(armResourceID, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_gazeTorso, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+		StringUtil.println("Starting a staging request OBJECTDROP arm " + whichArm + " dropOnObjectID " + dropOnObjectID + " surfaceID " + surfaceID);
+		walkToPt.x = xDropPos;
+		walkToPt.y = yDropPos;
+		walkToPt.z = zDropPos;
+	}	
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, dropOnObjectID, walkToPt, walkToAngle, walkType);
+
+	// 1. walk to the dropOnObject
+	subgoal WalkToPoint();
+
+	// 2. drop the object
+	with (ignore_failure) subgoal DoGaze(resourcePriority, eGazeType_headAndEyesOnly, dropOnObjectID);
+	subgoal DoPutdownObjGesture(-1, whichArm, armGesture, false,
+								dropOnObjectID, surfaceID, 0.0f, 0.0f, 0.0f, ePutdownObjParam_none);
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request OBJECTDROP arm " + whichArm); }
+}
+
+// ###############
+// in case a bad parameter is passed to StagingObjectDrop, let's assert fail instead of behavior fail
+// cannot just do specificity2/1 solution, because if a step fails in the above, we don't want this assert to happen
+sequential behavior StagingObjectDrop_Body(int resourcePriority, int stagingObjectID, int dropOnObjectID, int surfaceID) {		
+	precondition {	!(ObjectPickupPositionWME objectID == dropOnObjectID)	}
+	mental_act { StringUtil.println("### ERROR: StagingObjectDrop startup error fixme"); }
+	mental_act { assert(false); }
+}
+sequential behavior StagingObjectDrop_Body(int resourcePriority, int stagingObjectID, int dropOnObjectID, int surfaceID) {		
+	precondition {	!(ObjectPickupRotationWME objectID == dropOnObjectID)	}
+	mental_act { StringUtil.println("### ERROR: StagingObjectDrop startup error fixme"); }
+	mental_act { assert(false); }
+}
+
+// ###############
+// STAGING ENTRY POINT: StagingObjectOffer
+sequential behavior StagingObjectOffer(int resourcePriority, int recipientID, int walkType) {		
+	with (property isStagingBodyGoal true) 
+		subgoal StagingObjectOffer_Body(resourcePriority, recipientID, walkType);
+}
+
+// do nothing if not holding an object in my offer-object hand 
+sequential behavior StagingObjectOffer_Body(int resourcePriority, int recipientID, int walkType) {		
+	precondition {	(g_objArm == eGestureBodyPartIndex_armL)
+					!(HeldObjectWME	characterID == me  attachPointID == g_leftHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Not holding an object -- ignoring staging request OBJECTOFFER arm " + g_objArm); }
+}
+sequential behavior StagingObjectOffer_Body(int resourcePriority, int recipientID, int walkType) {		
+	precondition {	(g_objArm == eGestureBodyPartIndex_armR)
+					!(HeldObjectWME	characterID == me  attachPointID == g_rightHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Not holding an object -- ignoring staging request OBJECTOFFER arm " + g_objArm); }
+}
+
+sequential behavior StagingObjectOffer_Body(int resourcePriority, int recipientID, int walkType) {		
+	specificity 1;
+
+	int armResourceID;
+	int offerArmGesture;
+	int holdArmGesture;
+	mental_act { 
+		if (g_objArm == eGestureBodyPartIndex_armL) {
+			armResourceID = eBodyResourceID_armL;
+			offerArmGesture = g_armLGesture_objectOffer;
+			holdArmGesture = g_armLGesture_objectHold;
+		} else {
+			armResourceID = eBodyResourceID_armR;
+			offerArmGesture = g_armRGesture_objectOffer;
+			holdArmGesture = g_armRGesture_objectHold;
+		}
+	} 
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(armResourceID, resourcePriority, eBodyResourceAction_fail);
+
+
+	// 1. first, go to the recipient
+	// if it fails (ie, it does not match because it does not need to perform), continue
+	// we DON'T do the isStagingBodyGoal here, because this behavior itself is the staging body!
+	with (/*property isStagingBodyGoal true, */ignore_failure) 
+		subgoal StagingConverse_Body(resourcePriority, recipientID, eConverseType_offCenterShared, cConverseDist_veryClose, walkType, 0.0f);
+
+	with (ignore_failure) subgoal StagingObjectOffer_Body_p2(offerArmGesture, holdArmGesture);
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request OBJECTOFFER recipientID " + recipientID); }
+}
+
+sequential behavior StagingObjectOffer_Body_p2(int offerArmGesture, int holdArmGesture) {		
+	// don't bother if the player is already holding something, e.g. player took grace's drink
+	// LongTermBehavior_FixDrink_Body will put the drink down on the bar
+	precondition { !(HeldObjectWME characterID == eSpriteID_player) }	
+
+	// 2. spawn a beatgoal -- each character has their own version of this
+	// APS 11.15.04: do this at higher priority than handlerDA,
+	// to be sure it starts first and doesn't abort any important mixins just starting
+	with (ignore_failure, priority 51) subgoal StagingObjectOffer_Mixin();
+
+	// 3. offer the object
+	subgoal DoGesture(-1, g_objArm, offerArmGesture, false);
+
+	// 4. wait for object to be taken
+	subgoal WaitForOfferedObjectToBeTaken(holdArmGesture);
+}
+
+
+// ###############
+parallel behavior WaitForOfferedObjectToBeTaken(int holdArmGesture) {		
+	subgoal WaitForOfferedObjectToBeTaken_Body(holdArmGesture);
+
+	//fixme: probably need something like the following...
+	//with (ignore_failure, property isStagingGoal true) spawngoal StagingFace(40, player);
+	//with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+}
+
+sequential behavior WaitForOfferedObjectToBeTaken_Body(int holdArmGesture) {		
+	with (ignore_failure) subgoal WaitForOfferedObjectToBeTaken_BodyStuff();
+	spawngoal EventuallyTurnOffIgnoreThanks(6);	// if the drink is taken, shorten the "thank" ignore to only 6 secs from now
+	subgoal WaitForOfferedObjectToBeTaken_RetractHand(holdArmGesture);
+}
+
+// wait until our hand is empty, or a timeout
+parallel behavior WaitForOfferedObjectToBeTaken_BodyStuff() {
+	number_needed_for_success 1;
+	with (success_test { !(HeldObjectWME	characterID == me  
+											attachPointID == g_objHand) } ) wait;
+	subgoal WaitFor(10);	
+}
+
+// if object is still in our hand, retract to still-held
+sequential behavior WaitForOfferedObjectToBeTaken_RetractHand(int holdArmGesture) {
+	precondition { (HeldObjectWME	characterID == me  
+									attachPointID == g_objHand) }
+	specificity 2;
+	mental_act { StringUtil.println("WaitForOfferedObjectToBeTaken_RetractHand still-held"); }
+	subgoal DoGesture(-1, g_objArm, holdArmGesture, false);	
+}
+// otherwise lower the arm
+sequential behavior WaitForOfferedObjectToBeTaken_RetractHand(int holdArmGesture) {
+	specificity 1;
+	mental_act { StringUtil.println("WaitForOfferedObjectToBeTaken_RetractHand"); }
+
+	// APS 2.11.05: The animEngine has a hack to suppress accidentally dropping objects,
+	// and it blocks the g_armGesture_default script; so call this with an explicit script
+	//subgoal DoGesture(-1, g_objArm, g_armGesture_default, false);	
+	subgoal DoGesture(-1, g_objArm, g_armObjGesture_objectOfferDone, false);	
+
+	mental_act { StringUtil.println("WaitForOfferedObjectToBeTaken_RetractHand done"); }
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingObjectTake
+sequential behavior StagingObjectTake(int resourcePriority, int giverID, int walkType) {		
+	with (property isStagingBodyGoal true) 
+		subgoal StagingObjectTake_Body(resourcePriority, giverID, walkType);
+}
+
+// do nothing if already holding an object in my offer-taking hand 
+sequential behavior StagingObjectTake_Body(int resourcePriority, int giverID, int walkType) {		
+	precondition {	(g_objArm == eGestureBodyPartIndex_armL)
+					(HeldObjectWME	characterID == me  attachPointID == g_leftHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Already holding an object -- ignoring staging request OBJECTTAKE arm " + g_objArm); }
+}
+sequential behavior StagingObjectTake_Body(int resourcePriority, int giverID, int walkType) {		
+	precondition {	(g_objArm == eGestureBodyPartIndex_armR)
+					(HeldObjectWME	characterID == me  attachPointID == g_rightHand) }
+	specificity 2;
+	subgoal DeleteStagingInfoWME();
+	mental_act { StringUtil.println("Already holding an object -- ignoring staging request OBJECTTAKE arm " + g_objArm); }
+}
+
+sequential behavior StagingObjectTake_Body(int resourcePriority, int giverID, int walkType) {		
+	specificity 1;
+
+	int armResourceID;
+	int offerArmGesture;
+	int holdArmGesture;
+	mental_act { 
+		if (g_objArm == eGestureBodyPartIndex_armL) {
+			armResourceID = eBodyResourceID_armL;
+			offerArmGesture = g_armLGesture_objectOffer;
+			holdArmGesture = g_armLGesture_objectHold;
+		} else {
+			armResourceID = eBodyResourceID_armR;
+			offerArmGesture = g_armRGesture_objectOffer;
+			holdArmGesture = g_armRGesture_objectHold;
+		}
+	} 
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(armResourceID, resourcePriority, eBodyResourceAction_fail);
+
+	// 1. first, go to the giver
+	// if it fails (ie, it does not match because it does not need to perform), continue
+	// we DON'T do the isStagingBodyGoal here, because this behavior itself is the staging body!
+	with (/*property isStagingBodyGoal true,*/ ignore_failure) 
+		subgoal StagingConverse_Body(resourcePriority, giverID, eConverseType_offCenterShared, cConverseDist_veryClose, walkType, 0.0f);
+
+	// 2. offer our hand to the giver
+	subgoal DoGaze(resourcePriority, eGazeType_normal, giverID);
+	subgoal DoGesture(-1, g_objArm, offerArmGesture, false);
+
+	// 3. wait for object to be given
+	subgoal WaitForOfferedObjectToBeGiven(holdArmGesture);
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request OBJECTTAKE giverID " + giverID); }
+}
+
+
+// ###############
+parallel behavior WaitForOfferedObjectToBeGiven(int holdArmGesture) {		
+	subgoal WaitForOfferedObjectToBeGiven_Body(holdArmGesture);
+
+	//fixme: probably need something like the following...
+	//with (ignore_failure, property isStagingGoal true) spawngoal StagingFace(40, player);
+	//with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+}
+
+sequential behavior WaitForOfferedObjectToBeGiven_Body(int holdArmGesture) {		
+	with (ignore_failure) subgoal WaitForOfferedObjectToBeGiven_BodyStuff();
+	subgoal WaitForOfferedObjectToBeGiven_RetractHand(holdArmGesture);
+}
+
+// wait until our hand is full, or a timeout
+parallel behavior WaitForOfferedObjectToBeGiven_BodyStuff() {
+	number_needed_for_success 1;
+	with (success_test { (HeldObjectWME	characterID == me  
+										attachPointID == g_objHand) } ) wait;
+	subgoal WaitFor(10);	
+}
+
+// if object is in our hand, retract to held
+sequential behavior WaitForOfferedObjectToBeGiven_RetractHand(int holdArmGesture) {
+	precondition { (HeldObjectWME	characterID == me  
+									attachPointID == g_objHand) }
+	specificity 2;
+	subgoal DoGesture(-1, g_objArm, holdArmGesture, false);	
+}
+// otherwise lower the arm
+sequential behavior WaitForOfferedObjectToBeGiven_RetractHand(int holdArmGesture) {
+	specificity 1;
+	// APS 2.11.05: The animEngine has a hack to suppress accidentally dropping objects,
+	// and it blocks the g_armGesture_default script; so call this with an explicit script
+	//subgoal DoGesture(-1, g_objArm, g_armGesture_default, false);	
+	subgoal DoGesture(-1, g_objArm, g_armObjGesture_objectOfferDone, false);	
+}
+
+
+// ###############
+// STAGING ENTRY POINT: StagingOpenDoor
+sequential behavior StagingOpenDoor(int resourcePriority, int stagingObjectID, int walkType) {		
+	with (property isStagingBodyGoal true) subgoal StagingOpenDoor_Body(resourcePriority, stagingObjectID, walkType);
+}
+
+sequential behavior StagingOpenDoor_Body(int resourcePriority, int stagingObjectID, int walkType) {		
+
+	Point3D walkToPt = new Point3D();
+	float walkToAngle;
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// fixme: check that arm is available to the gesture!
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+		StringUtil.println("Starting a staging request OPENDOOR objID " + stagingObjectID);
+	
+		//fixme: use stagingObjectID to know which door to open; currently hardwired for frontdoor
+		walkToPt.x = -154.0f; //stagingObjectPosWME.getX();
+		walkToPt.y = -5.0f; //stagingObjectPosWME.getY();
+		walkToPt.z = 126.0f; //stagingObjectPosWME.getZ();
+
+		walkToAngle = 218.0f; //stagingObjectRotWME.getY();
+	}	
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, stagingObjectID, walkToPt, walkToAngle, walkType);
+
+	// 1. walk to the door
+	subgoal WalkToPoint();
+
+	// 2. open the door
+	subgoal DoGesture(-1, eGestureBodyPartIndex_armR, g_armRGesture_openDoor, true);
+	//fixme remove when grace has door open anim!
+	with (ignore_failure) subgoal StagingOpenDoor_gracehack();
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request OPENDOOR objID " + stagingObjectID); }
+}
+
+sequential behavior StagingOpenDoor_gracehack() {
+	precondition { (me == grace) }
+	act setAnimEngineInfo(eSetAnimEngineInfo_magicallyOpenDoor, grace);
+}
+sequential behavior StagingCloseDoor_gracehack() {
+	precondition { (me == grace) }
+	act setAnimEngineInfo(eSetAnimEngineInfo_magicallyCloseDoor, grace);
+}
+
+// ###############
+// STAGING ENTRY POINT: StagingCloseDoor
+// if sig changes, update bGGreetsPT1_GreetP_closeDoorIfNotAlready()
+sequential behavior StagingCloseDoor(int resourcePriority, int stagingObjectID, int walkType) {		
+	with (property isStagingBodyGoal true) subgoal StagingCloseDoor_Body(resourcePriority, stagingObjectID, walkType);
+}
+
+sequential behavior StagingCloseDoor_Body(int resourcePriority, int stagingObjectID, int walkType) {		
+
+	Point3D walkToPt = new Point3D();
+	float walkToAngle;
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// fixme: check that arm is available to the gesture!
+
+	// grab the resources at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail);
+
+	mental_act { 
+		StringUtil.println("Starting a staging request CLOSEDOOR objID " + stagingObjectID);
+	
+		//fixme: use stagingObjectID to know which door to open; currently hardwired for frontdoor
+		walkToPt.x = -174.0f; //stagingObjectPosWME.getX();
+		walkToPt.y = -5.0f; //stagingObjectPosWME.getY();
+		walkToPt.z = 68.0f; //stagingObjectPosWME.getZ();
+
+		walkToAngle = 226.0f; //stagingObjectRotWME.getY();
+	}	
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, stagingObjectID, walkToPt, walkToAngle, walkType);
+
+	// 1. walk to the door
+	subgoal WalkToPoint();
+
+	// 2. close the door
+	subgoal DoGesture(-1, eGestureBodyPartIndex_armR, g_armRGesture_closeDoor, true);
+	//fixme remove when grace has door open anim!
+	with (ignore_failure) subgoal StagingCloseDoor_gracehack();
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+
+	//stagingprint mental_act { StringUtil.println(myName + " finished staging request CLOSEDOOR objID " + stagingObjectID); }
+}
+
+
+
+// ###############
+// STAGING ENTRY POINT: StagingGrabPlayer
+sequential behavior StagingGrabPlayer(int resourcePriority, int walkType) {
+	subgoal StagingGrabPlayer_Body(resourcePriority, walkType);
+	mental_act { StringUtil.println("Finished GRABPLAYER"); }
+}
+
+sequential behavior StagingGrabPlayer_Body(int resourcePriority, int walkType) {
+
+	// grab the legsBody resource at the requested priority; this will fail if it cannot get the resource
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_legsBody, resourcePriority, eBodyResourceAction_fail);
+
+	// keep trying until successful
+	with (persistent when_fails) subgoal StagingGrabPlayer_BodyStuff(resourcePriority, walkType);
+
+	// ## GRAB THE PLAYER
+	// trip should be offscreen at this point
+	// this act will jumpcut trip into position and abruptly stop any locomotion
+	act setAnimEngineInfo(eSetAnimEngineInfo_tripGrabsPlayer, 0);
+	subgoal SetBeatFlagInStoryMemory("grabbed player");
+	with (ignore_failure) spawngoal DoGesture(70, eGestureBodyPartIndex_armL, etripScript_layer_armL_propose1_hold, true);
+	with (ignore_failure) spawngoal DoGesture(70, eGestureBodyPartIndex_armR, etripScript_layer_armR_question1_hold, true);
+	subgoal WaitFor(2);	// wait for the player to get pulled towards trip
+
+	// finished
+	subgoal DeleteStagingInfoWME();
+}
+
+sequential behavior StagingGrabPlayer_BodyStuff(int resourcePriority, int walkType) {
+	precondition {	(ObjectPositionWME objectID == player	x :: playerX   z :: playerZ) 
+					(ObjectRotationWME objectID == player	y :: playerRotY) }
+
+	// target a point behind the player
+	Point3D targetPos;
+	mental_act { 
+		targetPos = Staging.pointAtAngleAndDist(50.0f, playerRotY + 180.0f, 
+												new Point3D(playerX, 0.0f, playerZ));
+	}
+
+	mental_act { StringUtil.println(myName + " starting a staging request GRABPLAYER"); }
+
+	// set our staging info -- useful state for ourselves and others
+	subgoal SetStagingInfoWME(resourcePriority, eSpriteID_NOTASPRITE, targetPos, DONTCAREANGLE, walkType);
+
+	// in case we're about to abort a current walk (due to the resource request below), 
+	// don't come to a stop first
+	act setAnimEngineInfo(eSetAnimEngineInfo_ignoreNextWalkAbort, me);
+
+	// this will fail if retargeting needs to occur, because we couldn't get behind the player
+	subgoal StagingGrabPlayer_BodyStuff_par();
+}
+
+parallel behavior StagingGrabPlayer_BodyStuff_par() {
+	number_needed_for_success 1;
+	subgoal StagingGrabPlayer_BodyStuff_walkAndFail();
+	with (priority_modifier 1) subgoal StagingGrabPlayer_BodyStuff_positionTest();	
+}
+
+// if we get to the end of this walk without the test succeeding, fail
+sequential behavior StagingGrabPlayer_BodyStuff_walkAndFail() {
+	subgoal WalkToPoint();
+	fail_step;
+}
+
+// wait until trip is not visible and close enough
+sequential behavior StagingGrabPlayer_BodyStuff_positionTest() {
+	with (success_test {
+				(ObjectPositionWME objectID == me 		x :: myX		z :: myZ)
+				(ObjectPositionWME objectID == player 	x :: playerX	z :: playerZ)
+				(ObjectRotationWME objectID == player	y :: playerRotY)
+
+				// is trip NOT visible to the player
+				(Staging.isPointWithinCharCone(myX, myZ, playerX, playerZ, playerRotY, 90.0f, 0.0f, 9999.0f) == false) 
+
+				// is trip somewhat close to the player
+				(Staging.getXZDistanceBetweenPoints(myX, myZ, playerX, playerZ) < 200.0f) } ) wait; 
+
+	mental_act { StringUtil.println(myName + " close enough to grab player"); }
+}
+
+
+
+// ###############
+// fail if we don't need to do this staging (if bINeedToStage == false)
+// also delete the staging info wme
+sequential behavior StopWalkingAndFailIfNeeded(boolean bINeedToStage) {
+	precondition { (bINeedToStage == false) }
+	specificity 2;
+	mental_act { StringUtil.println(myName + " not performing staging request"); }
+	subgoal DeleteStagingInfoWME();
+	fail_step;
+}
+
+// otherwise just succeed
+sequential behavior StopWalkingAndFailIfNeeded(boolean bINeedToStage) {
+	precondition { (bINeedToStage == true) }
+	specificity 1;
+	succeed_step;						 
+}
+
+
+
+// ###############
+// fixme: do something here
+sequential behavior LowerArmsBeforeWalkingFixme() {
+	succeed_step;
+}
+
+
+
+// ---------------------------------------------
+
+
+
+
+// ###############
+sequential behavior WalkToPoint(float delayBeforeWalking) { 
+	subgoal WaitFor(delayBeforeWalking);
+	subgoal WalkToPoint();
+}
+
+sequential behavior WalkToPoint() { 
+
+	// lower arms before walking
+	spawngoal LowerArmsBeforeWalkingFixme();	
+
+	subgoal WalkToPoint_Body();
+}
+
+
+// ###############
+// first check if we're DONE walking (higher specificity)
+
+// version where we don't care about the angle, targetRot == DONTCAREANGLE
+sequential behavior WalkToPoint_Body() { 
+	precondition {	(StagingInfoWME targetX :: targetX  targetZ :: targetZ  targetRot :: targetRot)
+					(ObjectPositionWME objectID == me  x == targetX  z == targetZ) 
+					(targetRot == DONTCAREANGLE) }
+	specificity 2;
+	//stagingprint mental_act { StringUtil.println(myName + " finished walk at x " + targetX + " z " + targetZ ); }
+	succeed_step;						 
+}
+
+// version where we care about the angle
+sequential behavior WalkToPoint_Body() {
+	precondition {	(StagingInfoWME targetX :: targetX  targetZ :: targetZ  targetRot :: targetRot)
+					(ObjectPositionWME objectID == me  x == targetX  z == targetZ) 
+					(ObjectRotationWME objectID == me  y :: myYRotation)	
+					// compare NORMALIZED angles
+					(Staging.normalize0to360(myYRotation) == Staging.normalize0to360(targetRot)) 
+	}
+	specificity 2;
+	//stagingprint mental_act { StringUtil.println(myName + " finished walk at x " + targetX + " z " + targetZ ); }
+	succeed_step;						 
+}
+
+
+// ###############
+// otherwise (lower specificity), take a step, then recursively call WalkToPoint_Body
+sequential behavior WalkToPoint_Body() {
+	precondition {	(StagingInfoWME	targetX :: targetX  
+							targetZ :: targetZ  
+							targetRot :: targetRot)
+					(ObjectPositionWME objectID == me  x :: curX  z :: curZ) 
+					(ObjectRotationWME objectID == me  y :: curYRotation) }
+
+	specificity 1;
+
+	/* //stg
+	mental_act { StringUtil.println(myName + " WalkToPoint_Body take a step towards x " + 
+										targetX + " z " + targetZ + " angle " + targetRot +
+										" dist " + Staging.getXZDistanceBetweenPoints(curX, curZ, targetX, targetZ) + 
+										" anglediff " + Math.abs(Staging.normalizeNeg180to180(curYRotation - targetRot))); } 
+	*/
+
+	// take a step
+	with (priority 70) subgoal WalkStep();
+
+	// when step is done, recursively call self to take another step
+	subgoal WalkToPoint_Body();
+}
+
+
+// ###############
+// take a step -- but if NOT towards player
+parallel behavior WalkStep() {
+	precondition {	(StagingInfoWME	targetObjectID != player
+							targetX :: targetX  
+							targetZ :: targetZ  
+							targetRot :: targetRot						
+							walkType :: walkType) }
+
+	specificity 2;
+
+	Point3D computedTargetPos = new Point3D();
+
+	// computedTargetPos gets FILLED IN by the walk act, with the actual final target that walk step will take us!
+	// small fixme: we don't need computedTargetPos anymore...
+	act walk(targetX, 0.0, targetZ, targetRot, walkType, computedTargetPos);
+}
+
+
+// ###############
+// take a step towards PLAYER
+parallel behavior WalkStep() {
+	precondition {	(StagingInfoWME	targetObjectID == player
+							targetX :: targetX  
+							targetZ :: targetZ  
+							targetRot :: targetRot
+							walkType :: walkType) }
+	specificity 2;
+
+	//fixme: instead of number_needed_for_success, 
+	// I want to use with (effect_only) on the last two steps here, 
+	// but apparently effect_only also causes an ignore_failure!  which I don't want.
+	number_needed_for_success 2;
+
+	Point3D computedTargetPos = new Point3D();
+	boolean bIAmOnlyTurningInPlace;	
+	with (priority_modifier 2) mental_act { bIAmOnlyTurningInPlace = false; }
+
+	// computedTargetPos gets FILLED IN by the walk act, with the actual final target that walk step will take us!
+	// small fixme: we don't need computedTargetPos anymore...
+	with (priority_modifier 1) act walk(targetX, 0.0, targetZ, targetRot, walkType, computedTargetPos);
+
+	// set a flag in StagingInfoWME if the player moved from its original
+	subgoal WalkStep_MonitorIfPlayerMoved();
+
+	// test if we should abort the walkstep
+	// we don't put this in a context condition in this behavior,
+	// because we want to be sure the walk act starts, so we can properly abort it if need be
+	// otherwise this behavior may fail without actually aborting the walk act, which the animEngine needs
+	subgoal WalkStep_AbortIfPlayerMoved(bIAmOnlyTurningInPlace);
+}
+
+
+
+// ###############
+// if walking failed, because the player was moving and we were close by
+sequential behavior WalkStep() {
+	specificity 1;
+	mental_act { 
+		//StringUtil.println(" "); 
+		//stagingprint StringUtil.println(myName + " aborted walk because player moved! try to retarget after a short delay"); 
+		//StringUtil.println(" "); 
+	}
+
+	subgoal WaitFor(3);
+
+	// restart walking, in order to recompute our target
+	subgoal RestartStagingBody();
+} 
+
+// ###############
+// test if we should abort the walkstep
+sequential behavior WalkStep_AbortIfPlayerMoved(boolean bIAmOnlyTurningInPlace) {
+	precondition {	(StagingInfoWME	targetX :: targetX 	targetZ :: targetZ)
+					(ObjectPositionWME objectID == me x :: myOrigX  z :: myOrigZ)
+					(BehavingEntity.constantTrue(
+						bIAmOnlyTurningInPlace = (myOrigX == targetX && myOrigZ == targetZ))) }
+
+	float distToPlayer;
+	float distToOrigTarget;
+
+	// if the player has moved at all during the staging (even before we got too close), 
+	// and we're not just turning in place,
+	// and now we are close to the player or our original target, 
+	// then fail the walkstep in order to restart staging
+	with (success_test {
+		(StagingInfoWME bObjMovedFromOrig :: bObjMovedFromOrig)
+		(ObjectPositionWME objectID == me  x :: myX  z :: myZ)
+		(ObjectPositionWME objectID == player  x :: playerX  z :: playerZ)
+
+		(BehavingEntity.constantTrue(distToPlayer = Staging.getXZDistanceBetweenPoints(myX, myZ, playerX, playerZ))) 
+		(BehavingEntity.constantTrue(distToOrigTarget = Staging.getXZDistanceBetweenPoints(myX, myZ, targetX, targetZ))) 
+
+		(bIAmOnlyTurningInPlace == false && 
+			bObjMovedFromOrig == true && 
+			(distToPlayer <= cConverseDist_moveSensitivityRadius || 
+			 distToOrigTarget <= cConverseDist_moveSensitivityRadius))
+
+
+	} ) wait;
+
+	//mental_act { StringUtil.println(myName + " WalkStep_AbortIfPlayerMoved"); }
+
+	fail_step;
+}
+
+
+// ###############
+// set a flag in StagingInfoWME if the player moved from its original position or rotation
+sequential behavior WalkStep_MonitorIfPlayerMoved() {
+	with (success_test { PlayerMemory (IsPlayerTranslatingOrRotatingWME b == true) } ) wait;
+	subgoal WalkStep_MonitorIfPlayerMoved_SetStagingInfoWMEFlag();
+	wait;
+}
+
+atomic sequential behavior WalkStep_MonitorIfPlayerMoved_SetStagingInfoWMEFlag() {
+	precondition { stagingInfoWME = (StagingInfoWME) }
+	mental_act { 
+		stagingInfoWME.setBObjMovedFromOrig(true);
+		//StringUtil.println(myName + " WalkStep_MonitorIfPlayerMoved"); 
+	}
+}
+
+
+// ------------------------------------
+
+
+
+// ###############
+// ###############
+// ###############
+// perform gesture behaviors and expressions
+
+
+// ###############
+// DoGesture
+
+// -1 bodypart is a no-op -- need for use in SetPerformanceInfo()
+sequential behavior DoGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping) {
+	precondition { (bodyPart == -1) }
+	specificity 2;
+	succeed_step;
+}
+
+sequential behavior DoGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping) {
+	precondition { (bDoMapping == false) }
+	specificity 1;
+	subgoal DoGesture_Dispatch(resourcePriority, bodyPart, gestureIndex);
+}
+sequential behavior DoGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping) {
+	precondition { (bDoMapping == true) }
+	specificity 1;
+
+	// map the gesture to something else, suppress it, or leave it as is 
+	// puts return value in DoGestureTempWME
+	subgoal MapSuppressOrKeepGesture(bodyPart, gestureIndex);
+
+	// either suppress the gesture or do it
+	subgoal DoGesture_SuppressOrDoIt(resourcePriority, bodyPart); // , gestureIndex);	// we get the new gestureIndex from DoGestureTempWME
+}
+
+// if we are to suppress the gesture, just succeed
+sequential behavior DoGesture_SuppressOrDoIt(int resourcePriority, int bodyPart) {
+	precondition { (DoGestureTempWME val == -2) }
+	specificity 2;
+	succeed_step;
+}
+sequential behavior DoGesture_SuppressOrDoIt(int resourcePriority, int bodyPart) {
+	precondition { (DoGestureTempWME val :: newGestureIndex) }
+	specificity 1;
+	subgoal DoGesture_Dispatch(resourcePriority, bodyPart, newGestureIndex);
+}
+
+
+// ###############
+// DoPickupObjGesture
+
+sequential behavior DoPickupObjGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping,
+										int objectToPickup) {
+	precondition { (bDoMapping == false) }
+	subgoal DoPickupObjGesture_Dispatch(resourcePriority, bodyPart, gestureIndex, objectToPickup);
+}
+sequential behavior DoPickupObjGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping,
+										int objectToPickup) {
+	precondition { (bDoMapping == true) }
+
+	// map the gesture to something else, suppress it, or leave it as is 
+	// puts return value in DoGestureTempWME
+	subgoal MapSuppressOrKeepGesture(bodyPart, gestureIndex);
+
+	// either suppress the gesture or do it
+	// we get the new gestureIndex from DoGestureTempWME
+	subgoal DoPickupObjGesture_SuppressOrDoIt(resourcePriority, bodyPart, objectToPickup); 
+}
+
+// if we are to suppress the gesture, just succeed
+sequential behavior DoPickupObjGesture_SuppressOrDoIt(int resourcePriority, int bodyPart, int objectToPickup) {
+	precondition { (DoGestureTempWME val == -2) }
+	specificity 2;
+	succeed_step;
+}
+sequential behavior DoPickupObjGesture_SuppressOrDoIt(int resourcePriority, int bodyPart, int objectToPickup) {
+	precondition { (DoGestureTempWME val :: newGestureIndex) }
+	specificity 1;
+	subgoal DoPickupObjGesture_Dispatch(resourcePriority, bodyPart, newGestureIndex, objectToPickup);
+}
+
+
+// ######
+// DoHoldObjGesture
+
+sequential behavior DoHoldObjGesture(int whichArm, int holdArmGesture, int stagingObjectID) {
+	precondition {	(HeldObjectWME	characterID == me  objectID == stagingObjectID) }
+	specificity 2;
+	subgoal DoGesture(-1, whichArm, holdArmGesture, true);
+}
+sequential behavior DoHoldObjGesture(int whichArm, int holdArmGesture, int stagingObjectID) {
+	specificity 1;
+	mental_act { StringUtil.println("### pickup object failed, putting arm down!"); }
+	subgoal DoGesture(-1, whichArm, g_armGesture_default, false);
+}
+
+
+// ###############
+// DoPutdownObjGesture
+
+sequential behavior DoPutdownObjGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping,
+											int ontoObjectID, int surfaceID,
+											float x, float y, float z,
+											int param) {
+	precondition { (bDoMapping == false) }
+	subgoal DoPutdownObjGesture_Dispatch(resourcePriority, bodyPart, gestureIndex,
+												ontoObjectID, surfaceID, x, y, z, param);
+}
+sequential behavior DoPutdownObjGesture(int resourcePriority, int bodyPart, int gestureIndex, boolean bDoMapping,
+											int ontoObjectID, int surfaceID,
+											float x, float y, float z,
+											int param) {
+	precondition { (bDoMapping == true) }
+
+	// map the gesture to something else, suppress it, or leave it as is 
+	// puts return value in DoGestureTempWME
+	subgoal MapSuppressOrKeepGesture(bodyPart, gestureIndex);
+
+	// either suppress the gesture or do it
+	// we get the new gestureIndex from DoGestureTempWME
+	subgoal DoPutdownObjGesture_SuppressOrDoIt(resourcePriority, bodyPart, 
+												ontoObjectID, surfaceID, x, y, z, param);
+}
+
+// if we are to suppress the gesture, just succeed
+sequential behavior DoPutdownObjGesture_SuppressOrDoIt(int resourcePriority, int bodyPart, 
+														int ontoObjectID, int surfaceID,
+														float x, float y, float z,
+														int param) {
+	precondition { (DoGestureTempWME val == -2) }
+	specificity 2;
+	succeed_step;
+}
+sequential behavior DoPutdownObjGesture_SuppressOrDoIt(int resourcePriority, int bodyPart,
+														int ontoObjectID, int surfaceID,
+														float x, float y, float z,
+														int param) {
+	precondition { (DoGestureTempWME val :: newGestureIndex) }
+	specificity 1;
+	subgoal DoPutdownObjGesture_Dispatch(resourcePriority, bodyPart, newGestureIndex,
+												ontoObjectID, surfaceID, x, y, z, param);
+}
+
+
+// ###############
+// ARML
+sequential behavior DoGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armL) }
+	subgoal DoGesture_ArmL(resourcePriority, gestureIndex);
+}
+sequential behavior DoGesture_ArmL(int resourcePriority, int gestureIndex) {
+	// grab or confirm the armL resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmL gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+
+	//mental_act { if (gestureIndex == etripScript_layer_arm_default) BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); }
+
+	act armLGesture(gestureIndex);
+}
+
+
+// ###############
+// PICKUPOBJ ARML
+sequential behavior DoPickupObjGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex, int objectToPickup) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armL) }
+	subgoal DoPickupObjGesture_ArmL(resourcePriority, gestureIndex, objectToPickup);
+}
+sequential behavior DoPickupObjGesture_ArmL(int resourcePriority, int gestureIndex, int objectToPickup) { 
+	// grab or confirm the armL resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmL gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armLPickupObjGesture(gestureIndex, objectToPickup);
+}
+
+
+// ###############
+// PUTDOWNOBJ ARML
+sequential behavior DoPutdownObjGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex,
+												int ontoObjectID, int surfaceID,
+												float x, float y, float z,
+												int param) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armL) }
+	subgoal DoPutdownObjGesture_ArmL(resourcePriority, gestureIndex,
+										ontoObjectID, surfaceID, x, y, z, param);
+}
+sequential behavior DoPutdownObjGesture_ArmL(int resourcePriority, int gestureIndex, 
+												int ontoObjectID, int surfaceID,
+												float x, float y, float z,
+												int param) {
+	// grab or confirm the armL resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmL gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armLPutdownObjGesture(gestureIndex, ontoObjectID, surfaceID, x, y, z, param);
+}
+
+
+// ###############
+// ARMR
+sequential behavior DoGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armR) }
+	subgoal DoGesture_ArmR(resourcePriority, gestureIndex);
+}
+sequential behavior DoGesture_ArmR(int resourcePriority, int gestureIndex) {
+	// grab or confirm the armR resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println("DoGesture_ArmR gestureIndex " + gestureIndex); }
+	act armRGesture(gestureIndex);
+}
+
+
+// ###############
+// PICKUPOBJ ARMR
+sequential behavior DoPickupObjGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex, int objectToPickup) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armR) }
+	subgoal DoPickupObjGesture_ArmR(resourcePriority, gestureIndex, objectToPickup);
+}
+sequential behavior DoPickupObjGesture_ArmR(int resourcePriority, int gestureIndex, int objectToPickup) {
+	// grab or confirm the armR resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmR gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armRPickupObjGesture(gestureIndex, objectToPickup);
+}
+
+
+// ###############
+// PUTDOWNOBJ ARMR
+sequential behavior DoPutdownObjGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex,
+												int ontoObjectID, int surfaceID,
+												float x, float y, float z,
+												int param) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armR) }
+	subgoal DoPutdownObjGesture_ArmR(resourcePriority, gestureIndex,
+										ontoObjectID, surfaceID, x, y, z, param);
+}
+sequential behavior DoPutdownObjGesture_ArmR(int resourcePriority, int gestureIndex, 
+												int ontoObjectID, int surfaceID,
+												float x, float y, float z,
+												int param) {
+	// grab or confirm the armR resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmR gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armRPutdownObjGesture(gestureIndex, ontoObjectID, surfaceID, x, y, z, param);
+}
+
+
+// ###############
+// ARMSBOTH
+sequential behavior DoGesture_Dispatch(int resourcePriority, int bodyPart, int gestureIndex) {
+	precondition { (bodyPart == eGestureBodyPartIndex_armsBoth) }
+	subgoal DoGesture_ArmsBoth(resourcePriority, gestureIndex);
+}
+sequential behavior DoGesture_ArmsBoth(int resourcePriority, int gestureIndex) {
+
+	// grab or confirm the armsBoth resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmsBoth gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armsBothGesture(gestureIndex);
+}
+
+
+// ###############
+// PICKUPOBJ ARMSBOTH
+sequential behavior DoPickupObjGesture_ArmsBoth(int resourcePriority, int gestureIndex, int objectToPickupL, int objectToPickupR) {
+	// grab or confirm the armsBoth resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmsBoth gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armsBothPickupObjGesture(gestureIndex, objectToPickupL, objectToPickupR);
+}
+
+
+// ###############
+// PUTDOWNOBJ ARMSBOTH
+sequential behavior DoPutdownObjGesture_ArmsBoth(int resourcePriority, int gestureIndex, 
+												int ontoObjectID, int surfaceID,
+												float x, float y, float z,
+												int param) {
+	// grab or confirm the armsBoth resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armL, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_armR, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+	//mental_act { StringUtil.println(myName + " DoGesture_ArmsBoth gestureIndex " + gestureIndex + " rp " + resourcePriority); }
+	act armsBothPutdownObjGesture(gestureIndex, ontoObjectID, surfaceID, x, y, z, param);
+}
+
+
+// ###############
+// randomly do one of two gestures
+sequential behavior PerformOneOfTwoGestures(int resourcePriority,
+											int bodyPart1, int gestureIndex1, 
+											int bodyPart2, int gestureIndex2) {
+	int rand0or1;
+	mental_act { rand0or1 = randGen.nextInt(2); }	
+	subgoal PerformOneOfTwoGestures_Body(resourcePriority, gestureIndex1, bodyPart1, gestureIndex2, bodyPart2, rand0or1);
+}
+
+sequential behavior PerformOneOfTwoGestures_Body(int resourcePriority,
+													int bodyPart1, int gestureIndex1, 
+													int bodyPart2, int gestureIndex2,
+													int rand0or1) {
+	precondition { (rand0or1 == 0) }
+	subgoal DoGesture(resourcePriority, bodyPart1, gestureIndex1, true);
+}
+
+sequential behavior PerformOneOfTwoGestures_Body(int resourcePriority,
+													int bodyPart1, int gestureIndex1, 
+													int bodyPart2, int gestureIndex2,
+													int rand0or1) {
+	precondition { (rand0or1 == 1) }
+	subgoal DoGesture(resourcePriority, bodyPart2, gestureIndex2, true);
+}
+
+
+// ###############
+// MapSuppressOrKeepGesture
+// puts return value in DoGestureTempWME
+
+// if the gesture isn't an arm gesture, there is no mapping to do
+sequential behavior MapSuppressOrKeepGesture(int bodyPart, int gestureIndex) {
+	precondition { (bodyPart != eGestureBodyPartIndex_armL &&
+					bodyPart != eGestureBodyPartIndex_armR &&
+					bodyPart != eGestureBodyPartIndex_armsBoth) 
+					gestureTempWME = (DoGestureTempWME) }
+	specificity 3;
+	mental_act { gestureTempWME.setVal(gestureIndex); }
+}
+
+// if armL and armR are active, armsBoth not active
+sequential behavior MapSuppressOrKeepGesture(int bodyPart, int gestureIndex) {
+	precondition {	(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armLGesture
+								base :: armLBase)
+					(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armRGesture
+								base :: armRBase) 
+					gestureTempWME = (DoGestureTempWME) }
+	specificity 2;
+	int newGestureIndex;
+	mental_act {
+		newGestureIndex = GestureMapping.MapArmLRGesture(me, bodyPart, gestureIndex, armLBase, armRBase, -1);
+		gestureTempWME.setVal(newGestureIndex);		// assign the return value
+	}
+}
+
+// if armsBoth active, armL and armR not active
+sequential behavior MapSuppressOrKeepGesture(int bodyPart, int gestureIndex) {
+	precondition {	(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armsBothGesture
+								base :: armsBothBase) 
+					gestureTempWME = (DoGestureTempWME) }
+	specificity 2;
+	int newGestureIndex;
+	mental_act {
+		newGestureIndex = GestureMapping.MapArmLRGesture(me, bodyPart, gestureIndex, -1, -1, armsBothBase);
+		gestureTempWME.setVal(newGestureIndex);		// assign the return value
+	}
+}
+
+// error checking
+sequential behavior MapSuppressOrKeepGesture(int bodyPart, int gestureIndex) {
+	specificity 1;
+	mental_act { assert false : ("bad arm base in MapSuppressOrKeepGesture_Body1"); }
+}
+
+
+
+// ###############
+// DoFullExpressionMood
+
+sequential behavior DoFullExpressionMood(int resourcePriority, int fullExprMood) {
+	subgoal DoFullExpressionMood(resourcePriority, fullExprMood, eSpriteID_NOTASPRITE, eSpriteID_NOTASPRITE);
+}
+
+sequential behavior DoFullExpressionMood(int resourcePriority, int fullExprMood, int sprite1ID, int sprite2ID) {
+
+	// grab or confirm the feMood resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_faceExpressionMood, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	act fullExpressionMood(fullExprMood, sprite1ID, sprite2ID);	
+}
+
+
+// ###############
+// DoFullExpressionBase
+
+sequential behavior DoFullExpressionBase(int resourcePriority, int fullExprBase) {
+	subgoal DoFullExpressionBase(resourcePriority, fullExprBase, eSpriteID_NOTASPRITE, eSpriteID_NOTASPRITE);
+}
+
+sequential behavior DoFullExpressionBaseAfterDelay(int resourcePriority, int fullExprBase, float delay) {
+	subgoal WaitFor(delay);
+	subgoal DoFullExpressionBase(resourcePriority, fullExprBase, eSpriteID_NOTASPRITE, eSpriteID_NOTASPRITE);
+}
+
+//fixme: remove when we get the hang bug fixed!
+// rename DoFullExpressionBase_doIt to DoFullExpressionBase 
+parallel behavior DoFullExpressionBase(int resourcePriority, int fullExprBase, int sprite1ID, int sprite2ID) {
+	number_needed_for_success 1;
+	subgoal DoFullExpressionBase_doIt(resourcePriority, fullExprBase, sprite1ID, sprite2ID);
+	subgoal DoFullExpressionBase_timeout();
+}
+
+sequential behavior DoFullExpressionBase_doIt(int resourcePriority, int fullExprBase, int sprite1ID, int sprite2ID) {
+
+	// grab or confirm the feBase resource
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_faceExpressionBase, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	act fullExpressionBase(fullExprBase, sprite1ID, sprite2ID);	
+}
+
+sequential behavior DoFullExpressionBase_timeout() {
+	subgoal WaitFor(1);
+	mental_act { 
+		StringUtil.println("**********");
+		StringUtil.println("********** ERROR: " +myName+ " DoFullExpressionBase_timeout!");
+		StringUtil.println("**********");
+	}
+}		
+
+
+// ---------------------------------------------
+
+// #############
+// miscellaneous utility behaviors
+
+// Wait for a duration in seconds
+sequential behavior WaitFor(float waitTime) {
+	long totalTime;
+	mental_act { totalTime = System.currentTimeMillis() + (int)(waitTime * 1000); }
+	with ( success_test { (System.currentTimeMillis() > totalTime) } ) wait;		
+}
+
+// a version that takes an int instead of a float
+sequential behavior WaitFor(int waitTime) {
+	float waitTimeFloat;
+	mental_act { waitTimeFloat = (float)waitTime; }
+	subgoal WaitFor(waitTimeFloat);
+}
+
+sequential behavior bgTestWaitFor(int waitTime) {
+	float waitTimeFloat;
+	mental_act { waitTimeFloat = (float)waitTime; }
+	subgoal WaitFor(waitTimeFloat);
+}
+
+
+// ###############
+// Wait for a random duration between shortest and longest seconds
+sequential behavior WaitFor(float shortest, float longest) {
+	long waitTime;
+	long totalTime;
+	mental_act { waitTime = randGen.nextInt((int)(longest*1000) - (int)(shortest*1000)) + (int)(shortest*1000); }
+	mental_act { totalTime = System.currentTimeMillis() + waitTime; }
+	with ( success_test { (System.currentTimeMillis() > totalTime) } ) wait;		
+}
+
+// a version that takes ints instead of floats
+sequential behavior WaitFor(int shortest, int longest) {
+	float shortestFloat;
+	float longestFloat;
+	mental_act { shortestFloat = (float)shortest; longestFloat = (float)longest; }
+	subgoal WaitFor(shortestFloat, longestFloat);
+}
+
+
+
+// ###############
+// TeleportPlayer()
+// do the extra work to prevent csensors from triggering when teleporting the player
+atomic sequential behavior TeleportPlayer(float x, float z, float rot) {
+	act setPlayerPos(x, 97.0, z);
+	act setPlayerRot(rot);
+	// fixme: this needs to be moved into player (player aware of beat start, initing, knowing when beat is done)
+	// one could set the PlayerMemory directly here, accept that the changes wouldn't be atomic with respect to the
+	// csensors running in Player (in a separate abl agent).
+	// for now having this code commented out will only cause a spurious CSensor trigger at the beginning of the beat
+	/* mental_act {
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("PlayerMemory", "PreviousCachedPlayerPositionWME");
+		BehavingEntity.getBehavingEntity().addWME(new PreviousCachedPlayerPositionWME(x, 0, z));
+
+		BehavingEntity.getBehavingEntity().deleteAllWMEClass("PreviousCachedPlayerRotationWME");
+		BehavingEntity.getBehavingEntity().addWME(new PreviousCachedPlayerRotationWME(0, rot, 0));
+	} */
+}
+
+
+// #########
+joint sequential behavior TeleportToKitchen(int who) { teammembers Trip Grace;
+	precondition { (who == me) }	
+	act setPos(-40.0f, -5.0f, 271.0f);
+	act setRot(274.0f);
+}
+
+joint sequential behavior TeleportToKitchen(int who) { teammembers Trip Grace;
+	precondition { (who != me) }	
+	succeed_step;
+}
+
+
+
+// ###############
+// ResetEntireBody()
+sequential behavior ResetEntireBody() {
+	subgoal StopStaging(); // turn off staging
+
+	//fixme: when meta-abl exists, do this instantaneously by killing off behaviors that are doing gestures
+	// for now, this ensures that any other gestures happening will finish (due to conflicts),
+	// allowing us to follow up with act resetEntireBody, below
+	subgoal ResetEntireBody_ReplaceThisWithMetaAbl();
+
+	// now it's safe to under-the-hood reset the body
+	// note this act will NOT automatically kill off any poses/walks/gestures occurring elsewhere in the abt!
+	act resetEntireBody();
+}
+
+parallel behavior ResetEntireBody_ReplaceThisWithMetaAbl() {
+	subgoal DoGesture(999, eGestureBodyPartIndex_armL, g_armGesture_default, false);
+	subgoal DoGesture(999, eGestureBodyPartIndex_armR, g_armGesture_default, false);
+	subgoal DoGesture(999, eGestureBodyPartIndex_armsBoth, g_armGesture_default, false);
+}
+
+// ###############
+// Waits for the door to be open the given percentage (0 - 100). 
+sequential behavior WaitForDoorPercentOpen(int percent) {	
+	// When opening the front door, the y-rotation runs from 30 to -65.
+	int targetYRot;
+	mental_act { targetYRot = 30 - Math.round((float)percent/100.0f * 95.0f); }
+	with ( success_test {(ObjectRotationWME objectID == eSpriteID_frontDoor  y <= targetYRot)} ) wait;
+}
+
+
+// ###############
+sequential behavior FailIfFalse(boolean b) {
+	precondition { (b == true) }
+	succeed_step;
+}
+
+// #############
+atomic sequential behavior SetSignal(String signal) {
+	mental_act { BehavingEntity.getBehavingEntity().addWME(new SignalWME(signal)); }
+}
+
+// #############
+atomic sequential behavior SucceedGoal(String sig) {
+	precondition { goal = (GoalStepWME signature == sig) }
+	specificity 2;
+	mental_act { StringUtil.println("SucceedAGoal " + sig); }
+	mental_act { goal.succeed(); } 
+}
+
+// bad precondition, or goal no longer exists
+atomic sequential behavior SucceedGoal(String sig) {
+	specificity 1;
+	mental_act { StringUtil.println("SucceedGoal precondition failed for " + sig); }
+	//mental_act { BehavingEntity.getBehavingEntity().breakNextDecisionCycle(); }	
+}
+
+
+// #############
+atomic sequential behavior FailGoal(String sig) {
+	precondition { goal = (GoalStepWME signature == sig) }
+	specificity 2;
+	mental_act { StringUtil.println("FailGoal " + sig); }
+	mental_act { 
+		goal.setPersistentWhenFails(false);
+		goal.setIgnoreFailure(true);
+		goal.fail(); 
+	} 
+}
+
+// bad precondition -- or a goal that simply doesn't exist, which is sometimes okay
+atomic sequential behavior FailGoal(String sig) {
+	specificity 1;
+	//mental_act { StringUtil.println("FailGoal precondition failed for " + sig); }
+	succeed_step;
+}
+
+
+
+// #############
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase)
+{
+	subgoal SetPerformanceInfo(resourcePriority, resourceTimeout, headEmphType, armsEmphType,
+		c1, c1c, c1gt, c1gp, c1feBase, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+}
+
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase,
+		int c2, int c2c, int c2gt, int c2gp, int c2feBase)
+{
+	subgoal SetPerformanceInfo(resourcePriority, resourceTimeout, headEmphType, armsEmphType,
+		c1, c1c, c1gt, c1gp, c1feBase, -1, -1, -1, -1, -1, -1, -1, -1,
+		c2, c2c, c2gt, c2gp, c2feBase, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+}
+
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase,
+		int c2, int c2c, int c2gt, int c2gp, int c2feBase,
+		int c3, int c3c, int c3gt, int c3gp, int c3feBase)
+{
+	subgoal SetPerformanceInfo(resourcePriority, resourceTimeout, headEmphType, armsEmphType,
+		c1, c1c, c1gt, c1gp, c1feBase, -1, -1, -1, -1, -1, -1, -1, -1,
+		c2, c2c, c2gt, c2gp, c2feBase, -1, -1, -1, -1, -1, -1, -1, -1,
+		c3, c3c, c3gt, c3gp, c3feBase, -1, -1, -1, -1, -1, -1, -1, -1);
+}
+
+// format: cue, character, gaze type, gaze param, fullexprBase, gesture1, gestureParam1, etc.
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4)
+{
+	subgoal SetPerformanceInfo(resourcePriority, resourceTimeout, headEmphType, armsEmphType,
+		c1, c1c, c1gt, c1gp, c1feBase, c1g1, c1p1, c1g2, c1p2, c1g3, c1p3, c1g4, c1p4,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+}
+
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4,
+		int c2, int c2c, int c2gt, int c2gp, int c2feBase, int c2g1, int c2p1, int c2g2, int c2p2, int c2g3, int c2p3, int c2g4, int c2p4)
+{
+	subgoal SetPerformanceInfo(resourcePriority, resourceTimeout, headEmphType, armsEmphType,
+		c1, c1c, c1gt, c1gp, c1feBase, c1g1, c1p1, c1g2, c1p2, c1g3, c1p3, c1g4, c1p4,
+		c2, c2c, c2gt, c2gp, c2feBase, c2g1, c2p1, c2g2, c2p2, c2g3, c2p3, c2g4, c2p4,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+}
+
+/* fixme: uncomment to reduce tracing spew for diagnostics
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4,
+		int c2, int c2c, int c2gt, int c2gp, int c2feBase, int c2g1, int c2p1, int c2g2, int c2p2, int c2g3, int c2p3, int c2g4, int c2p4,
+		int c3, int c3c, int c3gt, int c3gp, int c3feBase, int c3g1, int c3p1, int c3g2, int c3p2, int c3g3, int c3p3, int c3g4, int c3p4)
+{
+	specificity 2;
+	succeed_step;
+}
+*/
+
+sequential behavior SetPerformanceInfo(int resourcePriority, int resourceTimeout, int headEmphType, int armsEmphType,
+		int c1, int c1c, int c1gt, int c1gp, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4,
+		int c2, int c2c, int c2gt, int c2gp, int c2feBase, int c2g1, int c2p1, int c2g2, int c2p2, int c2g3, int c2p3, int c2g4, int c2p4,
+		int c3, int c3c, int c3gt, int c3gp, int c3feBase, int c3g1, int c3p1, int c3g2, int c3p2, int c3g3, int c3p3, int c3g4, int c3p4)
+{
+	precondition {	moodWME = (MoodWME) 
+					setPerfTempWME = (SetPerfTempWME) 
+					setPerfArmBaseWME = (SetPerfArmBaseWME) }
+
+
+	boolean bAmIGrace;
+	BehaviorWME ownerBehaviorWME;
+	int temp;
+	int armLLoopBase;
+	int armRLoopBase;
+	int numArmLLoopAlts;
+	int numArmRLoopAlts;
+
+	boolean bWantExplicitGaze;
+	boolean bCanDoExplicitGaze;
+	int gazeResourcePriority;
+
+	boolean bWantExplicitArmL;		// if we want explicit
+	boolean bCanDoExplicitArmL;		// if we can actually do explicit
+	boolean bWantEmphasisArmL;		// if we want emphasis
+	boolean bWillDoEmphasisArmL;	// if we will actually do emphasis
+	boolean bArmLResourceIsFree;
+	int armLResourcePriority;
+	int armLEmphasisSetupGesture;
+
+	boolean bWantExplicitArmR;
+	boolean bCanDoExplicitArmR;
+	boolean bWantEmphasisArmR;
+	boolean bWillDoEmphasisArmR;
+	boolean bArmRResourceIsFree;
+	int armRResourcePriority;
+	int armREmphasisSetupGesture;
+
+	boolean bExplicitIsOnlyStartWith;
+	int releaseTimeout;
+
+	int c4;
+	int c4c;
+	int c4gt;
+	int c4gp;
+	int c4feBase;
+	int c4g1;
+	int c4p1;
+	int c4g2;
+	int c4p2;
+	int c4g3;
+	int c4p3;
+	int c4g4;
+	int c4p4;
+
+	int c5;
+	int c5c;
+	int c5gt;
+	int c5gp;
+	int c5feBase;
+	int c5g1;
+	int c5p1;
+	int c5g2;
+	int c5p2;
+	int c5g3;
+	int c5p3;
+	int c5g4;
+	int c5p4;
+
+	int c6;
+	int c6c;
+	int c6gt;
+	int c6gp;
+	int c6feBase;
+	int c6g1;
+	int c6p1;
+	int c6g2;
+	int c6p2;
+	int c6g3;
+	int c6p3;
+	int c6g4;
+	int c6p4;
+
+	int newc1;
+
+	// first get the arm base info -- puts return values in SetPerfArmBaseWME
+	subgoal SetPerformanceInfo_GetArmBase();
+
+	mental_act {
+
+		// catch bad params
+		assert(c1c == me || c1c == spouse || c1c == -1); 
+		assert(c2c == me || c2c == spouse || c2c == -1); 
+		assert(c3c == me || c3c == spouse || c3c == -1); 
+
+		c4 = -1; c4c = -1; c4gt = -1; c4gp = -1; c4feBase = -1;
+		c4g1 = -1; c4p1 = -1; c4g2 = -1; c4p2 = -1; c4g3 = -1; c4p3 = -1; c4g4 = -1; c4p4 = -1;
+		c5 = -1; c5c = -1; c5gt = -1; c5gp = -1; c5feBase = -1;
+		c5g1 = -1; c5p1 = -1; c5g2 = -1; c5p2 = -1; c5g3 = -1; c5p3 = -1; c5g4 = -1; c5p4 = -1;
+		c6 = -1; c6c = -1; c6gt = -1; c6gp = -1; c6feBase = -1;
+		c6g1 = -1; c6p1 = -1; c6g2 = -1; c6p2 = -1; c6g3 = -1; c6p3 = -1; c6g4 = -1; c6p4 = -1;
+
+		if (me == eSpriteID_grace) bAmIGrace = true;
+		else bAmIGrace = false;
+
+		ownerBehaviorWME = getReflectionWME().getParent(); 
+
+		bWantExplicitGaze = true;										// fixme: do this check
+
+		bWantExplicitArmL = (c1g1 == eGestureBodyPartIndex_armL || c1g2 == eGestureBodyPartIndex_armL || c1g3 == eGestureBodyPartIndex_armL || c1g4 == eGestureBodyPartIndex_armL || 
+								c2g1 == eGestureBodyPartIndex_armL || c2g2 == eGestureBodyPartIndex_armL || c2g3 == eGestureBodyPartIndex_armL || c2g4 == eGestureBodyPartIndex_armL || 
+								c3g1 == eGestureBodyPartIndex_armL || c3g2 == eGestureBodyPartIndex_armL || c3g3 == eGestureBodyPartIndex_armL || c3g4 == eGestureBodyPartIndex_armL);
+		bWantEmphasisArmL = (armsEmphType != eArmsEmphType_none);
+
+		bWantExplicitArmR = (c1g1 == eGestureBodyPartIndex_armR || c1g2 == eGestureBodyPartIndex_armR || c1g3 == eGestureBodyPartIndex_armR || c1g4 == eGestureBodyPartIndex_armR || 
+								c2g1 == eGestureBodyPartIndex_armR || c2g2 == eGestureBodyPartIndex_armR || c2g3 == eGestureBodyPartIndex_armR || c2g4 == eGestureBodyPartIndex_armR || 
+								c3g1 == eGestureBodyPartIndex_armR || c3g2 == eGestureBodyPartIndex_armR || c3g3 == eGestureBodyPartIndex_armR || c3g4 == eGestureBodyPartIndex_armR);
+		bWantEmphasisArmR = (armsEmphType != eArmsEmphType_none);
+
+		bExplicitIsOnlyStartWith = true;								// fixme: do this check
+
+		// we can release our resources after the given timeout only if we are only doing explicit stuff in "startWith"
+		if (bExplicitIsOnlyStartWith) {
+			releaseTimeout = resourceTimeout;
+		} else {
+			releaseTimeout = -1;
+		}
+	}
+
+	// ## if we are doing explicit arm gestures, we will try to grab the arm resource at the given priority
+	// we won't do any emphasis arm gestures, even if requested
+
+	// ## if we are NOT doing explicit arm gestures, we may want to do (non-critical) emphasis gestures
+	// for that possibility, let's find out now if the armL and armR resources happen to be free
+
+	// set flags if arms are free
+	subgoal SetPerformanceInfo_CheckIfResourceIsFree(eBodyResourceID_armL);
+	mental_act { bArmLResourceIsFree = setPerfTempWME.getBVal(); }		// workaround lack of return values
+	subgoal SetPerformanceInfo_CheckIfResourceIsFree(eBodyResourceID_armR);
+	mental_act { bArmRResourceIsFree = setPerfTempWME.getBVal(); }		// workaround lack of return values
+
+	// if they are free, we will go ahead and allow arm emphasis requests to be  
+	//  sent to the animEngine via the setPerformanceInfo act
+	// We will do arm emphasis setup at 0 priority, grabbing it on the fly, with ignore_failure
+	// This allows the emphasis to happen without interfering with anything else more important,
+	// and for either arm resource to get taken away without failing SetPerformanceInfo()
+	// (for the emphases themselves (after the setup), the gestures are done internally in the animEngine; 
+	//  so we never actually grab the abl resource beyond the emphasis setup.  
+	//  The animEngine will stop doing the requested emphasis gestures automatically if an explicit arm gesture happens.)
+	// if they are not free, we will not send arm emphasis requests
+
+	mental_act {
+	
+		// gaze resource priorities
+		if (bWantExplicitGaze) {
+			gazeResourcePriority = resourcePriority;
+		} else {
+			gazeResourcePriority = -1;
+		}
+
+		// armL resource priority
+		if (bWantExplicitArmL) {
+			armLResourcePriority = resourcePriority;
+		} else {	
+			armLResourcePriority = -1;		// emphasis only, or not needed
+		}
+
+		// armR resource priority
+		if (bWantExplicitArmR) {
+			armRResourcePriority = resourcePriority;
+		} else {	
+			armRResourcePriority = -1;		// emphasis only, or not needed
+		}
+	}
+
+	//speed with (priority_modifier 99) mental_act { if (me == grace) StringUtil.println("************** 1"); }
+
+	// ## try requesting required resources at the determined priorities 
+	// (a resource priority of -1 means don't grab it yet)
+	// note that feBase is the only resource we can assume we'll always get! e.g. mood burst may be overriding us for gaze and arms
+	subgoal SetPerformanceInfo_RequestResource(eBodyResourceID_faceExpressionBase,			resourcePriority, ownerBehaviorWME);
+	with (ignore_failure) subgoal SetPerformanceInfo_RequestResource(eBodyResourceID_gaze,	gazeResourcePriority, ownerBehaviorWME);
+	with (ignore_failure) subgoal SetPerformanceInfo_RequestResource(eBodyResourceID_armL,	armLResourcePriority, ownerBehaviorWME);
+	with (ignore_failure) subgoal SetPerformanceInfo_RequestResource(eBodyResourceID_armR,	armRResourcePriority, ownerBehaviorWME);
+
+	// ## let's see if we got the resources or not, to know if we can do requested explicit gaze/arms, if any
+	subgoal SetPerformanceInfo_CheckIfResourceOwned(eBodyResourceID_gaze);
+	mental_act { bCanDoExplicitGaze = (setPerfTempWME.getBVal()); }		// workaround lack of return values
+	subgoal SetPerformanceInfo_CheckIfResourceOwned(eBodyResourceID_armL);
+	mental_act { bCanDoExplicitArmL = (setPerfTempWME.getBVal()); }		// workaround lack of return values
+	subgoal SetPerformanceInfo_CheckIfResourceOwned(eBodyResourceID_armR);
+	mental_act { bCanDoExplicitArmR = (setPerfTempWME.getBVal()); }		// workaround lack of return values
+
+	mental_act {
+
+		// ## if we want but cannot do explicit actions, clear away any requests to do so!
+		if (bWantExplicitGaze && !bCanDoExplicitGaze) {
+			StringUtil.println(myName + " SetPerformanceInfo can't do explicit gaze");
+			c1gt = -1; c2gt = -1; c3gt = -1; c4gt = -1; c5gt = -1; c6gt = -1;
+		}
+		if (bWantExplicitArmL && !bCanDoExplicitArmL) {
+			StringUtil.println(myName + " SetPerformanceInfo can't do explicit armL gestures");
+			c1g1 = -1; c1g2 = -1; c1g3 = -1; c1g4 = -1;		// fixme: only want to clear away those that are for armL
+			c2g1 = -1; c2g2 = -1; c2g3 = -1; c2g4 = -1;  
+			c3g1 = -1; c3g2 = -1; c3g3 = -1; c3g4 = -1;  
+			c4g1 = -1; c4g2 = -1; c4g3 = -1; c4g4 = -1;  
+			c5g1 = -1; c5g2 = -1; c5g3 = -1; c5g4 = -1;  
+			c6g1 = -1; c6g2 = -1; c6g3 = -1; c6g4 = -1;  
+		}
+		if (bWantExplicitArmR && !bCanDoExplicitArmR) {
+			StringUtil.println(myName + " SetPerformanceInfo can't do explicit armR gestures");
+			c1g1 = -1; c1g2 = -1; c1g3 = -1; c1g4 = -1;		// fixme: only want to clear away those that are for armR
+			c2g1 = -1; c2g2 = -1; c2g3 = -1; c2g4 = -1;  
+			c3g1 = -1; c3g2 = -1; c3g3 = -1; c3g4 = -1;  
+			c4g1 = -1; c4g2 = -1; c4g3 = -1; c4g4 = -1;  
+			c5g1 = -1; c5g2 = -1; c5g3 = -1; c5g4 = -1;  
+			c6g1 = -1; c6g2 = -1; c6g3 = -1; c6g4 = -1;  
+		}
+
+
+		// ### HEAD EMPHASIS GESTURES
+
+		// generate head emphasis in cue slots 4,5,6 gesture 1, based on the given type
+		if (headEmphType != eHeadEmphType_none) {
+
+			c4 = eDcue_e1; c4c = me; c4g1 = eGestureBodyPartIndex_headEmphasis;
+			c5 = eDcue_e2; c5c = me; c5g1 = eGestureBodyPartIndex_headEmphasis;
+			c6 = eDcue_e3; c6c = me; c6g1 = eGestureBodyPartIndex_headEmphasis;
+
+			if (headEmphType == eHeadEmphType_nodStrong) {
+				c4p1 = eHeadEmphasis_nodSmall;
+				c5p1 = eHeadEmphasis_nodSmall;	
+				c6p1 = eHeadEmphasis_nodSmall;
+
+			// eHeadEmphType_nodMild
+			} else {
+				c4p1 = eHeadEmphasis_default;
+				c5p1 = eHeadEmphasis_default;	
+				c6p1 = eHeadEmphasis_default;
+			}
+		}
+
+
+		// ### ARM EMPHASIS GESTURES
+
+		// assume we will NOT do arm emphasis setup
+		armLEmphasisSetupGesture = -1;
+		armREmphasisSetupGesture = -1;
+
+		// can we actually do arm emphasis?
+		bWillDoEmphasisArmL = (!bWantExplicitArmL &&				// if we are NOT doing EXPLICIT gestures
+										bWantEmphasisArmL &&	// and we want to do emphasis
+										bArmLResourceIsFree);	// and the arm is free
+		bWillDoEmphasisArmR = (!bWantExplicitArmR &&		
+										bWantEmphasisArmR &&	
+										bArmRResourceIsFree);			
+
+
+		// if we are doing arm EMPHASIS gestures, do setup and generate arm emphasis in cue slots 4,5,6 gesture 2,3
+		// fixme: allow for only one to happen, not requiring both 
+		if (bWillDoEmphasisArmL && bWillDoEmphasisArmR) {
+
+			// ## establish arm gestures, if any
+			if (armsEmphType != eArmsEmphType_none) {
+
+				//StringUtil.println("@@@ " + myName + " doing setperf arm emphasis gestures"); 
+
+				// generate arm emphasis in cue slots 4,5,6 gestures 2 and 3, based on the given type
+				c4 = eDcue_e1; c4c = me; c4g2 = eGestureBodyPartIndex_armL; c4g3 = eGestureBodyPartIndex_armR;
+				c5 = eDcue_e2; c5c = me; c5g2 = eGestureBodyPartIndex_armL; c5g3 = eGestureBodyPartIndex_armR;
+				c6 = eDcue_e3; c6c = me; c6g2 = eGestureBodyPartIndex_armL; c6g3 = eGestureBodyPartIndex_armR;
+
+				if (armsEmphType == eArmsEmphType_gestureReadyL) {
+
+					armLEmphasisSetupGesture = g_armLGesture_gestureReady; 
+					armREmphasisSetupGesture = g_armGesture_default; 
+
+					//fixme: combine grace and trip when Grace has gestures
+					if (bAmIGrace) {
+						c4p2 = g_armLGesture_gestureReady;
+						c4p3 = g_armGesture_default;
+						c5p2 = g_armLGesture_gestureReady;	
+						c5p3 = g_armGesture_default;
+						c6p2 = g_armLGesture_gestureReady;
+						c6p3 = g_armGesture_default;
+
+					} else {
+						c4p2 = etripScript_layer_armL_gestureReady_smallForward + randGen.nextInt(5);
+						c4p3 = g_armGesture_default;
+						c5p2 = etripScript_layer_armL_gestureReady_smallForward + randGen.nextInt(5);
+						c5p3 = g_armGesture_default;
+						c6p2 = etripScript_layer_armL_gestureReady_smallForward + randGen.nextInt(5);
+						c6p3 = g_armGesture_default;
+					}
+
+				} else if (armsEmphType == eArmsEmphType_suggestL) {
+
+					armLEmphasisSetupGesture = g_armLGesture_suggestReady; 
+					armREmphasisSetupGesture = g_armGesture_default; 
+
+					//fixme: combine grace and trip when Grace has gestures
+					if (bAmIGrace) {
+						c4p2 = g_armLGesture_suggestReady;
+						c4p3 = g_armGesture_default;
+						c5p2 = g_armLGesture_suggestReady;	
+						c5p3 = g_armGesture_default;
+						c6p2 = g_armLGesture_suggestReady;
+						c6p3 = g_armGesture_default;
+
+					} else {
+						c4p2 = etripScript_layer_armL_suggest_gesture1 + randGen.nextInt(2);
+						c4p3 = g_armGesture_default;
+						c5p2 = etripScript_layer_armL_suggest_gesture1 + randGen.nextInt(2);
+						c5p3 = g_armGesture_default;
+						c6p2 = etripScript_layer_armL_suggest_gesture1 + randGen.nextInt(2);
+						c6p3 = g_armGesture_default;
+					}
+
+				} else if (armsEmphType == eArmsEmphType_gestureReadyLMotion) {
+
+					armLEmphasisSetupGesture = g_armLGesture_gestureReady; 
+					armREmphasisSetupGesture = g_armGesture_default; 
+
+					//fixme: combine grace and trip when Grace has gestures
+					if (bAmIGrace) {
+
+						c4p2 = g_armLGesture_gestureReady;
+						c4p3 = g_armGesture_default;
+						c5p2 = g_armLGesture_gestureReady;	
+						c5p3 = g_armGesture_default;
+						c6p2 = g_armLGesture_gestureReady;
+						c6p3 = g_armGesture_default;
+
+					// trip
+					} else {
+						temp = randGen.nextInt(10);
+						if (temp == 0)		c4p2 = etripScript_layer_armL_gestureReady_comere;
+						else if (temp == 1) c4p2 = etripScript_layer_armL_gestureReady_either;
+						else if (temp == 2) c4p2 = etripScript_layer_armL_gestureReady_nthen;
+						else if (temp == 3) c4p2 = etripScript_layer_armL_gestureReady_totheside;
+						else if (temp == 4) c4p2 = etripScript_layer_armL_gestureReady_wide;
+						else if (temp == 5) c4p2 = etripScript_layer_armL_gestureReady_scoop;
+						else				c4p2 = etripScript_layer_armL_gestureReady_gesture1;
+
+						c4p3 = g_armGesture_default;
+
+						temp = randGen.nextInt(10);
+						if (temp == 0)		c5p2 = etripScript_layer_armL_gestureReady_comere;
+						else if (temp == 1) c5p2 = etripScript_layer_armL_gestureReady_either;
+						else if (temp == 2) c5p2 = etripScript_layer_armL_gestureReady_nthen;
+						else if (temp == 3) c5p2 = etripScript_layer_armL_gestureReady_totheside;
+						else if (temp == 4) c5p2 = etripScript_layer_armL_gestureReady_wide;
+						else if (temp == 5) c5p2 = etripScript_layer_armL_gestureReady_scoop;
+						else				c5p2 = etripScript_layer_armL_gestureReady_gesture1;
+
+						c5p3 = g_armGesture_default;
+
+						temp = randGen.nextInt(10);
+						if (temp == 0)		c6p2 = etripScript_layer_armL_gestureReady_comere;
+						else if (temp == 1) c6p2 = etripScript_layer_armL_gestureReady_either;
+						else if (temp == 2) c6p2 = etripScript_layer_armL_gestureReady_nthen;
+						else if (temp == 3) c6p2 = etripScript_layer_armL_gestureReady_totheside;
+						else if (temp == 4) c6p2 = etripScript_layer_armL_gestureReady_wide;
+						else if (temp == 5) c6p2 = etripScript_layer_armL_gestureReady_scoop;
+						else				c6p2 = etripScript_layer_armL_gestureReady_gesture1;
+
+						c6p3 = g_armGesture_default;
+					}
+
+
+				//fixme: this doesn't do eArmsEmphType_gestureReadyRMotion, 
+				// nor does it do little gesture motions for eArmsEmphType_gestureReadyR
+				} else if (armsEmphType == eArmsEmphType_gestureReadyR ||
+							armsEmphType == eArmsEmphType_gestureReadyRMotion) {
+
+					armLEmphasisSetupGesture = g_armGesture_default; 
+					armREmphasisSetupGesture = g_armRGesture_gestureReady; 
+
+					c4p2 = g_armGesture_default;
+					c4p3 = g_armRGesture_gestureReady;
+					c5p2 = g_armGesture_default;
+					c5p3 = g_armRGesture_gestureReady;	
+					c6p2 = g_armGesture_default;
+					c6p3 = g_armRGesture_gestureReady;
+				
+
+				//fixme for similar reasons as above
+				} else if (armsEmphType == eArmsEmphType_gestureReadyLR) {
+
+					armLEmphasisSetupGesture = g_armLGesture_gestureReady; 
+					armREmphasisSetupGesture = g_armRGesture_gestureReady; 
+
+					c4p2 = g_armLGesture_gestureReady;
+					c4p3 = g_armRGesture_gestureReady;
+					c5p2 = g_armLGesture_gestureReady;
+					c5p3 = g_armRGesture_gestureReady;	
+					c6p2 = g_armLGesture_gestureReady;
+					c6p3 = g_armRGesture_gestureReady;
+
+				// eArmsEmphType_bothBarelyRaised or eArmsEmphType_bothRaised
+				} else if (armsEmphType == eArmsEmphType_bothBarelyRaised || 
+							armsEmphType == eArmsEmphType_bothRaised) {
+
+					if (armsEmphType == eArmsEmphType_bothBarelyRaised) {
+						armLEmphasisSetupGesture = g_armLGesture_atSideEmphasis2; 
+						armLLoopBase = g_armLGesture_atSideEmphasis2_loop1; numArmLLoopAlts = 2;
+						armREmphasisSetupGesture = g_armRGesture_atSideEmphasis2; 
+						armRLoopBase = g_armRGesture_atSideEmphasis2_loop1; numArmRLoopAlts = 2;
+
+					} else {
+						armLEmphasisSetupGesture = g_armLGesture_atSideEmphasis3; 
+						armLLoopBase = g_armLGesture_atSideEmphasis3_loop1; numArmLLoopAlts = 2;
+						armREmphasisSetupGesture = g_armRGesture_atSideEmphasis3; 
+						armRLoopBase = g_armRGesture_atSideEmphasis3_loop1; numArmRLoopAlts = 2;
+					}
+
+					// decide if at an emphasis cue, should both arms move, or neither
+					// actually let's always make arms move
+					temp = 0; // randGen.nextInt(3);
+					if (temp != 2) {		c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armREmphasisSetupGesture;
+					}
+					temp = 0; // randGen.nextInt(3);
+					if (temp != 2) {		c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armREmphasisSetupGesture;
+					}
+					temp = 0; // randGen.nextInt(3);
+					if (temp != 2) {		c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armREmphasisSetupGesture;
+					}
+
+
+				// eArmsEmphType_atSideAndOneRaised
+				} else if (armsEmphType == eArmsEmphType_atSideAndOneRaised) {
+
+					// decide if we should raise (emph3) either armL and R, or neither 
+					temp = randGen.nextInt(2);
+					if (temp == 0) {
+						armLEmphasisSetupGesture = g_armLGesture_atSideEmphasis3; 
+						armLLoopBase = g_armLGesture_atSideEmphasis3_loop1; numArmLLoopAlts = 2;
+
+						armREmphasisSetupGesture = g_armGesture_default; 
+						armRLoopBase = g_armRGesture_atSideEmphasis_loop1; numArmRLoopAlts = 3;
+
+					} else {
+						armLEmphasisSetupGesture = g_armGesture_default; 
+						armLLoopBase = g_armLGesture_atSideEmphasis_loop1; numArmLLoopAlts = 3;
+
+						armREmphasisSetupGesture = g_armRGesture_atSideEmphasis3; 
+						armRLoopBase = g_armRGesture_atSideEmphasis3_loop1; numArmRLoopAlts = 2;
+					}
+
+					// decide if at an emphasis cue, should one arm move, or neither
+					temp = randGen.nextInt(4);
+					if (temp == 0) {		c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(4);
+					if (temp == 0) {		c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(4);
+					if (temp == 0) {		c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armREmphasisSetupGesture;
+					}
+
+
+				// eArmsEmphType_atSideOrBarelyRaised
+				} else if (armsEmphType == eArmsEmphType_atSideOrBarelyRaised) {
+
+					// decide if we should slightly raise (emph2) either armL and R, or neither 
+					temp = randGen.nextInt(5);
+					if (temp == 0) {
+						armLEmphasisSetupGesture = g_armLGesture_atSideEmphasis2; 
+						armLLoopBase = g_armLGesture_atSideEmphasis2_loop1; numArmLLoopAlts = 2;
+						armREmphasisSetupGesture = g_armGesture_default; 
+						armRLoopBase = g_armRGesture_atSideEmphasis_loop1; numArmRLoopAlts = 3;
+
+					} else if (temp == 1) {
+						armLEmphasisSetupGesture = g_armGesture_default; 
+						armLLoopBase = g_armLGesture_atSideEmphasis_loop1; numArmLLoopAlts = 3;
+						armREmphasisSetupGesture = g_armRGesture_atSideEmphasis2; 
+						armRLoopBase = g_armRGesture_atSideEmphasis2_loop1; numArmRLoopAlts = 2;
+
+					} else {
+						armLEmphasisSetupGesture = g_armGesture_default; 
+						armLLoopBase = g_armLGesture_atSideEmphasis_loop1; numArmLLoopAlts = 3;
+						armREmphasisSetupGesture = g_armGesture_default; 
+						armRLoopBase = g_armRGesture_atSideEmphasis_loop1; numArmRLoopAlts = 3;
+					}
+
+					// decide if at an emphasis cue, should one arm move, both, or neither
+					temp = randGen.nextInt(5);
+					if (temp == 0) {		c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2 && armLEmphasisSetupGesture == armREmphasisSetupGesture) {	
+											c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(5);
+					if (temp == 0) {		c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2 && armLEmphasisSetupGesture == armREmphasisSetupGesture) {	
+											c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(5);
+					if (temp == 0) {		c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2 && armLEmphasisSetupGesture == armREmphasisSetupGesture) {	
+											c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armREmphasisSetupGesture;
+					}
+
+				// eArmsEmphType_atSide
+				} else {	
+
+					// don't raise arms (emph1)
+					armLEmphasisSetupGesture = g_armGesture_default; 
+					armLLoopBase = g_armLGesture_atSideEmphasis_loop1; numArmLLoopAlts = 3;
+
+					armREmphasisSetupGesture = g_armGesture_default; 
+					armRLoopBase = g_armRGesture_atSideEmphasis_loop1; numArmRLoopAlts = 3;
+
+					// decide if at an emphasis cue, should one arm move, both, or neither
+					temp = randGen.nextInt(8);
+					if (temp == 0) {		c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2) {	c4p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c4p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c4p2 = armLEmphasisSetupGesture;
+											c4p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(8);
+					if (temp == 0) {		c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2) {	c5p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c5p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c5p2 = armLEmphasisSetupGesture;
+											c5p3 = armREmphasisSetupGesture;
+					}
+					temp = randGen.nextInt(8);
+					if (temp == 0) {		c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armREmphasisSetupGesture;
+					} else if (temp == 1) {	c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else if (temp == 2) {	c6p2 = armLLoopBase + randGen.nextInt(numArmLLoopAlts);
+											c6p3 = armRLoopBase + randGen.nextInt(numArmRLoopAlts);
+					} else {				c6p2 = armLEmphasisSetupGesture;
+											c6p3 = armREmphasisSetupGesture;
+					}
+				}
+			}
+		}
+
+		// ### Filter the gestures through a gesture mapper, modulated by the current arm bases
+		armLEmphasisSetupGesture = GestureMapping.MapArmLRGesture(me, eGestureBodyPartIndex_armL, armLEmphasisSetupGesture, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		armREmphasisSetupGesture = GestureMapping.MapArmLRGesture(me, eGestureBodyPartIndex_armR, armREmphasisSetupGesture, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c1p1 = GestureMapping.MapArmLRGesture(me, c1g1, c1p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c1p2 = GestureMapping.MapArmLRGesture(me, c1g2, c1p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c1p3 = GestureMapping.MapArmLRGesture(me, c1g3, c1p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c2p4 = GestureMapping.MapArmLRGesture(me, c2g4, c2p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c2p1 = GestureMapping.MapArmLRGesture(me, c2g1, c2p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c2p2 = GestureMapping.MapArmLRGesture(me, c2g2, c2p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c2p3 = GestureMapping.MapArmLRGesture(me, c2g3, c2p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c2p4 = GestureMapping.MapArmLRGesture(me, c2g4, c2p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c3p1 = GestureMapping.MapArmLRGesture(me, c3g1, c3p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c3p2 = GestureMapping.MapArmLRGesture(me, c3g2, c3p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c3p3 = GestureMapping.MapArmLRGesture(me, c3g3, c3p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c3p4 = GestureMapping.MapArmLRGesture(me, c3g4, c3p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c4p1 = GestureMapping.MapArmLRGesture(me, c4g1, c4p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c4p2 = GestureMapping.MapArmLRGesture(me, c4g2, c4p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c4p3 = GestureMapping.MapArmLRGesture(me, c4g3, c4p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c4p4 = GestureMapping.MapArmLRGesture(me, c4g4, c4p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c5p1 = GestureMapping.MapArmLRGesture(me, c5g1, c5p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c5p2 = GestureMapping.MapArmLRGesture(me, c5g2, c5p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c5p3 = GestureMapping.MapArmLRGesture(me, c5g3, c5p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c5p4 = GestureMapping.MapArmLRGesture(me, c5g4, c5p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c6p1 = GestureMapping.MapArmLRGesture(me, c6g1, c6p1, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c6p2 = GestureMapping.MapArmLRGesture(me, c6g2, c6p2, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c6p3 = GestureMapping.MapArmLRGesture(me, c6g3, c6p3, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+		c6p4 = GestureMapping.MapArmLRGesture(me, c6g4, c6p4, setPerfArmBaseWME.getArmLBase(), setPerfArmBaseWME.getArmRBase(), setPerfArmBaseWME.getArmsBothBase());
+	}
+
+	//speed with (priority_modifier 99) mental_act { if (me == grace) StringUtil.println("************** 2"); }
+
+	// setup the arms (at 0 priority) for upcoming arm emphasis gestures for this performance, if any
+	// these SPAWN the arms, to let the waiting parallel DoDialog start
+	subgoal SetPerformanceInfo_EmphasisSetupArms(armLEmphasisSetupGesture, armREmphasisSetupGesture);
+
+	// do any startWith performance of just gaze -- ie, if (c1 == startWith)
+	// note we do startWith Gaze BEFORE the setPerformanceInfo act,
+	// because if we did it after, it might set the g_bIgnoreGazeSetPerf flag true in the animEngine, 
+	// which would prevent gaze in setPerformanceInfo from happening
+	// we do the fullexpression and gesture startWiths after the setPerformanceInfo act
+	subgoal SetPerformanceInfo_DoStartWithIfAny_Gaze(c1, c1c, c1gt, c1gp);
+
+	// don't send startWith to the setperfinfo act, because we are manually doing the startWith stuff here in abl
+	mental_act { if (c1 == startWith) newc1 = -1; else newc1 = c1; }
+
+	// cue up the setperfinfo
+	// this is okay to do BEFORE doing the startwith stuff, because setperfinfo is waiting on cues that happen later
+	// we NEED to set this act first, because the startwith behavior will do some acts,
+	// which will allow DoDialog to immediately begin; we need the setperfinfo to be in the animEngine first
+	act setPerformanceInfo(
+		newc1,	c1c, c1gt, c1gp, -1, c1feBase, c1g1, c1p1, c1g2, c1p2, c1g3, c1p3, c1g4, c1p4,
+		c2,		c2c, c2gt, c2gp, -1, c2feBase, c2g1, c2p1, c2g2, c2p2, c2g3, c2p3, c2g4, c2p4,
+		c3,		c3c, c3gt, c3gp, -1, c3feBase, c3g1, c3p1, c3g2, c3p2, c3g3, c3p3, c3g4, c3p4,
+		c4,		c4c, c4gt, c4gp, -1, c4feBase, c4g1, c4p1, c4g2, c4p2, c4g3, c4p3, c4g4, c4p4,
+		c5,		c5c, c5gt, c5gp, -1, c5feBase, c5g1, c5p1, c5g2, c5p2, c5g3, c5p3, c5g4, c5p4,
+		c6,		c6c, c6gt, c6gp, -1, c6feBase, c6g1, c6p1, c6g2, c6p2, c6g3, c6p3, c6g4, c6p4); 
+
+	//speed with (priority_modifier 99) mental_act { if (me == grace) StringUtil.println("************** 3"); }
+
+	// do any startWith performance of fullexpression and gesture -- ie, if (c1 == startWith)
+	// note that if there are arm gestures in this, then we wouldn't have even done any arm emphasis setup earlier
+	// once these acts begin, DoDialog will be able to begin
+	// note that DoDialog should not be allowed to start until the setPerformanceInfo act is done,
+	// because setPerformanceInfo relies on dialog cues
+	subgoal SetPerformanceInfo_DoStartWithIfAny_FullExprAndGesture(
+		c1, c1c, c1feBase, c1g1, c1p1, c1g2, c1p2, c1g3, c1p3, c1g4, c1p4);
+
+	//speed with (priority_modifier 99) mental_act { if (me == grace) StringUtil.println("************** 4"); }
+
+	// SetPerformanceInfo() is subgoaled team_effect_only
+	// so we can safely WAIT FOREVER, in order to keep hold of our resources
+	// this behavior will die when the beatgoal terminates
+
+	// first release resources after a timeout, if requested
+	with (ignore_failure) subgoal SetPerformanceInfo_ReleaseAfterTimeout(releaseTimeout);	
+
+	wait;
+}
+
+
+// #############
+sequential behavior SetPerformanceInfo_CheckIfResourceIsFree(int resourceID) {
+	precondition {	setPerfTempWME = (SetPerfTempWME) 
+					(BodyResourceWME resourceID == resourceID  owner == null) }
+	specificity 2;
+	mental_act { setPerfTempWME.setBVal(true); }
+}
+sequential behavior SetPerformanceInfo_CheckIfResourceIsFree(int resourceID) {
+	precondition { setPerfTempWME = (SetPerfTempWME) }
+	specificity 1;
+	mental_act { setPerfTempWME.setBVal(false); }
+}
+
+
+// #############
+// SetPerformanceInfo_RequestResource
+sequential behavior SetPerformanceInfo_RequestResource(int resourceID, int resourcePriority, BehaviorWME ownerBehaviorWME) {
+	precondition { (resourcePriority >= 0) }
+	specificity 2;
+	subgoal RequestOrConfirmBodyResource(resourceID, resourcePriority, eBodyResourceAction_fail, ownerBehaviorWME);
+}
+
+// do nothing if we don't want the resource after all 
+sequential behavior SetPerformanceInfo_RequestResource(int resourceID, int resourcePriority, BehaviorWME ownerBehaviorWME) {
+	precondition { (resourcePriority < 0) }
+	specificity 1;
+	succeed_step;
+}
+
+// #############
+sequential behavior SetPerformanceInfo_CheckIfResourceOwned(int resourceID) {
+	precondition { setPerfTempWME = (SetPerfTempWME) }
+	specificity 2;
+	subgoal BodyResources_IsOwner(resourceID);
+	mental_act { setPerfTempWME.setBVal(true); }
+	//mental_act { StringUtil.println(myName + " SetPerformanceInfo got resource " + PrintUtilities.bodyResource(resourceID)); }
+}
+sequential behavior SetPerformanceInfo_CheckIfResourceOwned(int resourceID) {
+	precondition { setPerfTempWME = (SetPerfTempWME) }
+	specificity 1;
+	mental_act { setPerfTempWME.setBVal(false); }
+	//mental_act { StringUtil.println(myName + " SetPerformanceInfo did NOT get resource " + PrintUtilities.bodyResource(resourceID)); }
+}
+
+
+
+// #############
+parallel behavior SetPerformanceInfo_DoStartWithIfAny_Gaze(int c1, int c1c, int c1gt, int c1gp)
+{
+	precondition { (c1 == startWith) }
+
+	// for all startWith requests, we should already own the resources
+	// except for feBase, if any of the below types/bodyparts are -1, each succeeds with no problem
+
+	with (ignore_failure) subgoal DoGaze(-1, c1gt, c1gp);		
+}
+// needed to allow above version to fail if we couldn't get a guaranteed resource, 
+// but not fail if the above precondition fails (which is okay)
+parallel behavior SetPerformanceInfo_DoStartWithIfAny_Gaze(int c1, int c1c, int c1gt, int c1gp)
+{
+	precondition { (c1 != startWith) }
+	succeed_step;	
+}
+
+
+// #############
+parallel behavior SetPerformanceInfo_DoStartWithIfAny_FullExprAndGesture(
+		int c1, int c1c, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4)
+{
+	precondition { (c1 == startWith) }
+
+	// for all startWith requests, we should already own the resources
+	// except for feBase, if any of the below types/bodyparts are -1, each succeeds with no problem
+
+	with (ignore_failure) subgoal DoFullExpressionBase(-1, c1feBase);	
+	with (ignore_failure) subgoal DoGesture(-1, c1g1, c1p1, false);	
+	with (ignore_failure) subgoal DoGesture(-1, c1g2, c1p2, false);	
+	with (ignore_failure) subgoal DoGesture(-1, c1g3, c1p3, false);	
+	with (ignore_failure) subgoal DoGesture(-1, c1g4, c1p4, false);	
+}
+// needed to allow above version to fail if we couldn't get a guaranteed resource, 
+// but not fail if the above precondition fails (which is okay)
+parallel behavior SetPerformanceInfo_DoStartWithIfAny_FullExprAndGesture(
+		int c1, int c1c, int c1feBase, int c1g1, int c1p1, int c1g2, int c1p2, int c1g3, int c1p3, int c1g4, int c1p4)
+{
+	precondition { (c1 != startWith) }
+	succeed_step;	
+}
+
+
+// #############
+parallel behavior SetPerformanceInfo_EmphasisSetupArms(int armLEmphasisSetupGesture, int armREmphasisSetupGesture) {
+	precondition { (armLEmphasisSetupGesture != -1 && armREmphasisSetupGesture != -1) }
+	//with (priority_modifier 1) mental_act { StringUtil.println(myName + " SetPerformanceInfo_EmphasisSetupArms trying"); }
+	// this is at 0 priority to allow other behaviors to override unimportant emphases
+	// because the resource may get taken away (which is okay), we use ignore_failure
+	// NOTE we SPAWN these, so as not to wait for the setup to be done before the setperfinfo act is passed to the animengine
+	with (ignore_failure, priority_modifier 1) 
+		spawngoal DoGesture(0, eGestureBodyPartIndex_armL, armLEmphasisSetupGesture, false); 
+	with (ignore_failure, priority_modifier 1) 
+		spawngoal DoGesture(0, eGestureBodyPartIndex_armR, armREmphasisSetupGesture, false); 
+
+	//with (priority_modifier 100) mental_act { StringUtil.println("### " + myName + " SetPerformanceInfo_EmphasisSetupArms " + armLEmphasisSetupGesture + " " + armREmphasisSetupGesture); }
+	//with (priority_modifier 100) subgoal PrintIfResourceIsGettable(eGestureBodyPartIndex_armL, 0);
+	//with (priority_modifier 100) subgoal PrintIfResourceIsGettable(eGestureBodyPartIndex_armR, 0);
+}
+// needed to allow above version to fail if we couldn't get a resource, but not fail if the above precondition fails
+parallel behavior SetPerformanceInfo_EmphasisSetupArms(int armLEmphasisSetupGesture, int armREmphasisSetupGesture) {
+	precondition { (!(armLEmphasisSetupGesture != -1 && armREmphasisSetupGesture != -1)) }
+	succeed_step;	
+}
+
+
+// #############
+sequential behavior SetPerformanceInfo_ReleaseAfterTimeout(int releaseTimeout) {
+	precondition { (releaseTimeout > 0) }
+	subgoal WaitFor(releaseTimeout);
+	//mental_act { StringUtil.println("### SetPerformanceInfo_ReleaseAfterTimeout"); }
+	with (ignore_failure) subgoal ReleaseBodyResource(eBodyResourceID_gaze);
+	with (ignore_failure) subgoal ReleaseBodyResource(eBodyResourceID_armL);
+	with (ignore_failure) subgoal ReleaseBodyResource(eBodyResourceID_armR);
+}
+
+// #############
+// first get the arm base info
+sequential behavior SetPerformanceInfo_GetArmBase() {
+	precondition {	(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armLGesture
+								base :: armLBase)
+					(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armRGesture
+								base :: armRBase) 
+					setPerfArmBaseWME = (SetPerfArmBaseWME) }
+	specificity 2;
+	mental_act {
+		setPerfArmBaseWME.setArmLBase(armLBase);
+		setPerfArmBaseWME.setArmRBase(armRBase);
+		setPerfArmBaseWME.setArmsBothBase(-1);
+	}
+}
+sequential behavior SetPerformanceInfo_GetArmBase() {
+	precondition {	(ArmBaseWME	characterID == me 
+								gestureLayer == eAnimLayer_armsBothGesture
+								base :: armsBothBase) 
+					setPerfArmBaseWME = (SetPerfArmBaseWME) }
+	specificity 2;
+	mental_act {
+		setPerfArmBaseWME.setArmLBase(-1);
+		setPerfArmBaseWME.setArmRBase(-1);
+		setPerfArmBaseWME.setArmsBothBase(armsBothBase);
+	}
+}
+sequential behavior SetPerformanceInfo_GetArmBase() {
+	precondition { setPerfArmBaseWME = (SetPerfArmBaseWME) }
+	specificity 1;
+	mental_act { assert false : ("bad arm base in SetPerformanceInfo_GetArmBase"); }
+	mental_act {
+		setPerfArmBaseWME.setArmLBase(-1);
+		setPerfArmBaseWME.setArmRBase(-1);
+		setPerfArmBaseWME.setArmsBothBase(-1);
+	}
+}
+
+// ------------
+
+// ############
+atomic sequential behavior AddEventWME(int type, int charID, int objID, int activ, 
+										boolean bVal, int iVal, int iVal2, float fVal) {
+	WorkingMemory beatMemory;
+	mental_act { 
+		beatMemory = WorkingMemory.lookupRegisteredMemory("BeatMemory");
+		beatMemory.addWME(new EventWME(type, charID, objID, activ, bVal, iVal, iVal2, fVal)); 
+	}
+}
+
+
+// ######
+sequential behavior DoNoticePlayerInteractionLittleAction() {
+	int cockAmount;
+	float duration;
+	mental_act {	cockAmount = 3 + randGen.nextInt(9);  duration = 1.0f + randGen.nextFloat()*1.0f; 
+					if (randGen.nextInt(2) == 0) cockAmount = -cockAmount; }
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_normal, player);
+	with (ignore_failure) subgoal DoMiscLittleAction(eMiscLittleAction_cockHead, cockAmount, duration);
+}
+
+// ############
+parallel behavior DoRaiseArms() {
+	subgoal DoGesture(55, eGestureBodyPartIndex_armL, g_armLGesture_atSideEmphasis3, true);
+	subgoal DoGesture(55, eGestureBodyPartIndex_armR, g_armRGesture_atSideEmphasis3, true);
+}
+
+// ############
+parallel behavior DoLowerArms() {
+	subgoal DoGesture(55, eGestureBodyPartIndex_armL, g_armGesture_default, true);
+	subgoal DoGesture(55, eGestureBodyPartIndex_armR, g_armGesture_default, true);
+}
+
+sequential behavior DoLowerArmsAfterDelay(int delay) {
+	subgoal WaitFor(delay);
+	subgoal DoLowerArms();
+}
+
+/* APS 7.25.03: Cut the raise arm version, it doesn't look good
+
+// ############
+// the version that tries to raise arm
+sequential behavior DoClearThroat(int finalLook) {
+	specificity 2;
+
+	// grab the voice at beat priority; fail if we cannot
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_voice, 70, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	// check if we can do the arm gesture; puts return value in DoGestureTempWME
+	subgoal MapSuppressOrKeepGesture(g_objArm, g_armGesture_clearThroat);
+
+	// grab the arm resource if we need it
+	with (ignore_failure) subgoal DoClearThroat_PossiblyGrabArmResource(ownerBehaviorWME);
+
+	// depending on what's available, do different versions of clear throat
+	// we do ignore_failure in case one fails during the performance; we don't want the other version to subsequently happen
+	with (ignore_failure) subgoal DoClearThroat_Body(ownerBehaviorWME);
+
+	with (ignore_failure) subgoal DoClearThroat_PossibleFinalLook(finalLook);
+}
+
+// if the gesture didn't get mapped/suppressed, grab the arm resource at 0 priority (ie, at most overriding emphasis gestures)
+sequential behavior DoClearThroat_PossiblyGrabArmResource(BehaviorWME requestingBehavior) {
+	precondition {	(DoGestureTempWME val == g_armGesture_clearThroat) }
+	subgoal RequestOrConfirmBodyResource(g_objArmResource, 0, eBodyResourceAction_fail, requestingBehavior);
+}
+
+
+// ## do the full clear throat behavior if the gesture wasn't mapped/suppressed,
+// and if we own the arm resource
+parallel behavior DoClearThroat_Body(BehaviorWME requestingBehavior) {
+	precondition {	(DoGestureTempWME val == g_armGesture_clearThroat) 
+					(BodyResourceWME resourceID == g_objArmResource  owner == requestingBehavior) }
+	specificity 2;
+	with (priority_modifier 2) mental_act { StringUtil.println(myName + " DoClearThroat_Body with gesture"); }
+
+	// do the arm gesture
+	subgoal DoGesture(-1, g_objArm, g_armGesture_clearThroat, false);
+
+	// in parallel, wait for cue or timeout to do littleaction and dialog
+	with (priority_modifier 1) subgoal DoClearThroat_FullPerformOnCueOrTimeout();
+}
+
+sequential behavior DoClearThroat_FullPerformOnCueOrTimeout() {
+	subgoal DoClearThroat_FullPerformOnCueOrTimeout_Wait();
+	subgoal DoClearThroat_FullPerformOnCueOrTimeout_Body();
+
+	// start arm returning to side
+	spawngoal DoGesture(-1, g_objArm, g_armGesture_default, false);
+}
+
+parallel behavior DoClearThroat_FullPerformOnCueOrTimeout_Wait() {
+	number_needed_for_success 1;
+	with (success_test { (AnimationCueWME layerIndex == g_objArmAnimLayer  cue == eScriptCue_clearThroat) } ) wait;
+	subgoal WaitFor(3);
+}
+
+parallel behavior DoClearThroat_FullPerformOnCueOrTimeout_Body() {
+	subgoal DoMiscLittleAction(eMiscLittleAction_clearThroat, 0, 0.0f);		// turns and tilt head towards hand
+	subgoal DoDialog(-1, false, g_dialog_clearThroat);
+}
+
+// ## otherwise, just do the clearthroat sound
+parallel behavior DoClearThroat_Body(BehaviorWME requestingBehavior) {
+	specificity 1;
+	with (priority_modifier 1) mental_act { StringUtil.println(myName + " DoClearThroat_Body without gesture"); }
+	subgoal DoDialog(-1, false, g_dialog_clearThroat);
+}
+
+*/
+
+// possibly do a final look
+sequential behavior DoClearThroat_PossibleFinalLook(int finalLook) {
+	precondition { (finalLook != noOne) }
+	subgoal DoGaze(40, eGazeType_normal, finalLook);
+	subgoal WaitFor(1);
+}
+
+// ############
+// the version that only turns away and makes sound, and does the final look
+sequential behavior DoClearThroat(int finalLook) {
+	specificity 2;
+
+	// grab the voice at beat priority; fail if we cannot
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_voice, 70, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	mental_act { StringUtil.println(myName + " DoClearThroat turn away"); }
+	with (ignore_failure) subgoal DoGaze(40, eGazeType_avert, spouse);
+	subgoal WaitFor(0.5f);
+	subgoal DoDialog(-1, false, g_dialog_clearThroat);
+
+	with (ignore_failure) subgoal DoClearThroat_PossibleFinalLook(finalLook);
+}
+
+// ############
+// fall back if DoClearThroat() failed
+sequential behavior DoClearThroat(int finalLook) {
+	specificity 1;
+	mental_act { StringUtil.println(myName + " DoClearThroat failed to get required resources"); }
+}
+
+
+// ############
+sequential behavior DoClearThroatAfterDelay(int finalLook, float delay) {
+	subgoal WaitFor(delay);
+	subgoal DoClearThroat(finalLook);
+}
+
+
+// ############
+// do temporary annoyed spouse glance
+sequential behavior DoTemporaryAnnoyedSpouseGlanceAfterDelay(float delay) {
+	subgoal WaitFor(delay);
+	with (ignore_failure) subgoal DoMiscLittleAction(eMiscLittleAction_temporaryAnnoyedSpouseGlance, 0, 0.0f);
+}
+
+
+// ############
+// do a little petulant reaction to a sprite 
+sequential behavior DoLittlePetulantReactionTo(int gazeSprite) {
+	// grab the voice at beat priority; fail if we cannot
+	BehaviorWME ownerBehaviorWME;
+	mental_act { ownerBehaviorWME = getReflectionWME().getParent(); }
+	subgoal RequestOrConfirmBodyResource(eBodyResourceID_voice, 70, eBodyResourceAction_fail, ownerBehaviorWME);
+
+	//mental_act { StringUtil.println(myName + " DoLittlePetulantReaction"); }
+	with (ignore_failure) subgoal DoGaze(40, eGazeType_normal, gazeSprite);
+	with (ignore_failure) 
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_impatient, eLittleActionStrength_low);
+	subgoal DoDialog(-1, false, g_dialog_sigh_short_petulant);
+}
+
+sequential behavior DoLittlePetulantReactionAfterDelayTo(int gazeSprite, float delay) {
+	subgoal WaitFor(delay);
+	with (ignore_failure) subgoal DoLittlePetulantReactionTo(gazeSprite);
+}
+
+sequential behavior MaybeDoLittlePetulantReactionAfterDelayTo(int gazeSprite, float delay) {
+	subgoal WaitFor(delay);
+	with (ignore_failure) subgoal DoLittlePetulantReactionTo(gazeSprite);
+}
+sequential behavior MaybeDoLittlePetulantReactionAfterDelayTo(int gazeSprite, float delay) {
+	succeed_step;
+}
+
+
+
+// -------------
+
+
+// #########
+sequential behavior SetMonitorPlayerBehavior(boolean bMonitorAntisocial,
+												boolean bMonitorLeavingApartment,
+												boolean bMonitorLeavingForKitchen) {
+	precondition { PlayerMemory w = (PlayerUncoopWME) }
+	boolean bOrigMonitorAntisocial;
+	boolean bOrigMonitorLeavingApartment;
+	boolean bOrigMonitorLeavingForKitchen;
+	mental_act {
+		bOrigMonitorAntisocial = w.getBMonitorAntisocial();
+		bOrigMonitorLeavingApartment = w.getBMonitorLeavingApartment();
+		bOrigMonitorLeavingForKitchen = w.getBMonitorLeavingForKitchen();
+		w.setBMonitorAntisocial(bMonitorAntisocial);
+		w.setBMonitorLeavingApartment(bMonitorLeavingApartment);
+		w.setBMonitorLeavingForKitchen(bMonitorLeavingForKitchen);
+
+		// reset this value to its default
+		w.setLeavingForKitchenZ(110.0f);
+
+		// if turning it on, reset its state
+		if (!bOrigMonitorAntisocial && bMonitorAntisocial) {
+			w.setMillisLastSpoke(0);
+			w.setMillisLastStill(0);
+			w.setMillisLastBeganMoving(0);
+		}
+		if (!bOrigMonitorLeavingApartment && bMonitorLeavingApartment) {
+			w.setMillisStartedLeavingApartment(0);
+		} 
+		if (!bOrigMonitorLeavingForKitchen && bMonitorLeavingForKitchen) {
+			w.setMillisStartedLeavingForKitchen(0);
+		} 
+	}
+}
+
+// #########
+sequential behavior SetMonitorPlayerBehaviorLeavingForKitchenZ(float val) {
+	precondition { PlayerMemory w = (PlayerUncoopWME) }
+	mental_act { w.setLeavingForKitchenZ(val); }
+}
+
+
+// -------------
+
+
+// ###############
+// CheckLongTermPriority
+
+// Given a oneAtATime priority, decides whether the new longterm request should kill itself off (by failing) 
+// or whether this new longterm request should kill off the current longterm behavior, if any.
+
+// there is no other previous longTerm goal currently running -- so there's no checking to do
+atomic sequential behavior CheckLongTermPriority() {
+	precondition {	(GoalStepWME isLongTermGoal != null  signature :: sig)
+					!(GoalStepWME isLongTermGoal != null signature != sig) }
+	specificity 3;
+	succeed_step;
+}
+
+// compare oneAtATime priorities between this new longterm and the current one
+atomic sequential behavior CheckLongTermPriority() {
+	precondition {	longTermGoal1 = (GoalStepWME isLongTermGoal != null  signature :: sig1  
+										oneAtATime :: oneAtATimeObj1)	
+
+					longTermGoal2 = (GoalStepWME isLongTermGoal != null  signature != sig1  
+										oneAtATime :: oneAtATimeObj2) }
+	specificity 2;
+
+	// longTermGoal1 is randomly either us (the new longterm goal), or the other current longterm goal
+	// longTermGoal2 is the other, depending on longTermGoal1
+
+	mental_act { 
+
+		// get the integer values of the property objects (the abl compiler does not yet unwrap these yet)
+		int oneAtATime1 = ((Integer)oneAtATimeObj1).intValue(); 
+		int oneAtATime2 = ((Integer)oneAtATimeObj2).intValue(); 
+
+		// figure out which is longTermGoal is not us
+		StepWME thisGoal = getReflectionWME();
+
+		// if we are longTermGoal1
+		if (thisGoal.isParent(longTermGoal1)) {
+
+			// if we are to always run, fail the other
+			if (oneAtATime1 == eOneAtATimePriority_always) {
+				longTermGoal2.fail(); 
+
+			// if we are to run only if the other is not "always", 
+			// and if the other actually is not "always", fail the other
+			} else if (oneAtATime1 == eOneAtATimePriority_ifNotAlways &&
+					oneAtATime2 != eOneAtATimePriority_always) {
+				longTermGoal2.fail(); 
+
+			// otherwise, fail ourself
+			} else {
+				longTermGoal1.fail(); 
+			}
+
+		// DUPLICATE LOGIC AS ABOVE, but with 1 and 2 switched
+		} else {
+			if (oneAtATime2 == eOneAtATimePriority_always) {
+				longTermGoal1.fail(); 
+
+			} else if (oneAtATime2 == eOneAtATimePriority_ifNotAlways &&
+					oneAtATime1 != eOneAtATimePriority_always) {
+				longTermGoal1.fail(); 
+
+			} else {
+				longTermGoal2.fail(); 
+			}
+		}
+	}
+}
+
+atomic sequential behavior CheckLongTermPriority() {
+	specificity 1;
+	mental_act { StringUtil.println("### ERROR: CheckLongTermPriority couldn't do the test properly"); }
+	mental_act { assert(false); }
+}
+
+
+
+// ##################
+// ##################
+// ## setting anaphoric references
+
+// ##
+sequential behavior SetHeRef(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 	
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting HeRef to " + charID);
+		anaphoricRefWME.setHeRef(charID); 
+	}
+}
+sequential behavior SetHeRef(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set HeRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetHeRefDefault(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting HeRef default to " + charID);
+		anaphoricRefWME.setHeRefDefault(charID); 
+	}
+}
+sequential behavior SetHeRefDefault(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set HeRef default failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetHeRefTimeout(int seconds) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		StringUtil.println("$$$$$ Setting HeRef timeout to " + seconds);
+		anaphoricRefWME.setHeRefTimeout(seconds); 
+	}
+}
+sequential behavior SetHeRefTimeout(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set HeRef timeout failed - AnaphoricReferenceWME not found"); }
+}
+
+
+// #####
+sequential behavior SetSheRef(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting SheRef to " + charID);
+		anaphoricRefWME.setSheRef(charID); 
+	}
+}
+sequential behavior SetSheRef(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set SheRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetSheRefDefault(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting SheRef default to " + charID);
+		anaphoricRefWME.setSheRefDefault(charID); 
+	}
+}
+sequential behavior SetSheRefDefault(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set SheRef default failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetSheRefTimeout(int seconds) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		StringUtil.println("$$$$$ Setting SheRef timeout to " + seconds);
+		anaphoricRefWME.setSheRefTimeout(seconds); 
+	}
+}
+sequential behavior SetSheRefTimeout(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set SheRef timeout failed - AnaphoricReferenceWME not found"); }
+}
+
+
+// #####
+sequential behavior SetYouRef(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting YouRef to " + charID);
+		anaphoricRefWME.setYouRef(charID); 
+	}
+}
+sequential behavior SetYouRef(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set YouRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetYouRefDefault(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting YouRef default to " + charID);
+		anaphoricRefWME.setYouRefDefault(charID); 
+	}
+}
+sequential behavior SetYouRefDefault(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set YouRef default failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetYouRefTimeout(int seconds) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		StringUtil.println("$$$$$ Setting YouRef timeout to " + seconds);
+		anaphoricRefWME.setYouRefTimeout(seconds); 
+	}
+}
+sequential behavior SetYouRefTimeout(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set YouRef timeout failed - AnaphoricReferenceWME not found"); }
+}
+
+// #####
+sequential behavior SetYouRefNoOverride(int charID) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(charID >= eSpriteID_FIRST_CHARACTER && charID <= eSpriteID_LAST_CHARACTER); 
+		StringUtil.println("$$$$$ Setting youRefNoOverride to " + charID);
+		anaphoricRefWME.setYouRefNoOverride(charID); 
+	}
+}
+sequential behavior SetYouRefNoOverride(int charID) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set YouRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// #####
+sequential behavior SetItRefAndDefault(int objParam) {
+	subgoal SetItRef(objParam);
+	subgoal SetItRefDefault(objParam);
+	subgoal SetItRefTimeout(15);
+}
+
+// #####
+sequential behavior SetTemporaryItRef(int objParam, int timeout) {
+	precondition { StoryMemory (AnaphoricReferenceWME itRef :: origItRef) }
+	subgoal SetItRef(objParam);
+	subgoal SetItRefDefault(origItRef);	// set the default to what the itRef was originally
+	subgoal SetItRefTimeout(timeout);
+}
+
+// #####
+sequential behavior SetItRef(int objParam) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(objParam == eDAMiscParam_NOPARAM || objParam == eDAMiscParam_NOITREF ||
+					(objParam >= eDAObjectParam_FIRST && objParam <= eDAObjectParam_LAST) || 
+					(objParam >= eDASatelliteTopicParam_FIRST && objParam <= eDASatelliteTopicParam_LAST)); 
+
+		// change the itRef, unless requested not to
+		if (objParam != eDAMiscParam_NOITREF) {
+			StringUtil.println("$$$$$ Setting ItRef to " + objParam);
+			anaphoricRefWME.setItRef(objParam); 
+		}
+	}
+
+	// also try updating the ThisRef; this may be ignored if the player is already holding something
+	subgoal SetThisRef(objParam);
+}
+sequential behavior SetItRef(int objParam) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ItRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetItRefDefault(int objParam) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(objParam == eDAMiscParam_NOPARAM || 
+					(objParam >= eDAObjectParam_FIRST && objParam <= eDAObjectParam_LAST) || 
+					(objParam >= eDASatelliteTopicParam_FIRST && objParam <= eDASatelliteTopicParam_LAST)); 
+		StringUtil.println("$$$$$ Setting ItRef default to " + objParam);
+		anaphoricRefWME.setItRefDefault(objParam); 
+	}
+}
+sequential behavior SetItRefDefault(int objParam) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ItRef default failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetItRefTimeout(int seconds) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		StringUtil.println("$$$$$ Setting ItRef timeout to " + seconds);
+		anaphoricRefWME.setItRefTimeout(seconds); 
+	}
+}
+sequential behavior SetItRefTimeout(int seconds) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ItRef timeout failed - AnaphoricReferenceWME not found"); }
+}
+
+
+
+// #####
+// Set ThisRef to what the player is holding, if something is held and it qualifies
+sequential behavior SetThisRef(int itRefObjParam) {
+	precondition { (HeldObjectWME characterID == eSpriteID_player  objectID :: heldObjSpriteID) }
+	int objParam;
+
+	// there are a few sprites that can be held, that can map to eDAObjectParams
+	mental_act {
+		if (heldObjSpriteID >= eSpriteID_trinket1 && heldObjSpriteID <= eSpriteID_trinket8) {
+			objParam = eDAObjectParam_trinkets;
+		} else if (heldObjSpriteID >= eSpriteID_FIRSTDRINKITEM && heldObjSpriteID <= eSpriteID_LASTDRINKITEM) {
+			objParam = eDAObjectParam_drinks;
+		} else if (heldObjSpriteID == eSpriteID_eightball) {
+			objParam = eDAObjectParam_eightball;
+		} else if (heldObjSpriteID == eSpriteID_brassbull) {
+			objParam = eDAObjectParam_brassBull;
+		} else {
+			objParam = itRefObjParam;
+		}
+
+		if (objParam != itRefObjParam) {
+			StringUtil.println("$$$$$ SetThisRef found held object " + heldObjSpriteID);
+		}
+	}
+	subgoal SetThisRef_Body(objParam);
+}
+
+// Otherwise, set ThisRef to be the same as the itRef, passed in here
+sequential behavior SetThisRef(int itRefObjParam) {
+	precondition { !(HeldObjectWME characterID == eSpriteID_player) }
+	subgoal SetThisRef_Body(itRefObjParam);
+}
+
+
+// this is sometimes different from ItRef, when an object is being held
+sequential behavior SetThisRef_Body(int objParam) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(objParam == eDAMiscParam_NOPARAM || objParam == eDAMiscParam_NOITREF ||
+					(objParam >= eDAObjectParam_FIRST && objParam <= eDAObjectParam_LAST) || 
+					(objParam >= eDASatelliteTopicParam_FIRST && objParam <= eDASatelliteTopicParam_LAST)); 
+
+		// change the thisRef, unless requested not to
+		if (objParam != eDAMiscParam_NOITREF) {
+			StringUtil.println("$$$$$ Setting ThisRef to " + objParam);
+			anaphoricRefWME.setThisRef(objParam); 
+		}
+	}
+}
+sequential behavior SetThisRef_Body(int objParam) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ThisRef failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetThisRefDefault(int objParam) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		assert(objParam == eDAMiscParam_NOPARAM || 
+					(objParam >= eDAObjectParam_FIRST && objParam <= eDAObjectParam_LAST) || 
+					(objParam >= eDASatelliteTopicParam_FIRST && objParam <= eDASatelliteTopicParam_LAST)); 
+		StringUtil.println("$$$$$ Setting ThisRef default to " + objParam);
+		anaphoricRefWME.setThisRefDefault(objParam); 
+	}
+}
+sequential behavior SetThisRefDefault(int objParam) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ThisRef default failed - AnaphoricReferenceWME not found"); }
+}
+
+// ##
+sequential behavior SetThisRefTimeout(int seconds) {
+	specificity 2;
+	precondition { StoryMemory anaphoricRefWME = (AnaphoricReferenceWME) }
+	mental_act { 
+		StringUtil.println("$$$$$ Setting ThisRef timeout to " + seconds);
+		anaphoricRefWME.setThisRefTimeout(seconds); 
+	}
+}
+sequential behavior SetThisRefTimeout(int seconds) {
+	specificity 1;
+	mental_act { StringUtil.println("$$$$$ Attempt to set ThisRef timeout failed - AnaphoricReferenceWME not found"); }
+}
+
+
+// ##########
+// which post beat mixin to do
+sequential behavior SetPostBeatMixin(int which) {
+	subgoal SetPostBeatMixin(which, -1);
+}
+
+// if repeat is ePostBeatMixinID_RepeatGrace or RepeatTrip, then set that as the actual value
+sequential behavior SetPostBeatMixin(int which, int repeat) {
+	precondition { StoryMemory pbmWME = (PostBeatMixinInfoWME) }
+	specificity 2;
+
+	mental_act {
+		StringUtil.println("### SetPostBeatMixin " +which);
+		switch (which) {
+
+			case ePostBeatMixinID_GGreetsP_Positive:
+			case ePostBeatMixinID_GGreetsP_Negative:
+			case ePostBeatMixinID_GGreetsP_Neutral:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatGGreetsP(which);
+				break;
+
+			case ePostBeatMixinID_ArtistAdvT1N_NoAffinityChange:
+			case ePostBeatMixinID_ArtistAdvT1N_LeanToGPA:
+			case ePostBeatMixinID_ArtistAdvT1N_LeanToTPA:
+			case ePostBeatMixinID_ArtistAdvT1GPA_NoAffinityChange:
+			case ePostBeatMixinID_ArtistAdvT1GPA_LeanToGPA:
+			case ePostBeatMixinID_ArtistAdvT1GPA_LeanToTPA:
+			case ePostBeatMixinID_ArtistAdvT1TPA_NoAffinityChange:
+			case ePostBeatMixinID_ArtistAdvT1TPA_LeanToGPA:
+			case ePostBeatMixinID_ArtistAdvT1TPA_LeanToTPA:
+			case ePostBeatMixinID_ArtistAdvT2GPA_NoAffinityChange:
+			case ePostBeatMixinID_ArtistAdvT2GPA_LeanToGPA:
+			case ePostBeatMixinID_ArtistAdvT2GPA_LeanToTPA:
+			case ePostBeatMixinID_ArtistAdvT2TPA_NoAffinityChange:
+			case ePostBeatMixinID_ArtistAdvT2TPA_LeanToGPA:
+			case ePostBeatMixinID_ArtistAdvT2TPA_LeanToTPA:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatArtistAdv(which);
+				break;
+
+			case ePostBeatMixinID_ExplDatAnniv_Agree:
+			case ePostBeatMixinID_ExplDatAnniv_MildDisagree:
+			case ePostBeatMixinID_ExplDatAnniv_StrongDisagree:
+			case ePostBeatMixinID_ExplDatAnniv_NonAnswer:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatExplDatAnniv(which);
+				pbmWME.setBExplDatAnniv(true);
+				break;
+
+			case ePostBeatMixinID_FAskDrinks_Agree:
+			case ePostBeatMixinID_FAskDrinks_Disagree:
+			case ePostBeatMixinID_FAskDrinks_NonAnswer:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatFAskDrink(which);
+				break;
+
+
+			case ePostBeatMixinID_RockyMarriageT1_WrongAnswer:
+			case ePostBeatMixinID_RockyMarriageT1_RightAnswer:
+			case ePostBeatMixinID_RockyMarriageT1_PlayerNotAtPicture:
+			case ePostBeatMixinID_RockyMarriageT2_WrongAnswer:
+			case ePostBeatMixinID_RockyMarriageT2_RightAnswer:
+			case ePostBeatMixinID_RockyMarriageT2_PlayerNotAtPicture:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatRockyMarriage(which);
+				break;
+
+			//fixme: do RockyMarriage_WorkTable
+
+			case ePostBeatMixinID_PhoneCall_G_PlayerDidNotPickUp:
+			case ePostBeatMixinID_PhoneCall_G_PlayerDidPickUp:
+			case ePostBeatMixinID_PhoneCall_T_PlayerDidNotPickUp:
+			case ePostBeatMixinID_PhoneCall_T_PlayerDidPickUp:
+				if (repeat == ePostBeatMixinID_RepeatGrace || 
+					repeat == ePostBeatMixinID_RepeatTrip) which = repeat;
+				pbmWME.setBeatPhoneCall(which);
+				break;
+
+			default:
+				StringUtil.println("### Unhandled value in SetPostBeatMixin " +which+ " " +repeat); 
+				break;
+		}
+	}
+}
+
+sequential behavior SetPostBeatMixin(int which, int repeat) {
+	specificity 1;
+	mental_act { StringUtil.println("### ERROR in SetPostBeatMixin " +which+ " " +repeat); }
+}
+
+
+
+// ##########
+// which postbeatmixin Phase I NLU to activate (some beats only have one rule)
+sequential behavior TurnOnPostBeatMixinNLURule(int which, boolean bVal) {
+	precondition { StoryMemory pbmWME = (PostBeatMixinInfoWME) }
+	specificity 2;
+
+	mental_act {
+		StringUtil.println("### TurnOnPostBeatMixinNLURule " +which+ " " +bVal);
+		switch (which) {
+
+			case ePostBeatMixinRuleFlag_bGGreetsP:
+				pbmWME.setBGGreetsP(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_txnIn:
+				pbmWME.setBAA_decorating_txnIn(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_txnOut:
+				pbmWME.setBAA_decorating_txnOut(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_styleApt:
+				pbmWME.setBAA_decorating_styleApt(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_couch:
+				pbmWME.setBAA_decorating_couch(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_armoire:
+				pbmWME.setBAA_decorating_armoire(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_trinkets:
+				pbmWME.setBAA_decorating_trinkets(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_paintings:
+				pbmWME.setBAA_decorating_paintings(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_weddingPicture:
+				pbmWME.setBAA_decorating_weddingPicture(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_view:
+				pbmWME.setBAA_decorating_view(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_sideTable:
+				pbmWME.setBAA_decorating_sideTable(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bAA_decorating_rug:
+				pbmWME.setBAA_decorating_rug(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bExplDatAnniv:
+				pbmWME.setBExplDatAnniv(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bRM_Italy:
+				pbmWME.setBRM_Italy(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bFAskDrinks:
+				pbmWME.setBFAskDrinks(bVal);
+				break;
+
+			case ePostBeatMixinRuleFlag_bPhoneCall:
+				pbmWME.setBPhoneCall(bVal);
+				break;
+
+
+			default:
+				StringUtil.println("### Unhandled value in TurnOnPostBeatMixinNLURule " +which); 
+				break;
+		}
+	}
+}
+
+sequential behavior TurnOnPostBeatMixinNLURule(int which, boolean bVal) {
+	specificity 1;
+	mental_act { StringUtil.println("### ERROR in TurnOnPostBeatMixinNLURule " +which); }
+}
+
+
+
+// ---------
+
+
+sequential behavior PutDownHeldObject() {
+	precondition { (HeldObjectWME characterID == me  attachPointID == g_objHand) }
+	specificity 2;
+	mental_act { StringUtil.println("PutDownHeldObject object"); }
+	with (ignore_failure) subgoal PutDownHeldObject_Obj();
+}
+
+sequential behavior PutDownHeldObject() {
+	precondition { (HeldObjectWME characterID == me  attachPointID == g_drinkHand) }
+	specificity 1;
+	mental_act { StringUtil.println("PutDownHeldObject drink"); }
+	with (ignore_failure) subgoal PutDownHeldObject_Drink();
+}
+
+sequential behavior PutDownHeldObject_Obj() {
+	precondition { !(GoalStepWME signature == "StagingObjectDrop(int, int, int, int, int)") }
+	with (property isStagingGoal true) subgoal StagingObjectDrop(-1, g_objArm, eSpriteID_bar, 0, eWalkType_normal);
+}
+sequential behavior PutDownHeldObject_Drink() {
+	precondition { !(GoalStepWME signature == "StagingObjectDrop(int, int, int, int, int)") }
+	with (property isStagingGoal true) subgoal StagingObjectDrop(-1, g_drinkArm, eSpriteID_bar, 0, eWalkType_normal);
+}
+
+
+// -------------
+
+
+// #########
+sequential behavior UserTestingDemon() {
+	with (success_test { (UserTestWME param1 != -1) } ) wait;
+	with (ignore_failure) subgoal UserTestingDemon_Body();
+}
+
+// 0 == little action
+sequential behavior UserTestingDemon_Body() {
+	precondition { userTestWME = (UserTestWME param1 == 0  param2 :: param2  param3 :: param3  param4 :: param4) }
+	mental_act { userTestWME.setParam1(-1); }
+	subgoal PerformLittleAction(999, param2, param3, param4);
+}
+
+// 1 == mood
+sequential behavior UserTestingDemon_Body() {
+	precondition { userTestWME = (UserTestWME param1 == 1  param2 :: param2  param3 :: param3) }
+	mental_act { userTestWME.setParam1(-1); }
+	subgoal SetMood(param2, param3, -1, 999, 999.0f);
+}
+
+// 2 == base
+sequential behavior UserTestingDemon_Body() {
+	precondition { userTestWME = (UserTestWME param1 == 2  param2 :: param2) }
+	mental_act { userTestWME.setParam1(-1); }
+	subgoal DoFullExpressionBase(999, param2);
+}
+
+// 3 == trip start fixing drink
+sequential behavior UserTestingDemon_Body() {
+	precondition {	userTestWME = (UserTestWME param1 == 3  param2 :: param2  param3 :: param3) 
+					(me == eSpriteID_trip) }
+	mental_act { userTestWME.setParam1(-1); }
+	subgoal WaitFor(param3);
+	subgoal CreateNewPlayerDrink(param2);
+	subgoal SetFixDrink_PlayerDrink(param2);
+	subgoal CreateNewGraceDrink(param2);
+	subgoal SetFixDrink_GraceDrink(param2);
+	subgoal CreateNewTripDrink(eDrink_martiniClassic);
+	subgoal SetFixDrink_TripDrink(eDrink_martiniClassic);
+	mental_act { StringUtil.println("### UserTestWME drinks " + param2); }
+	with (property isLongTermGoal true, property oneAtATime eOneAtATimePriority_always,
+			priority 25) spawngoal LongTermBehavior_FixDrink();	
+}
+

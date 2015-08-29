@@ -1,0 +1,36 @@
+<NotepadPlus>
+    <UserLang name="ABL" ext="abl">
+        <Settings>
+            <Global caseIgnored="no" />
+            <TreatAsSymbol comment="yes" commentLine="yes" />
+            <Prefix words1="no" words2="yes" words3="no" words4="no" />
+        </Settings>
+        <KeywordLists>
+            <Keywords name="Delimiters">&quot;00&quot;00</Keywords>
+            <Keywords name="Folder+"></Keywords>
+            <Keywords name="Folder-"></Keywords>
+            <Keywords name="Operators">- ! &amp; ( ) ; [ ] ^ { | } ~ + &lt; = &gt;</Keywords>
+            <Keywords name="Comment">1/* 2*/ 0//</Keywords>
+            <Keywords name="Words1">behavior with mental_act act subgoal success_test wait initial_tree context_condition conflict action wme precondition specificity</Keywords>
+            <Keywords name="Words2">sequential parallel priority persistent BehavingEntity register</Keywords>
+            <Keywords name="Words3">for while</Keywords>
+            <Keywords name="Words4">java.lang.String double int Object import package String long boolean</Keywords>
+        </KeywordLists>
+        <Styles>
+            <WordsStyle name="DEFAULT" styleID="11" fgColor="000000" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" fontSize="10" />
+            <WordsStyle name="FOLDEROPEN" styleID="12" fgColor="000000" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="FOLDERCLOSE" styleID="13" fgColor="000000" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="KEYWORD1" styleID="5" fgColor="F1396D" bgColor="FFFFFF" fontName="Miriam" fontStyle="1" />
+            <WordsStyle name="KEYWORD2" styleID="6" fgColor="FD6081" bgColor="FFFFFF" fontName="Miriam" fontStyle="1" />
+            <WordsStyle name="KEYWORD3" styleID="7" fgColor="8F9924" bgColor="FFFFFF" fontName="Miriam" fontStyle="1" />
+            <WordsStyle name="KEYWORD4" styleID="8" fgColor="ACC95F" bgColor="FFFFFF" fontName="Miriam" fontStyle="1" />
+            <WordsStyle name="COMMENT" styleID="1" fgColor="339194" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="COMMENT LINE" styleID="2" fgColor="339194" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="NUMBER" styleID="4" fgColor="000000" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="OPERATOR" styleID="10" fgColor="8F9924" bgColor="FFFFFF" fontName="Miriam" fontStyle="1" />
+            <WordsStyle name="DELIMINER1" styleID="14" fgColor="FB6B41" bgColor="FFFFFF" fontName="Miriam" fontStyle="0" />
+            <WordsStyle name="DELIMINER2" styleID="15" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER3" styleID="16" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+        </Styles>
+    </UserLang>
+</NotepadPlus>

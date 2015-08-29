@@ -1,0 +1,718 @@
+// grace bRMt1GPA.abl
+
+// note that in this beat, grace looks at the armoire when she intends to look at Trip near the italyPic
+// this is because the performance looks better this way
+
+
+
+// ############
+joint sequential behavior BeatInit() { teammembers Trip Grace; 
+	precondition { StoryMemory (StoryStatusWME currentBeat == eBeatID_RockyMarriage_GPA_T1) } 
+	succeed_step;
+}
+
+
+// ############
+// bRMt1GPA_bgTxnIn_Default
+
+joint parallel behavior bRMt1GPA_TxnIn_Default_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, -1,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, spouse,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,	eFEBase_serious);
+	subgoal bRMt1GPA_TxnIn_Default_BodyStuff_seq();
+}
+sequential behavior bRMt1GPA_TxnIn_Default_BodyStuff_seq() {
+	subgoal WaitFor(2);
+	with (priority_modifier 2) subgoal SetMood(eMood_anxious, eMoodStrength_barely, -1, 0); 
+	subgoal WaitFor(2);
+	with (priority_modifier 2) subgoal SetMood(eMood_angry, eMoodStrength_barely, -1, 0); 
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_normal, player);
+	subgoal WaitFor(1);
+}
+
+joint parallel behavior bRMt1GPA_TxnIn_Default_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_eyesOnly, spouse, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_impatient, eLittleActionStrength_low);
+	subgoal DoDialog(70, true, egraceScript_vocalSound_sigh_impatient,
+						egraceScript_dialog_RMT1GPA_IMPATIENT_SIGH_trip);
+}
+
+joint parallel behavior bRMt1GPA_TxnIn_REPEAT_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, spouse,	-1, 
+			eDcue_DialogUnderway, spouse, eGazeType_normal, player,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// ############
+// bRMt1GPA_bgTxnIn_ReferTo
+
+joint parallel behavior bRMt1GPA_TxnIn_ReferTo_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, -1,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, spouse,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,	eFEBase_serious);
+	subgoal bRMt1GPA_TxnIn_Default_BodyStuff_seq();
+}
+
+joint parallel behavior bRMt1GPA_TxnIn_ReferTo_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_eyesOnly, spouse, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_impatient, eLittleActionStrength_low);
+	subgoal DoDialog(70, true, egraceScript_vocalSound_sigh_impatient,
+						egraceScript_dialog_RMT1GPA_IMPATIENT_SIGH_trip);
+}
+
+
+// ############
+// bRMt1GPA_bgLurePlayer
+
+joint parallel behavior bRMt1GPA_LurePlayer_FirstTime_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, eGazeType_normal, player,					eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_impatient, eMoodStrength_low, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_LurePlayer_FirstTime_BodyStuff2() { teammembers Trip Grace; 
+//	with (ignore_failure) subgoal bRM_WalkToMiddleOfRoomIfNeeded();
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			startWith, -1,	eGazeType_avert, spouse, eFEBase_serious);
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_LurePlayer_FirstTime_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_barely);
+	subgoal DoDialog(70, true, egraceScript_vocalSound_sigh_little);
+}
+
+joint parallel behavior bRMt1GPA_LurePlayer_FirstTime_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			startWith, -1,	eGazeType_normal, player, eFEBase_pleasant);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_low, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+joint parallel behavior bRMt1GPA_LurePlayer_SecondTime_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, player,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_impatient, eMoodStrength_low, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_LurePlayer_SecondTime_BodyStuff1b() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_impatient, eMoodStrength_low, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_angry, eLittleActionStrength_barely);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_why_did_i_let_you_put_that_up);
+}
+
+joint parallel behavior bRMt1GPA_LurePlayer_SecondTime_BodyStuff2() { teammembers Trip Grace; 
+//	with (ignore_failure) subgoal bRM_WalkToMiddleOfRoomIfNeeded();
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_none,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_impatient, eMoodStrength_low, -1, 0); 
+}
+
+
+// ############
+// bRMt1GPA_bgStartGuessingGame_pre
+
+joint parallel behavior bRMt1GPA_StartGuessingGame_pre_BodyStuff() { teammembers Trip Grace; 
+	subgoal bRM_WalkToCouch();
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal SetLetBeatGoalFinishFlag_opt(true);	
+	subgoal bRMt1GPA_StartGuessingGame_pre_BodyStuff_seq();
+}
+sequential behavior bRMt1GPA_StartGuessingGame_pre_BodyStuff_seq() { 
+	subgoal DoDialog(70, true, egraceScript_dialog_player_WARM,
+						egraceScript_dialog_RMT1GPA_come_over_here_and_sit_on_the_couch_with_me);
+	subgoal SetBeatFlagInStoryMemory("bRMt1_PlayerWasInvitedToCouch");
+}
+
+
+// ############
+// bRMt1GPA_bgStartGuessingGame
+
+joint parallel behavior bRMt1GPA_StartGuessingGame_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+}
+
+joint parallel behavior bRMt1GPA_StartGuessingGame_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_BORED_oh_please_trip_dont_put_our_friend_on_the_spot);
+}
+
+joint parallel behavior bRMt1GPA_StartGuessingGame_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_StartGuessingGame_BodyStuff5() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_dialog_player_WARM,
+						egraceScript_dialog_RMT1GPA_come_over_here_youll_be_more_comfortable);
+}
+
+
+
+// ############
+// bRMt1GPA_bgMixin_MoreThanAWord
+
+joint parallel behavior bRMt1GPA_Mixin_MoreThanAWord_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_Mixin_MoreThanAWord_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_avert, spouse, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal bRMt1GPA_Mixin_zinger();
+}
+
+sequential behavior bRMt1GPA_Mixin_zinger() {
+	//fixme: don't do this if done in last session
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_how_about_obnoxious);
+}
+sequential behavior bRMt1GPA_Mixin_zinger() {
+	//fixme: don't do this if done in last session
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_how_about_inane);
+}
+
+
+joint parallel behavior bRMt1GPA_Mixin_MoreThanAWord_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// ############
+// bRMt1GPA_bgMixin_WrongSingleWord
+
+joint parallel behavior bRMt1GPA_Mixin_WrongSingleWord_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal bRMt1GPA_Mixin_WrongSingleWord_BodyStuff_seq();
+}
+sequential behavior bRMt1GPA_Mixin_WrongSingleWord_BodyStuff_seq() {
+	subgoal WaitFor(1.5f);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_INTERRUPTING_yeah_thats_a_good_answer_i_like_that);
+}
+
+joint parallel behavior bRMt1GPA_Mixin_WrongSingleWord_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// ############
+// bRMt1GPA_bgMixin_FirstGuessTimeout
+
+joint parallel behavior bRMt1GPA_Mixin_FirstGuessTimeout_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_IMPATIENT_SIGH_trip_i_dont_know_what_kind_of);
+}
+
+joint parallel behavior bRMt1GPA_Mixin_FirstGuessTimeout_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_avert, spouse, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal bRMt1GPA_Mixin_zinger();
+}
+
+joint parallel behavior bRMt1GPA_Mixin_FirstGuessTimeout_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// ############
+// bRMt1GPA_bgMixin_TellMeMore
+
+joint parallel behavior bRMt1GPA_Mixin_TellMeMore_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleActionAtDialogCue(10, eDcue_DialogBegin, spouse,
+			eLittleActionType_think, eLittleActionTone_anxious, eLittleActionStrength_low);
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_Mixin_TellMeMore_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_impatient, eLittleActionStrength_barely);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_ANNOYED_what,
+						egraceScript_dialog_RMT1GPA_ANNOYED_trip_is_totally_exaggerating_it_was1_just_a_weekend_getaway_thats_all);
+}
+
+joint parallel behavior bRMt1GPA_Mixin_TellMeMore_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_avert, eSpriteID_cabinet, eFEBase_frown);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_Mixin_TellMeMore_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_frown);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+// ############
+// bRMt1GPA_bgMixin_LookAndIgnore
+
+joint parallel behavior bRMt1GPA_Mixin_LookAndIgnore_BodyStuff() { teammembers Trip Grace; 
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_normal, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only) 
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	-1, -1, -1);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_serious, eLittleActionStrength_barely);
+}
+
+
+// ############
+// bRMt1GPA_bgWaitTimeout
+
+joint parallel behavior bRMt1GPA_WaitTimeout_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+}
+
+
+// ############
+// bRMt1GPA_bgTxnOut_WrongAnswer
+
+// ## positive spin
+
+joint parallel behavior bRMt1GPA_TxnOut_WrongAnswer_posSpin_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_WrongAnswer_posSpin_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_vocalSound_sigh_little,
+						egraceScript_dialog_player_NEUTRAL,
+						egraceScript_dialog_RMT1GPA_i_liked1_your_answer_better);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_WrongAnswer_posSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_avert, spouse,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_frown);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+// ## negative spin
+
+joint parallel behavior bRMt1GPA_TxnOut_WrongAnswer_negSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_avert, spouse,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_frown);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_WrongAnswer_negSpin_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, player,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_frown);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+
+
+// ############
+// bRMt1GPA_bgTxnOut_LeanToTPA_RightAnswer
+
+// ## positive spin
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_avert, spouse, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_vocalSound_sigh_little);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, player,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff4_seq();
+}
+sequential behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_posSpin_BodyStuff4_seq() {
+	subgoal WaitFor(1);
+	with (ignore_failure) subgoal DoGaze(70, eGazeType_avert, spouse);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_you_could_say_that);
+}
+
+
+// ## negative spin
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_negSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_normal, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_negSpin_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_negSpin_BodyStuff4_seq();
+}
+sequential behavior bRMt1GPA_TxnOut_LeanToTPA_RightAnswer_negSpin_BodyStuff4_seq() {
+	subgoal WaitFor(1);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_SARCASTIC_thats_right_trip);
+}
+
+
+
+// ############
+// bRMt1GPA_bgTxnOut_PlayerNotAtPicture
+
+// ## positive spin
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_posSpin_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_smile,
+			eDcue_DialogBegin, me,	eGazeType_eyesOnly, eSpriteID_cabinet, -1);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (ignore_failure) subgoal DoGazeAfterDelay(70, eGazeType_normal, player, 3.0f);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_trip_see_your1_weird_obsession_for_italy_is_making_our_friend_uncomfortable);
+	
+	mental_act {
+		ProvocativeContentArchive.archive.AddContent(eProvocativeContentType_SpecificMediumHotEvent, 
+														eProvocativeContentParam_Grace_says_Trip_has_a_weird_obsession_for_Italy,
+														trip,
+														eBackstoryCategory_Grace_feels_like_their_marriage_is_a_facade_all_for_show_where_is_the_real_feeling__Trip_deep_down_knows_hes_putting_on_a_facade_F,
+														eBackstoryCategory_Trip_wants_to_be_highclass_to_completely_leave_behind_his_embarrassing_background_F,
+														-1);
+	}
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_posSpin_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_smile);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_posSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, -1,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, eSpriteID_cabinet,	eFEBase_frown); 
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_posSpin_BodyStuff5() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_smile);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_think, eLittleActionTone_serious, eLittleActionStrength_low);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_on_second_thought_lets_not_sit);
+}
+
+
+// ## negative spin
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_smile);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (ignore_failure) subgoal DoGazeAfterDelay(70, eGazeType_normal, player, 3.0f);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_trip_see_your1_weird_obsession_for_italy_is_making_our_friend_uncomfortable);
+	
+	mental_act {
+		ProvocativeContentArchive.archive.AddContent(eProvocativeContentType_SpecificMediumHotEvent, 
+														eProvocativeContentParam_Grace_says_Trip_has_a_weird_obsession_for_Italy,
+														trip,
+														eBackstoryCategory_Grace_feels_like_their_marriage_is_a_facade_all_for_show_where_is_the_real_feeling__Trip_deep_down_knows_hes_putting_on_a_facade_F,
+														eBackstoryCategory_Trip_wants_to_be_highclass_to_completely_leave_behind_his_embarrassing_background_F,
+														-1);
+	}
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff2() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff3() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_react, eLittleActionTone_impatient, eLittleActionStrength_barely);
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_ANNOYED_what_trip_youre1_totally_exaggerating_it_was2_just_a_weekend_getaway);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff4() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_frown,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, eSpriteID_cabinet,	-1);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff5() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			eDcue_DialogBegin, spouse,	eGazeType_eyesOnly, eSpriteID_cabinet,	-1, 
+			eDcue_DialogUnderway, spouse, -1, -1,					eFEBase_serious);
+	with (priority_modifier 2, team_effect_only)
+		subgoal SetMoodAtDialogCue(eDcue_DialogUnderway, spouse, eMood_neutral, eMoodStrength_barely, -1, 0); 
+	succeed_step; //fixme remove when it's safe to have no non-effect_only steps in a behavior 
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff7() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_bothBarelyRaised,
+			startWith, -1,	eGazeType_normal, player, eFEBase_smile);
+	with (priority_modifier 2) subgoal SetMood(eMood_angry, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleActionAtDialogCue(10, eDcue_1, me,
+			eLittleActionType_think, eLittleActionTone_serious, eLittleActionStrength_low);
+	subgoal DoDialog(70, true, egraceScript_dialog_player_NEUTRAL,
+						egraceScript_dialog_RMT1GPA_OUT_LOUD_you_know_all_the_buildings_there_were1_so_old_and_crumbling,
+						egraceScript_vocalSound_pause,
+						egraceScript_dialog_RMT1GPA_OUT_LOUD_everything_there2_was_falling_apart_uhh);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff8() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_eyesOnly, eSpriteID_cabinet, eFEBase_serious);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal WaitFor(1);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff9() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, eSpriteID_player, eFEBase_smile);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	subgoal DoDialog(70, true, egraceScript_dialog_RMT1GPA_i_would_have_been1_perfectly_happy_to_have_gone_to_a_nice_italian_restaurant2_here_in_the_city_you_know,
+						egraceScript_vocalSound_pause,
+						egraceScript_dialog_RMT1GPA_anyway);
+}
+
+joint parallel behavior bRMt1GPA_TxnOut_PlayerNotAtPicture_negSpin_BodyStuff10() { teammembers Trip Grace; 
+	with (persistent, team_effect_only) subgoal TryToKeepFacingSprite(0, player);
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal SetPerformanceInfo(40, 2, eHeadEmphType_nodMild, eArmsEmphType_atSide,
+			startWith, -1,	eGazeType_normal, player, eFEBase_smile);
+	with (priority_modifier 2) subgoal SetMood(eMood_neutral, eMoodStrength_barely, -1, 0); 
+	with (priority_modifier 1, ignore_failure, team_effect_only)
+		subgoal PerformLittleAction(10, eLittleActionType_think, eLittleActionTone_serious, eLittleActionStrength_low);
+	subgoal DoDialog(70, true, egraceScript_vocalSound_pause,
+						egraceScript_dialog_RMT1GPA_on_second_thought_lets_not_sit);
+}
+
+
+

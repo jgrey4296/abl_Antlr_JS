@@ -68,8 +68,21 @@ JGListener.prototype.enterConstants = function(ctx){
 
 
 JGListener.prototype.enterTeamNeeded = function(ctx){
-
-
+    if(ctx.JOINTNEG()
+       && ctx.TEAMNEEDED()){
+        this.parsedStack.push({
+            teamNeeded : true,
+            oneNeeded : false,
+            type : "teamNeededForSuccessDeclaration"
+            
+        });
+    }else if(ctx.JOINTNEG() && ctx.ONENEEDED()){
+        this.parsedStack.push({
+            teamNeeded : false,
+            oneNeeded : true,
+            type : "teamNeededForSuccessDeclaration"
+        });
+    }
 };
 
 

@@ -21,7 +21,8 @@ define(['./lib/antlr4/index','./ABLListener','./ABLLexer','./ABLParser','./JGLis
         parser.buildParseTrees = true;
 
         if(parser[startRule] === undefined){
-            throw new Error("Parser does not have a rule:",startRule);
+            throw new Error("Parser does not have a rule:" +
+                            startRule);
         }        
  
 

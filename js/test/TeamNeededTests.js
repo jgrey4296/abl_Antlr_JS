@@ -4,8 +4,8 @@ exports.teamNeededForSuccessTests = {
 
     //Simple Smoke test
     simpleTeamNeeded : function(test){
-        var parseString = "team_needed_for_success;";
-        var startRule = "teamNeededForSuccessDeclaration";
+        var parseString = "joint_goal_success_negotiation team_needed_for_success;";
+        var startRule = "teamNeeded";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);
@@ -18,7 +18,7 @@ exports.teamNeededForSuccessTests = {
 
     //simple one needed test
     simpleOneNeeded : function(test){
-        var parseString = "one_needed_for_success;";
+        var parseString = "joint_goal_success_negotiation one_needed_for_success;";
         var startRule = "teamNeeded";
         var result = ABLModule.parse(parseString,startRule);
 

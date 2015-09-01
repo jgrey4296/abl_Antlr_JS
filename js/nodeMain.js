@@ -1,3 +1,12 @@
+/**
+   @module ABLParser
+   @submodule example
+*/
+
+/**
+   An example Node based use of the ABLParser
+   @class nodeMain
+ */
 var fs = require('fs');
 var ABLModule = require('./ABLModule');
 

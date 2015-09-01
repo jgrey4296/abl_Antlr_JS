@@ -1,5 +1,13 @@
+/**
+   @module ABLParser
+ */
 var ABLListener = require('./ABLListener');
 
+/**
+   The JGListener constructor
+   @class JGListener
+   @constructor
+ */
 var JGListener = function(){
     //Not ABLListener.call:
     ABLListener.ABLListener.call(this);
@@ -8,16 +16,26 @@ var JGListener = function(){
 };
 
 //Not ABLListener.prototype, just ABLListener
+//Setup the prototype chain:
 JGListener.prototype = Object.create(ABLListener.ABLListener.prototype);
 JGListener.prototype.constructor = JGListener;
 
 //------------------------------
 //PARSING METHODS:
 
+/**
+   Enter the root rule of the ABL Grammar
+   Sets up the parsedStack datastructure
+   @method enterProg
+ */
 JGListener.prototype.enterProg = function(ctx){
     this.parsedStack = [];
 };
 
+/**
+   Parses a package declaration
+   @method enterG_package
+ */
 JGListener.prototype.enterG_package = function(ctx){
     if(ctx.TYPE().getText() === "<missing undefined>"){
         throw new Error("Package missing TYPE");
@@ -31,6 +49,10 @@ JGListener.prototype.enterG_package = function(ctx){
     );
 };
 
+/**
+   Parses an import statement
+   @method enterG_import
+*/
 JGListener.prototype.enterG_import = function(ctx){
     //console.log("import name:", ctx.name().getText());
     for(var x in ctx.TYPE()){
@@ -54,6 +76,10 @@ JGListener.prototype.enterG_import = function(ctx){
     }
 };
 
+/**
+   Parses constant declarations
+   @method enterConstants
+ */
 JGListener.prototype.enterConstants = function(ctx){
     for(var x in ctx.TYPE()){
         var importName = ctx.TYPE()[x].getText();
@@ -66,7 +92,10 @@ JGListener.prototype.enterConstants = function(ctx){
     }
 };
 
-
+/**
+   Parse team needed statements
+   @method enterTeamNeeded
+ */
 JGListener.prototype.enterTeamNeeded = function(ctx){
     if(ctx.JOINTNEG()&& ctx.TEAMNEEDED()){
         this.parsedStack.push({
@@ -84,7 +113,10 @@ JGListener.prototype.enterTeamNeeded = function(ctx){
     }
 };
 
-
+/**
+   Parse Conflict Declarations
+   @method enterConflictDecl
+ */
 JGListener.prototype.enterConflictDecl = function(ctx){
     console.log("conflict Dec:");
     var secondObj = [];
@@ -105,6 +137,10 @@ JGListener.prototype.enterConflictDecl = function(ctx){
     }
 };
 
+/**
+   parse wmeRegistration
+   @method enterWmeRegistration
+ */
 JGListener.prototype.enterWmeRegistration = function(ctx){
 
     if(ctx.TYPE(0).getText() !== '<missing undefined>' && ctx.TYPE(1).getText() !== '<missing undefined>'){

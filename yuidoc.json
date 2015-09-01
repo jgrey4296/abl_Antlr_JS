@@ -5,6 +5,7 @@
     "url": "http://www.github/com/jgrey4296/abl_Antlr_JS",
     "options" : {
         "outdir" : "docs",
-        "paths"  : "src/*"
+        "paths"  : "js",
+        "exclude": "node_modules,docs,js/lib"
     }
 }

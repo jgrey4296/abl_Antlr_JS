@@ -1,11 +1,22 @@
+/**
+   @module ABLParser
+ */
 if(define !== 'function'){
     var define = require('amdefine')(module);
 }
 
 
 define(['./lib/antlr4/index','./ABLListener','./ABLLexer','./ABLParser','./JGListener'],function(antlr4,ABLListener,ABLLexer,ABLParser,JGListener){
-    //Setup:
-    
+
+    /**
+       The Parse Function
+       @method parseInput
+       @param input The Input string to be parsed
+       @param startRule The rule of the grammar to start on
+       @static
+
+       Grammar to be found in ABL.g4 and ABLTokens.g4
+     */
     var parseInput = function(input,startRule){
         if(startRule === undefined){
             startRule = "prog";
@@ -37,6 +48,10 @@ define(['./lib/antlr4/index','./ABLListener','./ABLLexer','./ABLParser','./JGLis
     };
 
 
-    //Returning interface:
+    /**
+       Wraps up the parser into an easy to use function
+       @class Parser
+       @static
+     */
     return { parse : parseInput};
 });

@@ -3,16 +3,20 @@ grammar ABL;
 import AblTokens;
 
 //top level of the parser
-prog : package imports* behavingEntity EOF;
+prog : g_package? g_import? behavingEntity? EOF;
 
-package : 'package' name ';';
-imports : 'import' name ';'; //todo .*?
-constants : 'constants' name ';';
+//g_ = grammar. As antlr will complain of conflicting keywords with target language
+g_package : 'package' TYPE ';';
+g_import : ('import' TYPE STAR?';')*; //todo .*?
+constants : ('constants' TYPE ';')*;
+
 teamNeeded
-    : 'joint_goal_success_negotiation'
-        ('team_needed_for_success' | 'one_needed_for_success')';';
+    : JOINTNEG (TEAMNEEDED | ONENEEDED)';';
+
+
 decisionCycle : 'decision_cycle_sm_call' name ';';
-conflictDecl : 'conflict' name+ ';';
+
+conflictDecl : 'conflict' name (name)+ ';';
 
 
 /*
@@ -36,7 +40,7 @@ initialTree : 'initial_tree' '{'
         '}';
 
 behaviour :
-        (ATOMIC|JOIN|ADAPTIVE)?
+        (ATOMIC|JOINT|ADAPTIVE)?
         (SEQ|PAR|COLL)
         BEH name '(' params  ')'
         '{'
@@ -159,7 +163,7 @@ param : TYPE name;
 
 
 //NAME
-name : CHAR;
+name : CHARS;
 nameList : name (',' name)*;
 
 //STRING HACK:

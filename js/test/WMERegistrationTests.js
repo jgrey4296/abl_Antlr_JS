@@ -5,7 +5,7 @@ exports.WMERegistrationTests = {
     //Simple Smoke test
     simpleRegistration : function(test){
         var parseString = "register wme Test with Blah;";
-        var startRule = "WMERegistration";
+        var startRule = "wmeRegistration";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);
@@ -18,7 +18,7 @@ exports.WMERegistrationTests = {
     //multiple registrations:
     multipleRegistrations : function(test){
         var parseString = "register wme Test with Blah; register wme Bloo with Jam;";
-        var startRule = "WMERegistration";
+        var startRule = "wmeRegistration_plural";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 2);
@@ -34,19 +34,22 @@ exports.WMERegistrationTests = {
     //Misspelled test:
     misspelledRegistration : function(test){
         var parseString = "registar wme Test with Blah;";
-        var startRule = "WMERegistration";
+        var startRule = "wmeRegistration";
 
-        test.throws(function(){
-            var result = ABLModule.parse(parseString,startRule);
-        });
+        var result = ABLModule.parse(parseString,startRule);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "WMERegistration");
+        test.ok(result[0].wmeType === "Test");
+        test.ok(result[0].target === "Blah");                
         
         test.done();
     },
 
     //Incomplete Test:
     incompleteTest : function(test){
-        var parseString = "register wme Test;"
-        var startRule = "WMERegistration";
+        var parseString = "register wme Test;";
+        var startRule = "wmeRegistration";
         test.throws(function(){
             var result = ABLModule.parse(parseString,startRule);
         });

@@ -12,7 +12,7 @@ ONENEEDED: 'one_needed_for_success';
 
 STAR : '*';
 TYPE : [A-Z][a-zA-Z_\.]+;
-CHARS : [a-z_\.]+;
+CHARS : [a-z][a-zA-Z_\.]+;
 INT : [0-9]+;    
 
 WS : [ \t\r\n\f]+ -> channel(HIDDEN);

@@ -43,7 +43,7 @@ exports.packageImportTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].name === "Blah");
-        test.ok(result[0].type === "package")
+        test.ok(result[0].type === "package");
         
         test.done();
     },

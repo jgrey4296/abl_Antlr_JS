@@ -29,7 +29,7 @@ JGListener.prototype.enterG_package = function(ctx){
             name : ctx.TYPE().getText(),
         }
     );
-}
+};
 
 JGListener.prototype.enterG_import = function(ctx){
     //console.log("import name:", ctx.name().getText());
@@ -52,7 +52,7 @@ JGListener.prototype.enterG_import = function(ctx){
             });
         }
     }
-}
+};
 
 JGListener.prototype.enterConstants = function(ctx){
     for(var x in ctx.TYPE()){
@@ -68,8 +68,7 @@ JGListener.prototype.enterConstants = function(ctx){
 
 
 JGListener.prototype.enterTeamNeeded = function(ctx){
-    if(ctx.JOINTNEG()
-       && ctx.TEAMNEEDED()){
+    if(ctx.JOINTNEG()&& ctx.TEAMNEEDED()){
         this.parsedStack.push({
             teamNeeded : true,
             oneNeeded : false,
@@ -86,31 +85,35 @@ JGListener.prototype.enterTeamNeeded = function(ctx){
 };
 
 
-JGListener.prototype.enterBehavingEntity = function(ctx){
-    console.log("Entering Behaving entity");
-    var be = {"name: ": ctx.TYPE().getText()};
-    this.parsedStack.push(be);
-}
+JGListener.prototype.enterConflictDecl = function(ctx){
+    console.log("conflict Dec:");
+    var secondObj = [];
+    for(var i = 1; i < ctx.name().length; i++) {
+        if(ctx.name(i).getText() != '<missing undefined>'){
+            secondObj.push(ctx.name(i).getText());
+        }
+    }
 
-JGListener.prototype.exitBehavingEntity = function(ctx){
-    console.log("Exit BE:",ctx.TYPE().getText());
-}
+    if(secondObj.length > 0){
+        var newObj = {
+            type : "conflictDeclaration",
+            first : ctx.name(0).getText(),
+            second : secondObj,
+        };
 
-JGListener.prototype.enterBehaviorStep = function(ctx){
-    console.log("Behaviour Step:",ctx.getText());
-    this.parsedStack[this.parsedStack.length-1].step = ctx.getText();
-}
-
-JGListener.prototype.enterInitialTree = function(ctx){
-    console.log("initial Tree");
-    var it = {};
-    this.parsedStack.push(it);
+        this.parsedStack.push(newObj);
+    }
 };
 
+JGListener.prototype.enterWmeRegistration = function(ctx){
 
-JGListener.prototype.exitInitialTree = function(ctx){
-    var it = this.parsedStack.pop();
-    this.parsedStack[this.parsedStack.length-1].initTree = it;
+    if(ctx.TYPE(0).getText() !== '<missing undefined>' && ctx.TYPE(1).getText() !== '<missing undefined>'){
+        this.parsedStack.push({
+            type : "WMERegistration",
+            wmeType : ctx.TYPE(0).getText(),
+            target : ctx.TYPE(1).getText(),
+        });
+    }
 };
 
 exports.JGListener = JGListener;

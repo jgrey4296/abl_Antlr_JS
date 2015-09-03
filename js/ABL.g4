@@ -76,7 +76,14 @@ successCondition : 'success_condition' testExpression;
 stateCondition : testExpression;
 successTest : 'success_test' testExpression;
 
+//Number Needed for success:
+numberNeededForSuccess : 'number_needed_for_success' ablLiteral ';';
+
+//TeamMemberSpecifier:
+teamMemberSpecifier : 'teammembers' name+;
+
 //Priority modifier:
+
 
 
 //NAME

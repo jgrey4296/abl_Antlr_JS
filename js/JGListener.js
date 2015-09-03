@@ -599,4 +599,29 @@ JGListener.prototype.exitSuccessTest = function(ctx){
     }
 };
 
+JGListener.prototype.exitNumberNeededForSuccess = function(ctx){
+    if(ctx.ablLiteral()
+       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+        this.parsedStack.push({
+            type : "numberNeededForSuccess",
+            value : this.parsedStack.pop()
+        });
+    }    
+};
+
+JGListener.prototype.exitTeamMemberSpecifier = function(ctx){
+    var outObj = {
+        type : "teamMemberSpecifier",
+        names : []
+    };
+
+    for(var i = 0; i < ctx.name().length; i++){
+        outObj.names.push(ctx.name(i).getText());
+    }
+
+    if(outObj.names.length > 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
 exports.JGListener = JGListener;

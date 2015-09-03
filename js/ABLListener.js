@@ -308,6 +308,24 @@ ABLListener.prototype.exitSuccessTest = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#numberNeededForSuccess.
+ABLListener.prototype.enterNumberNeededForSuccess = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#numberNeededForSuccess.
+ABLListener.prototype.exitNumberNeededForSuccess = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#teamMemberSpecifier.
+ABLListener.prototype.enterTeamMemberSpecifier = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#teamMemberSpecifier.
+ABLListener.prototype.exitTeamMemberSpecifier = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#name.
 ABLListener.prototype.enterName = function(ctx) {
 };

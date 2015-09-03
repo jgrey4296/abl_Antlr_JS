@@ -1,5 +1,9 @@
 grammar AblTokens;
 
+
+AND : '&&';
+OR  : '||';
+
 BIND : '::';
 GT : '>';
 GE : '>=';

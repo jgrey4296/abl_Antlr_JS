@@ -182,6 +182,132 @@ ABLListener.prototype.exitWmeTest = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#binaryOp.
+ABLListener.prototype.enterBinaryOp = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#binaryOp.
+ABLListener.prototype.exitBinaryOp = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#javaMethod.
+ABLListener.prototype.enterJavaMethod = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#javaMethod.
+ABLListener.prototype.exitJavaMethod = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#clause.
+ABLListener.prototype.enterClause = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#clause.
+ABLListener.prototype.exitClause = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#booleanHelper.
+ABLListener.prototype.enterBooleanHelper = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#booleanHelper.
+ABLListener.prototype.exitBooleanHelper = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#mixedCall.
+ABLListener.prototype.enterMixedCall = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#mixedCall.
+ABLListener.prototype.exitMixedCall = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#conditionalExpression.
+ABLListener.prototype.enterConditionalExpression = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#conditionalExpression.
+ABLListener.prototype.exitConditionalExpression = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#wmeTestSequence.
+ABLListener.prototype.enterWmeTestSequence = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#wmeTestSequence.
+ABLListener.prototype.exitWmeTestSequence = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#testExpression.
+ABLListener.prototype.enterTestExpression = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#testExpression.
+ABLListener.prototype.exitTestExpression = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#precondition.
+ABLListener.prototype.enterPrecondition = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#precondition.
+ABLListener.prototype.exitPrecondition = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#contextCondition.
+ABLListener.prototype.enterContextCondition = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#contextCondition.
+ABLListener.prototype.exitContextCondition = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#entryCondition.
+ABLListener.prototype.enterEntryCondition = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#entryCondition.
+ABLListener.prototype.exitEntryCondition = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#successCondition.
+ABLListener.prototype.enterSuccessCondition = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#successCondition.
+ABLListener.prototype.exitSuccessCondition = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#stateCondition.
+ABLListener.prototype.enterStateCondition = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#stateCondition.
+ABLListener.prototype.exitStateCondition = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#successTest.
+ABLListener.prototype.enterSuccessTest = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#successTest.
+ABLListener.prototype.exitSuccessTest = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#name.
 ABLListener.prototype.enterName = function(ctx) {
 };

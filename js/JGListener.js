@@ -156,7 +156,7 @@ JGListener.prototype.enterWmeRegistration = function(ctx){
 
 /**
    Parse parameters
-   @method enterParam
+   @method enterParams
  */
 JGListener.prototype.enterParams = function(ctx){
     var outObj = {
@@ -164,12 +164,13 @@ JGListener.prototype.enterParams = function(ctx){
         names: [],
     };
     for(var i = 0; i < ctx.param().length; i++){
-        if(ctx.param(i) && ctx.param(i).TYPE()){
+        if(ctx.param(i)){
             var param = {
                 type : "param",
-                varType : ctx.param(i).TYPE().getText(),
-                name : ctx.param(i).name() ? ctx.param(i).name().getText() : undefined,
             };
+            param.varType =  ctx.param(i).TYPE() ? ctx.param(i).TYPE().getText() : undefined;
+            param.name = ctx.param(i).name() ? ctx.param(i).name().getText() : undefined;
+            
             outObj.names.push(param);
         }
     }
@@ -384,11 +385,218 @@ JGListener.prototype.exitWmeTest = function(ctx){
         }
     }
     
-    if(outObj.name !== undefined
-       && outObj.wmeType !== undefined){
+    if(outObj.wmeType !== undefined){
         this.parsedStack.push(outObj);
     }
 };
 
+//Binary Op:
+JGListener.prototype.exitBinaryOp = function(ctx){
+    var outObj = {
+        type : "binaryOp",
+        bang : false,
+        expressions : [],
+        operator : undefined
+    };
+
+    if(ctx.BANG()){
+        outObj.bang = true;
+    }
+
+    if(ctx.operator() && ctx.ablExpression().length === 2
+       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"
+       && this.parsedStack[this.parsedStack.length-2].type === "operator"){
+        outObj.expressions[1] = this.parsedStack.pop();
+        outObj.operator = this.parsedStack.pop();
+    }
+
+    if(ctx.ablExpression(0)
+       && this.parsedStack[this.parsedStack.length-1]){
+        outObj.expressions[0] = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitJavaMethod = function(ctx){
+    var outObj = {
+        type : "javaMethod",
+        bang : false,
+        name : undefined,
+        params : undefined,
+    };
+
+    if(ctx.BANG()){
+        outObj.bang = true;
+    }
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.params() && this.parsedStack[this.parsedStack.length-1].type === "params"){
+        outObj.params = this.parsedStack.pop();
+    }
+
+    if(outObj.name && outObj.params){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitClause = function(ctx){
+    var outObj = {
+        type : 'clause',
+        child : undefined
+    };
+
+    if(ctx.BOOL()){
+        if(ctx.BOOL().getText() === "True"){
+            outObj.child = true;
+        }else{
+            outObj.child = false;
+        }
+    }else if(ctx.name()){
+        outObj.child = ctx.name().getText();
+    }else if(ctx.javaMethod()
+             && this.parsedStack[this.parsedStack.length-1].type === "javaMethod"){
+        outObj.child = this.parsedStack.pop();
+    }else if(ctx.binaryOp()
+             && this.parsedStack[this.parsedStack.length-1].type === "binaryOp"){
+        outObj.child = this.parsedStack.pop();
+    }    
+
+    if(outObj.child !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+JGListener.prototype.enterBooleanHelper = function(ctx){
+    var outObj = {
+        type : "booleanHelper",
+        value : undefined
+    };
+
+    if(ctx.AND()){
+        outObj.value = "and";
+        this.parsedStack.push(outObj);
+    }else{
+        outObj.value = "or";
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitMixedCall = function(ctx){
+    var outObj = {
+        type : "mixedCall",
+        clauses : [],
+    };
+
+    while(this.parsedStack.length > 1 && this.parsedStack[this.parsedStack.length-1].type === "clause" && this.parsedStack[this.parsedStack.length-2].type === "booleanHelper"){
+        var clause = this.parsedStack.pop();
+        var op = this.parsedStack.pop();
+        outObj.clauses.unshift([clause,op.value]);
+    }
+
+    if(this.parsedStack.length >= 1 && this.parsedStack[this.parsedStack.length-1].type === "clause"){
+        outObj.clauses.unshift([this.parsedStack.pop(),"default"]);
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitConditionalExpression = function(ctx){
+    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "mixedCall"){
+        this.parsedStack[this.parsedStack.length-1].type = "conditionalExpression";
+    }
+};
+
+JGListener.prototype.exitWmeTestSequence = function(ctx){
+    var outObj = {
+        type : "wmeTestSequence",
+        clauses : []
+    };
+
+    while(this.parsedStack.length > 0
+          && (this.parsedStack[this.parsedStack.length-1].type === "wmeTest" || this.parsedStack[this.parsedStack.length-1].type === "conditionalExpression")){
+        outObj.clauses.unshift(this.parsedStack.pop());
+    }
+    
+    if(outObj.clauses.length > 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitTestExpression = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "wmeTestSequence"){
+        this.parsedStack[this.parsedStack.length-1].type === "testExpression";
+    }
+
+};
+
+JGListener.prototype.exitPrecondition = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "precondition",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitContextCondition = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "contextCondition",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitEntryCondition = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "entryCondition",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitSuccessCondition = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "successCondition",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitStateCondition = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "stateCondition",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitSuccessTest = function(ctx){
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+        this.parsedStack.push({
+            type : "successTest",
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
 
 exports.JGListener = JGListener;

@@ -14,6 +14,7 @@ exports.preconditionTests = {
         var parseString = "";
         var startRule = "";
         var result = ABLModule.parse(parseString,startRule);
+        test.ok(false);
         test.done();
     },
 

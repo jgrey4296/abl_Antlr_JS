@@ -22,7 +22,8 @@ exports.paramsTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
         test.ok(result[0].names.length === 1,result[0].names.length);
-        test.ok(result[0].names[0].type === "Test");
+        test.ok(result[0].names[0].type === "param");
+        test.ok(result[0].names[0].varType === "Test");
         
         test.done();
     },
@@ -39,9 +40,9 @@ exports.paramsTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
         test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0].type === "Test");
-        test.ok(result[0].names[1].type === "Blah");
-        test.ok(result[0].names[2].type === "Bloo");        
+        test.ok(result[0].names[0].varType === "Test");
+        test.ok(result[0].names[1].varType === "Blah");
+        test.ok(result[0].names[2].varType === "Bloo");        
         test.done();
     },
 
@@ -72,7 +73,7 @@ exports.paramsTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
         test.ok(result[0].names.length === 1);
-        test.ok(result[0].names[0].type === "String");
+        test.ok(result[0].names[0].varType === "String");
         test.ok(result[0].names[0].name === "blah");
         
         test.done();
@@ -91,16 +92,16 @@ exports.paramsTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
         test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0].type === "String");
+        test.ok(result[0].names[0].varType === "String");
         test.ok(result[0].names[0].name === "blah");
-        test.ok(result[0].names[1].type === "Something");
+        test.ok(result[0].names[1].varType === "Something");
         test.ok(result[0].names[1].name === "else");
-        test.ok(result[0].names[2].type === "One");
+        test.ok(result[0].names[2].varType === "One");
         test.ok(result[0].names[2].name === "more");
         
         test.done();
     },
 
-
+    //add in tests where there isnt a type
     
 };

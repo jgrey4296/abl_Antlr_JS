@@ -16,13 +16,13 @@ exports.propertyDeclarationTests = {
        @method simpleDeclaration
      */
     simpleDeclaration : function(test){
-        var parseString = "property String Test;";
+        var parseString = "property String test;";
         var startRule = "propertyDeclaration";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "propertyDeclaration");
-        test.ok(result[0].name === "Test");
+        test.ok(result[0].name === "test");
         test.ok(result[0].varType === "String");
         
         test.done();

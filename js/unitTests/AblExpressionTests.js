@@ -17,13 +17,13 @@ exports.ablExpressionTests = {
        @method simple
      */
     simple : function(test){
-        var parseString = "Test";
-        var startRule = "AblExpression";
+        var parseString = "test";
+        var startRule = "ablExpression";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);
-        test.ok(result.type === "AblExpression");
-        test.ok(result.value === "Test");
+        test.ok(result[0].type === "ablExpression");
+        test.ok(result[0].value === "test");
         
         test.done();
     },
@@ -34,15 +34,15 @@ exports.ablExpressionTests = {
      */
     simpleLiteral : function(test){
         var parseString = "1";
-        var startRule = "AblExpression";
+        var startRule = "ablExpression";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 1);
-        test.ok(result.type === "AblExpression");
-        test.ok(result.value);
-        test.ok(result.value.type === "AblLiteral");
-        test.ok(result.value.value === "1");
-        test.ok(result.value.varType === "integer");
+        test.ok(result[0].type === "ablExpression");
+        test.ok(result[0].value);
+        test.ok(result[0].value.type === "ablLiteral");
+        test.ok(result[0].value.value === "1");
+        test.ok(result[0].value.varType === "int");
         
         test.done();
     },

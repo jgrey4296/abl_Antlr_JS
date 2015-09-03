@@ -21,8 +21,8 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 1);
-        test.ok(result[0].names[0] === "Test");
+        test.ok(result[0].names.length === 1,result[0].names.length);
+        test.ok(result[0].names[0].type === "Test");
         
         test.done();
     },
@@ -39,9 +39,9 @@ exports.paramsTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
         test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0] === "Test");
-        test.ok(result[0].names[1] === "Blah");
-        test.ok(result[0].names[2] === "Bloo");        
+        test.ok(result[0].names[0].type === "Test");
+        test.ok(result[0].names[1].type === "Blah");
+        test.ok(result[0].names[2].type === "Bloo");        
         test.done();
     },
 
@@ -54,10 +54,53 @@ exports.paramsTests = {
         var startRule = "params";
         var result = ABLModule.parse(parseString,startRule);
 
-        test.ok(result.length === 0);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "params");
+        test.ok(result[0].names.length === 0);
         test.done();
     },
-    
-    
 
+    /**
+       check that both types and names are a recognised
+       @method paramsOfTYPEandName
+     */
+    paramsOfTYPEandName : function(test){
+        var parseString = "( String blah)";
+        var startRule = "params";
+        var result = ABLModule.parse(parseString,startRule);
+        
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "params");
+        test.ok(result[0].names.length === 1);
+        test.ok(result[0].names[0].type === "String");
+        test.ok(result[0].names[0].name === "blah");
+        
+        test.done();
+    },
+
+
+    /**
+       check that multiples of types and names are recognised
+       @method paramsOfTYPEandNameMULTIPLE
+     */
+    paramsOfTYPEandNameMULTIPLE : function(test){
+        var parseString = "( String blah, Something else, One more)";
+        var startRule = "params";
+        var result = ABLModule.parse(parseString,startRule);
+        
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "params");
+        test.ok(result[0].names.length === 3);
+        test.ok(result[0].names[0].type === "String");
+        test.ok(result[0].names[0].name === "blah");
+        test.ok(result[0].names[1].type === "Something");
+        test.ok(result[0].names[1].name === "else");
+        test.ok(result[0].names[2].type === "One");
+        test.ok(result[0].names[2].name === "more");
+        
+        test.done();
+    },
+
+
+    
 };

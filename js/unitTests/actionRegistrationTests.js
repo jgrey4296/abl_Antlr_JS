@@ -23,7 +23,8 @@ exports.actionRegistrationTests = {
         test.ok(result[0].type === "actionRegistration");
         test.ok(result[0].name === "Test");
         test.ok(result[0].target === "Blah");
-        test.ok(result[0].params.length === 0);
+        test.ok(result[0].params.type === "params");
+        test.ok(result[0].params.names.length === 0);
         test.done();
     },
 
@@ -40,14 +41,19 @@ exports.actionRegistrationTests = {
         test.ok(result[0].type === "actionRegistration");
         test.ok(result[0].name === "Test");
         test.ok(result[0].target === "Bloo");
-        test.ok(result[0].params.length === 3);
-        test.ok(result[0].params[0] === "Blah");
-        test.ok(result[0].params[1] === "Something");
-        test.ok(result[0].params[2] === "Else");
+        test.ok(result[0].params.type === "params");
+        test.ok(result[0].params.names.length === 3);
+        test.ok(result[0].params.names[0].type === "Blah");
+        test.ok(result[0].params.names[0].name === undefined);
+        test.ok(result[0].params.names[1].type === "Something");
+        test.ok(result[0].params.names[2].type === "Else");
+        
 
         test.done();
     },
     
+    //Test with typed and named parameters
 
+    
     //Add failures
 };

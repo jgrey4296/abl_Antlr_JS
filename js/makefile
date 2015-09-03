@@ -13,7 +13,7 @@ $(GEN_FILES) : compileGrammar
 	perl -pi -e "s/\'antlr4\/index/\'.\/lib\/antlr4\/index/g" $@
 
 test : FORCE 
-	nodeunit ./test/unitTests.js
+	nodeunit ./unitTests/unitTests.js
 
 FORCE : 
 

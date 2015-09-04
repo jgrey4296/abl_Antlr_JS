@@ -41,6 +41,6 @@ exports.namedPropertyTests = require('./namedPropertyTests');
 exports.stepModifierTests = require('./stepModifierTests');
 
 exports.basicStepTests = require('./basicStepTests');
-exports.primitiveActTests = require('./primitieActTests');
+exports.primitiveActTests = require('./primitiveActTests');
 exports.goalStepTests = require('./goalStepTests');
 

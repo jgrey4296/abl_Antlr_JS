@@ -353,6 +353,15 @@ ABLListener.prototype.exitStepModifier = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#basicStep.
+ABLListener.prototype.enterBasicStep = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#basicStep.
+ABLListener.prototype.exitBasicStep = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#name.
 ABLListener.prototype.enterName = function(ctx) {
 };

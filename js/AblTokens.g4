@@ -23,6 +23,9 @@ POST_TO : 'post_to';
 TEAMNEEDED: 'team_needed_for_success';
 ONENEEDED: 'one_needed_for_success';
 
+FAIL : 'fail';
+SUCCEED : 'succeed';
+WAIT : 'wait';
 
 
 SEQ : 'sequential';

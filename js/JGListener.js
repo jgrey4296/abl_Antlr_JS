@@ -744,5 +744,24 @@ JGListener.prototype.exitStepModifier = function(ctx){
     }    
 };
 
+JGListener.prototype.enterBasicStep = function(ctx){
+    var outObj = {
+        type : "basicStep",
+        value : undefined
+    };
+
+    if(ctx.FAIL()){
+        outObj.value = "fail";
+    }else if(ctx.SUCCEED()){
+        outObj.value = "succeed";
+    }else if(ctx.WAIT()){
+        outObj.value = "wait";
+    }
+
+    if(outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
 
 exports.JGListener = JGListener;

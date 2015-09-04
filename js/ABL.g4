@@ -104,7 +104,8 @@ stepModifier : IGNORE_FAILURE
     | namedProperty
     | successTest;
 
-
+//Basic step, integrating fail,succeed, and wait
+basicStep : (FAIL | SUCCEED | WAIT) ';';
 
 
 

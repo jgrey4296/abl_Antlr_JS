@@ -650,9 +650,7 @@ JGListener.prototype.exitPersistence = function(ctx){
         outObj.value = "whenSucceeds";
     }
 
-    if(outObj.value !== undefined){
-        this.parsedStack.push(outObj);
-    }
+    this.parsedStack.push(outObj);
 };
 
 
@@ -686,16 +684,21 @@ JGListener.prototype.exitStepModifier = function(ctx){
         modValue : undefined
     };
 
-    if(this.parsedStack.length < 1) return;
-    
-    var prevValue = this.parsedStack[this.parsedStack.length-1];
-    
+    var prevValue;
+    if(this.parsedStack.length > 0){
+        prevValue = this.parsedStack[this.parsedStack.length-1];
+    }
+
     if(ctx.IGNORE_FAILURE()){
+        console.log("ignore failure found");
         outObj.modType = "ignoreFailure";
         outObj.modValue = 0;
     }else if(ctx.EFFECT_ONLY()){
         outObj.modType = "effectOnly";
         outObj.modValue = 0;
+    }else if(ctx.TEAM_EFFECT_ONLY()){
+        outObj.modType = "teamEffectOnly";
+        outObj.modValue = 0;        
     }else if(ctx.POST()){
         outObj.modType = "post";
         outObj.modValue = 0;
@@ -709,25 +712,25 @@ JGListener.prototype.exitStepModifier = function(ctx){
         outObj.modType = "oneNeeded";
         outObj.modValue = 0;
     }else if(ctx.priorityModifier()){
-        if(prevValue.type === "priorityModifier"){
+        if(prevValue && prevValue.type === "priorityModifier"){
             this.parsedStack.pop();
             outObj.modType = "priorityModifier";
             outObj.modValue = prevValue;
         }
     }else if(ctx.persistence()){
-        if(prevValue.type === "persistence"){
+        if(prevValue && prevValue.type === "persistence"){
             this.parsedStack.pop();
             outObj.modType = "persistence";
             outObj.modValue = prevValue;
         }
     }else if(ctx.namedProperty()){
-        if(prevValue.type === "namedProperty"){
+        if(prevValue && prevValue.type === "namedProperty"){
             this.parsedStack.pop();
             outObj.modType = "namedProperty";
             outObj.modValue = prevValue;
         }           
     }else if(ctx.successTest()){
-        if(prevValue.type === "successTest"){
+        if(prevValue && prevValue.type === "successTest"){
             this.parsedStack.pop();
             outObj.modType = "successTest";
             outObj.modValue = prevValue;

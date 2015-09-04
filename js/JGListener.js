@@ -191,6 +191,13 @@ JGListener.prototype.exitParams = function(ctx){
         params: [],
     };
 
+    //transfer all individual param into the params array
+    while(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "param"){
+        outObj.params.unshift(this.parsedStack.pop());
+    };
+
+
+    
     this.parsedStack.push(outObj);
 };
 

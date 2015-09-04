@@ -21,9 +21,10 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 1,result[0].names.length);
-        test.ok(result[0].names[0].type === "param");
-        test.ok(result[0].names[0].varType === "Test");
+        test.ok(result[0].params.length === 1);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === "Test");
+        test.ok(result[0].params[0].value === undefined);
         
         test.done();
     },
@@ -39,10 +40,16 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0].varType === "Test");
-        test.ok(result[0].names[1].varType === "Blah");
-        test.ok(result[0].names[2].varType === "Bloo");        
+        test.ok(result[0].params.length === 3);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === "Test");
+        test.ok(result[0].params[0].value === undefined);
+        test.ok(result[0].params[1].type === "param");
+        test.ok(result[0].params[1].varType === "Blah");
+        test.ok(result[0].params[1].value === undefined);
+        test.ok(result[0].params[2].type === "param");
+        test.ok(result[0].params[2].varType === "Bloo");
+        test.ok(result[0].params[2].value === undefined);
         test.done();
     },
 
@@ -57,7 +64,7 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 0);
+        test.ok(result[0].params.length === 0);
         test.done();
     },
 
@@ -72,9 +79,12 @@ exports.paramsTests = {
         
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 1);
-        test.ok(result[0].names[0].varType === "String");
-        test.ok(result[0].names[0].name === "blah");
+        test.ok(result[0].params.length === 1);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === "String");
+        test.ok(result[0].params[0].value.type === "ablExpression");
+        test.ok(result[0].params[0].value.varType === "name");
+        test.ok(result[0].params[0].value.value === "blah");
         
         test.done();
     },
@@ -91,13 +101,29 @@ exports.paramsTests = {
         
         test.ok(result.length === 1);
         test.ok(result[0].type === "params");
-        test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0].varType === "String");
-        test.ok(result[0].names[0].name === "blah");
-        test.ok(result[0].names[1].varType === "Something");
-        test.ok(result[0].names[1].name === "else");
-        test.ok(result[0].names[2].varType === "One");
-        test.ok(result[0].names[2].name === "more");
+
+        test.ok(result[0].params.length === 3);
+        
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === "String");
+        test.ok(result[0].params[0].value.type === "ablExpression");
+        test.ok(result[0].params[0].value.varType === "name");
+        test.ok(result[0].params[0].value.value === "blah");
+
+
+        test.ok(result[0].params[1].type === "param");
+        test.ok(result[0].params[1].varType === "Something");
+        test.ok(result[0].params[1].value.type === "ablExpression");
+        test.ok(result[0].params[1].value.varType === "name");
+        test.ok(result[0].params[1].value.value === "else");
+
+        
+        test.ok(result[0].params[2].type === "param");
+        test.ok(result[0].params[2].varType === "One");
+        test.ok(result[0].params[2].value.type === "ablExpression");
+        test.ok(result[0].params[2].value.varType === "name");
+        test.ok(result[0].params[2].value.value === "more");
+
         
         test.done();
     },

@@ -32,8 +32,10 @@ SEQ : 'sequential';
 PAR : 'parallel';
 BEH : 'behaviour' | 'behavior';
 COLL: 'collection';
-SUBG : 'subgoal';
+SUBGOAL : 'subgoal';
+SPAWNGOAL : 'spawngoal';
 JOINTNEG : 'joint_goal_success_negotiation';
+JOINT : 'joint';
 
 STAR : '*';
 BOOL : 'True' | 'False';

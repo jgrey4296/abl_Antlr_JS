@@ -20,6 +20,12 @@ conflictDecl : 'conflict' name (name)+ ';';
 wmeRegistration : 'register' 'wme' TYPE 'with' TYPE ';';
 wmeRegistration_plural : (wmeRegistration)+;
 
+//Literal:
+ablLiteral : INT | FLOAT | string | BOOL | NULL;
+
+ablExpression : name | ablLiteral;
+
+
 //Generic parameters rule
 params : '(' param? (',' param)* ')';
 param : TYPE name?
@@ -37,10 +43,6 @@ wmeDeclaration : 'wme' TYPE ('extends' TYPE)? '{' ablVariableDeclaration* '}';
 //Property Declaration:
 propertyDeclaration : 'property' TYPE name ';';
 
-//Literal:
-ablLiteral : INT | FLOAT | string | BOOL | NULL;
-
-ablExpression : name | ablLiteral;
 
 //WME Field Test:
 operator : BIND | GT | GE | LT | LE | EQ | NE;
@@ -107,6 +109,11 @@ stepModifier : IGNORE_FAILURE
 //Basic step, integrating fail,succeed, and wait
 basicStep : (FAIL | SUCCEED | WAIT) ';';
 
+//Now On to modifiable Steps:
+primitiveAct : 'act' name params ';';
+
+//Goal Step:
+goalStep : JOINT? (SUBGOAL | SPAWNGOAL) name params? ('at' name)?';';
 
 
 

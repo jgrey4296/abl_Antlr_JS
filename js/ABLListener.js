@@ -362,6 +362,24 @@ ABLListener.prototype.exitBasicStep = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#primitiveAct.
+ABLListener.prototype.enterPrimitiveAct = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#primitiveAct.
+ABLListener.prototype.exitPrimitiveAct = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#goalStep.
+ABLListener.prototype.enterGoalStep = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#goalStep.
+ABLListener.prototype.exitGoalStep = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#name.
 ABLListener.prototype.enterName = function(ctx) {
 };

@@ -763,5 +763,28 @@ JGListener.prototype.enterBasicStep = function(ctx){
     }
 };
 
+JGListener.prototype.exitPrimitiveAct = function(ctx){
+    var outObj = {
+        type : "primitiveAct",
+        name : undefined,
+        params : undefined
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.params()
+       && this.parsedStack[this.parsedStack.length-1].type === "params"){
+        outObj.params = this.parsedStack.pop();
+    }
+
+    if(outObj.name !== undefined
+       && outObj.params !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+
 
 exports.JGListener = JGListener;

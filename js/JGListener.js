@@ -716,7 +716,6 @@ JGListener.prototype.exitStepModifier = function(ctx){
     }
 
     if(ctx.IGNORE_FAILURE()){
-        console.log("ignore failure found");
         outObj.modType = "ignoreFailure";
         outObj.modValue = 0;
     }else if(ctx.EFFECT_ONLY()){
@@ -851,5 +850,24 @@ JGListener.prototype.exitGoalStep = function(ctx){
     
 };
 
+JGListener.prototype.exitBehaviourStep = function(ctx){
+    var outObj = {
+        type : "behaviourStep",
+        modifiers : [],
+        step : undefined
+    };
+
+    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "basicStep"){
+        outObj.step = this.parsedStack.pop();
+    }
+
+    while(this.parsedStack.length > 0
+          && this.parsedStack[this.parsedStack.length-1].type == "stepModifier"){
+        outObj.modifiers.unshift(this.parsedStack.pop());
+    }
+
+    this.parsedStack.push(outObj);
+    
+};
 
 exports.JGListener = JGListener;

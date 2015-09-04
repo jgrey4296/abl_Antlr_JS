@@ -27,11 +27,14 @@ FAIL : 'fail';
 SUCCEED : 'succeed';
 WAIT : 'wait';
 
+MOVESTEP : 'move_step';
+DELETESTEP : 'delete_step';
+ADDSTEP : 'add_step';
 
 SEQ : 'sequential';
 PAR : 'parallel';
-BEH : 'behaviour' | 'behavior';
 COLL: 'collection';
+BEH : 'behaviour' | 'behavior';
 SUBGOAL : 'subgoal';
 SPAWNGOAL : 'spawngoal';
 JOINTNEG : 'joint_goal_success_negotiation';

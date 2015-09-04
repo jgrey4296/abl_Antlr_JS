@@ -116,8 +116,14 @@ primitiveAct : 'act' name params ';';
 //Goal Step:
 goalStep : JOINT? (SUBGOAL | SPAWNGOAL) name params? ('at' name)?';';
 
+//Modify step skipped as no examples
 
+//Mental Act would go here:
 
+//Behaviour Step:
+behaviourStep : ('with' '(' stepModifier (',' stepModifier)* ')')? (goalStep | primitiveAct | basicStep);
+
+//Anonymous block
 
 //NAME
 name : CHARS;

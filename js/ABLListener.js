@@ -380,6 +380,15 @@ ABLListener.prototype.exitGoalStep = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#behaviourStep.
+ABLListener.prototype.enterBehaviourStep = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#behaviourStep.
+ABLListener.prototype.exitBehaviourStep = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#name.
 ABLListener.prototype.enterName = function(ctx) {
 };

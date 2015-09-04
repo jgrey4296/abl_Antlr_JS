@@ -56,26 +56,25 @@ JGListener.prototype.enterG_package = function(ctx){
    @method enterG_import
 */
 JGListener.prototype.enterG_import = function(ctx){
-    //console.log("import name:", ctx.name().getText());
-    for(var x in ctx.TYPE()){
-        var importName = ctx.TYPE()[x].getText();
-        var star = false;
-        if(ctx.STAR()){
-            star = true;
-            //remove the dot from the name:
-            if(importName[importName.length-1] === "."){
-                importName = importName.slice(0,-1);
-            }
-        }
+    var outObj = {
+        type : 'importDeclaration',
+        starred : false,
+        name : undefined
+    };
 
-        if(importName !== '<missing undefined>'){
-            this.parsedStack.push({
-                name : importName,
-                type : "importDeclaration",
-                starred : star,
-            });
-        }
+    if(ctx.TYPE() && ctx.TYPE().getText() !== "<missing undefined>"){
+        outObj.name = ctx.TYPE().getText();
     }
+    
+    if(ctx.STAR()){
+        outObj.starred = true;
+        outObj.name = outObj.name.slice(0,-1);
+    }
+
+    if(outObj.name !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
 };
 
 /**
@@ -218,7 +217,7 @@ JGListener.prototype.exitActionRegistration = function(ctx){
     if(ctx.TYPE(0) && ctx.TYPE(1)){
         outObj.name = ctx.TYPE(0).getText();
         outObj.target = ctx.TYPE(1).getText();
-        outObj.params = this.parsedStack.pop();
+        outObj.params = this.parsedStack.pop().params;
         this.parsedStack.push(outObj);
     }
 };
@@ -461,7 +460,7 @@ JGListener.prototype.exitJavaMethod = function(ctx){
     }
 
     if(ctx.params() && this.parsedStack[this.parsedStack.length-1].type === "params"){
-        outObj.params = this.parsedStack.pop();
+        outObj.params = this.parsedStack.pop().params;
     }
 
     if(outObj.name && outObj.params){
@@ -803,7 +802,7 @@ JGListener.prototype.exitPrimitiveAct = function(ctx){
 
     if(ctx.params()
        && this.parsedStack[this.parsedStack.length-1].type === "params"){
-        outObj.params = this.parsedStack.pop();
+        outObj.params = this.parsedStack.pop().params;
     }
 
     if(outObj.name !== undefined
@@ -812,6 +811,45 @@ JGListener.prototype.exitPrimitiveAct = function(ctx){
     }
 };
 
+
+JGListener.prototype.exitGoalStep = function(ctx){
+    var outObj = {
+        type : 'goalStep',
+        joint : false,
+        goalType : undefined,
+        at : undefined,
+        goalName : undefined,
+        params : undefined
+    };
+
+    if(ctx.JOINT()){
+        outObj.joint = true;
+    }
+
+    if(ctx.SUBGOAL()){
+        outObj.goalType = "sub";
+    }else if(ctx.SPAWNGOAL()){
+        outObj.goalType = "spawn";
+    }
+
+    if(ctx.name(0)){
+        outObj.goalName = ctx.name(0).getText();
+    }
+
+    if(ctx.name(1)){
+        outObj.at = ctx.name(1).getText();
+    }
+
+    if(this.parsedStack[this.parsedStack.length-1].type === "params"){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(outObj.goalName !== undefined
+       && outObj.goalType !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
+};
 
 
 exports.JGListener = JGListener;

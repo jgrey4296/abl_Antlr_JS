@@ -23,8 +23,8 @@ exports.actionRegistrationTests = {
         test.ok(result[0].type === "actionRegistration");
         test.ok(result[0].name === "Test");
         test.ok(result[0].target === "Blah");
-        test.ok(result[0].params.type === "params");
-        test.ok(result[0].params.names.length === 0);
+        test.ok(result[0].params instanceof Array);
+        test.ok(result[0].params.length === 0);
         test.done();
     },
 
@@ -41,13 +41,17 @@ exports.actionRegistrationTests = {
         test.ok(result[0].type === "actionRegistration");
         test.ok(result[0].name === "Test");
         test.ok(result[0].target === "Bloo");
-        test.ok(result[0].params.type === "params");
-        test.ok(result[0].params.names.length === 3);
-        test.ok(result[0].params.names[0].type === "Blah");
-        test.ok(result[0].params.names[0].name === undefined);
-        test.ok(result[0].params.names[1].type === "Something");
-        test.ok(result[0].params.names[2].type === "Else");
-        
+        test.ok(result[0].params instanceof Array);
+        test.ok(result[0].params.length === 3);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === "Blah");
+        test.ok(result[0].params[0].value === undefined);
+        test.ok(result[0].params[1].type === "param");
+        test.ok(result[0].params[1].varType === "Something");
+        test.ok(result[0].params[1].value === undefined);
+        test.ok(result[0].params[2].type === "param");
+        test.ok(result[0].params[2].varType === "Else");
+        test.ok(result[0].params[2].value === undefined);
 
         test.done();
     },

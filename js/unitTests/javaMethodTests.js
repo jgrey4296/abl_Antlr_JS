@@ -22,11 +22,12 @@ exports.conditionalExpressionTests = {
         test.ok(result[0].type === "javaMethod");
         test.ok(result[0].bang === true);
         test.ok(result[0].name === "something.somethingElse");
-        test.ok(result[0].params.names.length === 2);
-        test.ok(result[0].params.names[0].varType === undefined);
-        test.ok(result[0].params.names[0].name === "x");
-        test.ok(result[0].params.names[1].varType === undefined);
-        test.ok(result[0].params.names[1].name === "y");
+        test.ok(result[0].params instanceof Array);
+        test.ok(result[0].params.length === 2);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === undefined);
+        test.ok(result[0].params[0].value.type === "ablExpression");
+        test.ok(result[0].params[0].value.value === "x");
         
         test.done();
     },
@@ -41,7 +42,7 @@ exports.conditionalExpressionTests = {
         test.ok(result[0].type === "javaMethod");
         test.ok(result[0].bang === true);
         test.ok(result[0].name === "test");
-        test.ok(result[0].params.names[0].varType === "BlahWME");
+        test.ok(result[0].params[0].varType === "BlahWME");
         
         test.done();
     }

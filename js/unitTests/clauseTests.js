@@ -74,7 +74,7 @@ exports.clauseTests = {
         test.ok(result[0].child.type === "javaMethod");
         test.ok(result[0].child.bang === true);
         test.ok(result[0].child.name === "testThis.something");
-        test.ok(result[0].child.params.names.length === 0);
+        test.ok(result[0].child.params.length === 0);
         test.done();
     },
 

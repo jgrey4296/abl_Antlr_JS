@@ -24,10 +24,13 @@ exports.primitiveActTests = {
         test.ok(result.length === 1);
         test.ok(result[0].type === "primitiveAct");
         test.ok(result[0].name === "walkToLocation");
-        test.ok(result[0].params.type === "params");
-        test.ok(result[0].params.names.length === 2);
-        test.ok(result[0].params.names[0].name === "myName");
-        test.ok(result[0].params.names[1].name === "targetLocation");
+        test.ok(result[0].params.length === 2);
+        test.ok(result[0].params[0].type === "param");
+        test.ok(result[0].params[0].varType === undefined);
+        test.ok(result[0].params[0].value.type === "ablExpression");
+        test.ok(result[0].params[0].value.varType === "name");
+        test.ok(result[0].params[0].value.value === "myName");
+            
         
         test.done();
     },

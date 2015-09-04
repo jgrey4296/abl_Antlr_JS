@@ -5,7 +5,6 @@
 var ABLModule = require('../ABLModule');
 
 var startRule = "g_import";
-
 /**
    Checks that import statements work
    @class UnitTests.importDeclarationTests 
@@ -70,7 +69,7 @@ exports.importDeclarationTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "importDeclaration");
-        test.ok(result[0].name === "Blah");
+        test.ok(result[0].name === "Blah",result[0].name);
         test.ok(result[0].starred === true);
         test.done();
     },
@@ -81,6 +80,7 @@ exports.importDeclarationTests = {
      */
     multipleImports : function(test){
         var parseString = "import Blah; import Bloo; import Something.else;";
+        var startRule = "prog";
         var result = ABLModule.parse(parseString,startRule);
 
         test.ok(result.length === 3);
@@ -117,7 +117,7 @@ exports.importDeclarationTests = {
 
         var result = ABLModule.parse(parseString,startRule);
 
-        test.ok(result.length === 0);
+        test.ok(result.length === 0,result.length);
         
         test.done();
     },

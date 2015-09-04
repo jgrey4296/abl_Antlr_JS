@@ -9,36 +9,38 @@ exports.ablLiteralTests = require('./AblLiteralTests');
 exports.ablExpressionTests = require('./AblExpressionTests');
 exports.paramTests = require('./paramTest');
 exports.paramsTests = require('./paramsTest');
-exports.actionRegistration = require('./actionRegistrationTests');
-export.ablVariableDeclarationTests = require('./ABLVariableDeclarationTests');
+exports.actionRegistration = require("./actionRegistrationTests");
 
-export.wmeDeclarationTests = require('./WMEDeclarationTests');
-export.propertyDeclarationTests = require('./PropertyDeclarationTests');
+exports.ablVariableDeclarationTests =
+    require('./ABLVariableDeclarationTests');
 
-export.operatorTests = require('./operatorTests');
-export.wmeFieldTestTests = require('./WmeFieldTestTests');
-export.wmeTestTests = require('./WMETestTest');
-export.binaryOpTests = require('./binaryOpTests');
-export.javaMethodTests = require('./javaMethodTests');
-export.clauseTests = require('./clauseTests');
-export.mixedCallTests = require('./mixedCallTests');
-export.conditionalExpressionTests = require('./conditionalExpressionTests');
+exports.wmeDeclarationTests = require('./WMEDeclarationTests');
+exports.propertyDeclarationTests = require('./PropertyDeclarationTests');
 
-export.wmeTestSequenceTests = require('./wmeTestSequenceTests');
-export.preconditionTests = require('./preconditionTests');
-export.contextConditionTests = require('./contextConditionTests');
-export.entryConditionTests = require('./entryConditionTests');
-export.successConditionTests = require('./successConditionTests');
-export.successTestTests = require('./successTestTests');
-export.numberNeededForSuccessTests = require('./numberNeededForSuccessTests');
-export.teamMemberSpecifierTests = require('./teamMemberSpecifierTests');
-export.priorityModifierTests = require('./priorityModifierTests');
+exports.operatorTests = require('./operatorTests');
+exports.wmeFieldTestTests = require('./WmeFieldTestTests');
+exports.wmeTestTests = require('./WMETestTest');
+exports.binaryOpTests = require('./binaryOpTests');
+exports.javaMethodTests = require('./javaMethodTests');
+exports.clauseTests = require('./clauseTests');
+exports.mixedCallTests = require('./mixedCallTests');
+exports.conditionalExpressionTests = require('./conditionalExpressionTests');
 
-export.persistenceTests = require('./persistenceTests');
-export.namedPropertyTests = require('./namedPropertyTests');
-export.stepModifierTests = require('./stepModifierTests');
+exports.wmeTestSequenceTests = require('./wmeTestSequenceTests');
+exports.preconditionTests = require('./preconditionTests');
+exports.contextConditionTests = require('./contextConditionTests');
+exports.entryConditionTests = require('./entryConditionTests');
+exports.successConditionTests = require('./successConditionTests');
+exports.successTestTests = require('./successTestTests');
+exports.numberNeededForSuccessTests = require('./numberNeededForSuccessTests');
+exports.teamMemberSpecifierTests = require('./teamMemberSpecifierTests');
+exports.priorityModifierTests = require('./priorityModifierTests');
 
-export.basicStepTests = require('./basicStepTests');
-export.primitiveActTests = require('./primitieActTests');
-export.goalStepTests = require('./goalStepTests');
+exports.persistenceTests = require('./persistenceTests');
+exports.namedPropertyTests = require('./namedPropertyTests');
+exports.stepModifierTests = require('./stepModifierTests');
+
+exports.basicStepTests = require('./basicStepTests');
+exports.primitiveActTests = require('./primitieActTests');
+exports.goalStepTests = require('./goalStepTests');
 

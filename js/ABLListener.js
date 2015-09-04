@@ -83,6 +83,24 @@ ABLListener.prototype.exitWmeRegistration_plural = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#ablLiteral.
+ABLListener.prototype.enterAblLiteral = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablLiteral.
+ABLListener.prototype.exitAblLiteral = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#ablExpression.
+ABLListener.prototype.enterAblExpression = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablExpression.
+ABLListener.prototype.exitAblExpression = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#params.
 ABLListener.prototype.enterParams = function(ctx) {
 };
@@ -134,24 +152,6 @@ ABLListener.prototype.enterPropertyDeclaration = function(ctx) {
 
 // Exit a parse tree produced by ABLParser#propertyDeclaration.
 ABLListener.prototype.exitPropertyDeclaration = function(ctx) {
-};
-
-
-// Enter a parse tree produced by ABLParser#ablLiteral.
-ABLListener.prototype.enterAblLiteral = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#ablLiteral.
-ABLListener.prototype.exitAblLiteral = function(ctx) {
-};
-
-
-// Enter a parse tree produced by ABLParser#ablExpression.
-ABLListener.prototype.enterAblExpression = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#ablExpression.
-ABLListener.prototype.exitAblExpression = function(ctx) {
 };
 
 

@@ -103,5 +103,7 @@ exports.paramsTests = {
     },
 
     //add in tests where there isnt a type
+
+    //TODO: TEST expressions / literals
     
 };

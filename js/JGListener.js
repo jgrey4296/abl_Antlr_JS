@@ -155,25 +155,42 @@ JGListener.prototype.enterWmeRegistration = function(ctx){
 };
 
 /**
-   Parse parameters
-   @method enterParams
+   parse individual parameter
+   @method exitParam
  */
-JGListener.prototype.enterParams = function(ctx){
+JGListener.prototype.exitParam = function(ctx){
+    var outObj = {
+        type : "param",
+        varType : undefined,
+        value : undefined
+    };
+    
+    if(ctx.TYPE()){
+        outObj.varType = ctx.TYPE().getText();
+    }
+
+    if(ctx.ablExpression()
+       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"){
+        outObj.value = this.parsedStack.pop();
+    }
+
+    
+    if(outObj.varType !== undefined || outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+
+/**
+   Parse parameters
+   @method exitParams
+ */
+JGListener.prototype.exitParams = function(ctx){
     var outObj = {
         type :"params",
-        names: [],
+        params: [],
     };
-    for(var i = 0; i < ctx.param().length; i++){
-        if(ctx.param(i)){
-            var param = {
-                type : "param",
-            };
-            param.varType =  ctx.param(i).TYPE() ? ctx.param(i).TYPE().getText() : undefined;
-            param.name = ctx.param(i).name() ? ctx.param(i).name().getText() : undefined;
-            
-            outObj.names.push(param);
-        }
-    }
+
     this.parsedStack.push(outObj);
 };
 
@@ -289,15 +306,18 @@ JGListener.prototype.enterAblLiteral = function(ctx){
 JGListener.prototype.exitAblExpression = function(ctx){
     var outObj = {
         type : 'ablExpression',
-        value : undefined
+        varType : undefined,
+        value : undefined        
     };
 
     if(ctx.name()){
         outObj.value = ctx.name().getText();
+        outObj.varType = "name";
         this.parsedStack.push(outObj);
     }else if(ctx.ablLiteral()
              && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
         outObj.value = this.parsedStack.pop();
+        outObj.varType = "ablLiteral";
         this.parsedStack.push(outObj);
     }
 };

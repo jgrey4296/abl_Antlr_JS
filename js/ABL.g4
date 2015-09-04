@@ -28,8 +28,8 @@ ablExpression : name | ablLiteral;
 
 //Generic parameters rule
 params : '(' param? (',' param)* ')';
-param : TYPE name?
-    | TYPE? name;
+param : TYPE ablExpression?
+    | TYPE? ablExpression;
 
 //Action Registration:
 actionRegistration : 'register' 'action' TYPE params 'with' TYPE';';

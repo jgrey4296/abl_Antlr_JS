@@ -290,15 +290,6 @@ ABLListener.prototype.exitSuccessCondition = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ABLParser#stateCondition.
-ABLListener.prototype.enterStateCondition = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#stateCondition.
-ABLListener.prototype.exitStateCondition = function(ctx) {
-};
-
-
 // Enter a parse tree produced by ABLParser#successTest.
 ABLListener.prototype.enterSuccessTest = function(ctx) {
 };
@@ -323,6 +314,42 @@ ABLListener.prototype.enterTeamMemberSpecifier = function(ctx) {
 
 // Exit a parse tree produced by ABLParser#teamMemberSpecifier.
 ABLListener.prototype.exitTeamMemberSpecifier = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#priorityModifier.
+ABLListener.prototype.enterPriorityModifier = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#priorityModifier.
+ABLListener.prototype.exitPriorityModifier = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#persistence.
+ABLListener.prototype.enterPersistence = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#persistence.
+ABLListener.prototype.exitPersistence = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#namedProperty.
+ABLListener.prototype.enterNamedProperty = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#namedProperty.
+ABLListener.prototype.exitNamedProperty = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#stepModifier.
+ABLListener.prototype.enterStepModifier = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#stepModifier.
+ABLListener.prototype.exitStepModifier = function(ctx) {
 };
 
 

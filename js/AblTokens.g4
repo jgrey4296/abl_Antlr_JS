@@ -13,6 +13,17 @@ EQ : '==';
 NE : '!=';
 BANG : '!';
 
+WHEN_FAILS : 'when_fails';
+WHEN_SUCCEEDS : 'when_succeeds';
+IGNORE_FAILURE : 'ignore_failure';
+EFFECT_ONLY : 'effect_only';
+TEAM_EFFECT_ONLY : 'team_effect_only';
+POST : 'post';
+POST_TO : 'post_to';
+TEAMNEEDED: 'team_needed_for_success';
+ONENEEDED: 'one_needed_for_success';
+
+
 
 SEQ : 'sequential';
 PAR : 'parallel';
@@ -20,8 +31,6 @@ BEH : 'behaviour' | 'behavior';
 COLL: 'collection';
 SUBG : 'subgoal';
 JOINTNEG : 'joint_goal_success_negotiation';
-TEAMNEEDED: 'team_needed_for_success';
-ONENEEDED: 'one_needed_for_success';
 
 STAR : '*';
 BOOL : 'True' | 'False';

@@ -16,9 +16,17 @@ exports.testExpressionTests = {
        @todo
      */
     simple : function(test){
-        var parseString = "";
-        var startRule = "";
+        var parseString = "{ (BlahWME) }";
+        var startRule = "testExpression";
         var result = ABLModule.parse(parseString,startRule);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "testExpression",result[0].type);
+        test.ok(result[0].clauses.length === 1);
+        test.ok(result[0].clauses[0].type === "wmeTest");
+        test.ok(result[0].clauses[0].bang === false);
+        test.ok(result[0].clauses[0].name === undefined);
+        test.ok(result[0].clauses[0].wmeType === "BlahWME");
         test.done();
     },
 

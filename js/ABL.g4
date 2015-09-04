@@ -73,8 +73,8 @@ precondition : 'precondition' testExpression;
 contextCondition : 'context_condition' testExpression;
 entryCondition : 'entry_condition' testExpression;
 successCondition : 'success_condition' testExpression;
-stateCondition : testExpression;
 successTest : 'success_test' testExpression;
+
 
 //Number Needed for success:
 numberNeededForSuccess : 'number_needed_for_success' ablLiteral ';';
@@ -83,6 +83,30 @@ numberNeededForSuccess : 'number_needed_for_success' ablLiteral ';';
 teamMemberSpecifier : 'teammembers' name+;
 
 //Priority modifier:
+priorityModifier : ('priority' | 'priority_modifier') ablLiteral;
+
+//Persistence:
+persistence : 'persistent' (WHEN_FAILS | WHEN_SUCCEEDS)?;
+
+//Named Property:
+namedProperty : 'property' name ablExpression;
+
+//Step Modifier:
+stepModifier : IGNORE_FAILURE
+    | EFFECT_ONLY
+    | TEAM_EFFECT_ONLY
+    | POST
+    | POST_TO name
+    | TEAMNEEDED
+    | ONENEEDED
+    | priorityModifier
+    | persistence
+    | namedProperty
+    | successTest;
+
+
+
+
 
 
 

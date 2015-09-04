@@ -529,7 +529,7 @@ JGListener.prototype.exitWmeTestSequence = function(ctx){
 JGListener.prototype.exitTestExpression = function(ctx){
     if(this.parsedStack.length > 0
        && this.parsedStack[this.parsedStack.length-1].type === "wmeTestSequence"){
-        this.parsedStack[this.parsedStack.length-1].type === "testExpression";
+        this.parsedStack[this.parsedStack.length-1].type = "testExpression";
     }
 
 };
@@ -623,5 +623,123 @@ JGListener.prototype.exitTeamMemberSpecifier = function(ctx){
         this.parsedStack.push(outObj);
     }
 };
+
+JGListener.prototype.exitPriorityModifier = function(ctx){
+    var outObj = {
+        type : "priorityModifier",
+        value : undefined
+    };
+
+    if(ctx.ablLiteral()
+       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+        outObj.value = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitPersistence = function(ctx){
+    var outObj = {
+        type : "persistence",
+        value : undefined
+    };
+
+    if(ctx.WHEN_FAILS()){
+        outObj.value = "whenFails";
+    }else if(ctx.WHEN_SUCCEEDS()){
+        outObj.value = "whenSucceeds";
+    }
+
+    if(outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+
+JGListener.prototype.exitNamedProperty = function(ctx){
+    var outObj = {
+        type : "namedProperty",
+        name : undefined,
+        value : undefined
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.ablExpression()
+       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"){
+        outObj.value = this.parsedStack.pop();
+    }
+
+    if(outObj.name !== undefined
+       && outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitStepModifier = function(ctx){
+    var outObj = {
+        type : 'stepModifier',
+        modType : undefined,
+        modValue : undefined
+    };
+
+    if(this.parsedStack.length < 1) return;
+    
+    var prevValue = this.parsedStack[this.parsedStack.length-1];
+    
+    if(ctx.IGNORE_FAILURE()){
+        outObj.modType = "ignoreFailure";
+        outObj.modValue = 0;
+    }else if(ctx.EFFECT_ONLY()){
+        outObj.modType = "effectOnly";
+        outObj.modValue = 0;
+    }else if(ctx.POST()){
+        outObj.modType = "post";
+        outObj.modValue = 0;
+    }else if(ctx.POST_TO() && ctx.name()){
+        outObj.modType = "postTo";
+        outObj.modValue = ctx.name().getText();
+    }else if(ctx.TEAMNEEDED()){
+        outObj.modType = "teamNeeded";
+        outObj.modValue = 0;
+    }else if(ctx.ONENEEDED()){
+        outObj.modType = "oneNeeded";
+        outObj.modValue = 0;
+    }else if(ctx.priorityModifier()){
+        if(prevValue.type === "priorityModifier"){
+            this.parsedStack.pop();
+            outObj.modType = "priorityModifier";
+            outObj.modValue = prevValue;
+        }
+    }else if(ctx.persistence()){
+        if(prevValue.type === "persistence"){
+            this.parsedStack.pop();
+            outObj.modType = "persistence";
+            outObj.modValue = prevValue;
+        }
+    }else if(ctx.namedProperty()){
+        if(prevValue.type === "namedProperty"){
+            this.parsedStack.pop();
+            outObj.modType = "namedProperty";
+            outObj.modValue = prevValue;
+        }           
+    }else if(ctx.successTest()){
+        if(prevValue.type === "successTest"){
+            this.parsedStack.pop();
+            outObj.modType = "successTest";
+            outObj.modValue = prevValue;
+        }
+    }
+
+    
+    if(outObj.modType !== undefined
+       && outObj.modValue !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
 
 exports.JGListener = JGListener;

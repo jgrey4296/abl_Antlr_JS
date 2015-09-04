@@ -5,16 +5,24 @@
 var ABLModule = require('../ABLModule');
 
 /**
-   Test the Precondition Construct
-   @class UnitTests.preconditionTests 
+   Test the contextCondition Construct
+   @class UnitTests.contextConditionTests 
  */
-exports.preconditionTests = {
+exports.contextConditionTests = {
 
-    stub : function(test){
-        var parseString = "";
-        var startRule = "";
+    simpleSmokeTest : function(test){
+        var parseString = "context_condition { (BlahWME) }";
+        var startRule = "contextCondition";
         var result = ABLModule.parse(parseString,startRule);
-        test.ok(false);
+
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "contextCondition");
+        test.ok(result[0].testExpression.type === "testExpression");
+        test.ok(result[0].testExpression.type === "testExpression");
+        test.ok(result[0].testExpression.clauses.length === 1);
+        test.ok(result[0].testExpression.clauses[0].type === "wmeTest");
+        test.ok(result[0].testExpression.clauses[0].wmeType === "BlahWME");
+        
         test.done();
     },
 

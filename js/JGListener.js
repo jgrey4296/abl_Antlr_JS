@@ -857,7 +857,11 @@ JGListener.prototype.exitBehaviourStep = function(ctx){
         step : undefined
     };
 
-    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "basicStep"){
+    var prevType = this.parsedStack[this.parsedStack.length-1].type;
+    
+    if(this.parsedStack.length > 0 && (prevType === "basicStep"
+                                       || prevType === "goalStep"
+                                      || prevType === "primitiveAct")){
         outObj.step = this.parsedStack.pop();
     }
 

@@ -4,7 +4,7 @@ grammar ABL;
 import AblTokens;
 
 //top level of the parser
-prog : g_package? g_import* EOF;
+prog : g_package? g_import* constants behavingEntity EOF;
 
 //g_ = grammar. As antlr will complain of conflicting keywords with target language
 g_package : 'package' TYPE ';';
@@ -78,18 +78,27 @@ entryCondition : 'entry_condition' testExpression;
 successCondition : 'success_condition' testExpression;
 successTest : 'success_test' testExpression;
 
-
 //Number Needed for success:
 numberNeededForSuccess : 'number_needed_for_success' ablLiteral ';';
 
 //TeamMemberSpecifier:
 teamMemberSpecifier : 'teammembers' name+;
 
+//specificity
+specificity : 'specificity' ablLiteral ';';
+
+//behaviourModifier
+//skipping reinforcement signals and state for the moment
+behaviourModifier : precondition | specificity | contextCondition | entryCondition | numberNeededForSuccess | teamMemberSpecifier | successCondition;
+
+
+
 //Priority modifier:
 priorityModifier : ('priority' | 'priority_modifier') ablLiteral;
 
 //Persistence:
 persistence : 'persistent' (WHEN_FAILS | WHEN_SUCCEEDS)?;
+
 
 //Named Property:
 namedProperty : 'property' name ablExpression;
@@ -123,7 +132,27 @@ goalStep : JOINT? (SUBGOAL | SPAWNGOAL) name params? ('at' name)?';';
 //Behaviour Step:
 behaviourStep : ('with' '(' stepModifier (',' stepModifier)* ')')? (goalStep | primitiveAct | basicStep);
 
-//Anonymous block
+//TODO:Anonymous block
+
+//Behaviour Definition:
+behaviourDefinition : (JOINT | ATOMIC | ADAPTIVE)* (SEQ | PAR | COLL) BEH name params '{' (behaviourModifier | ablVariableDeclaration | behaviourStep)*; 
+
+
+//Initial Tree!!
+initialTree : 'initial_tree' '{' behaviourStep* '}';
+
+//Decision cycle:
+decisionCycleSMCallDeclaration : 'decision_cycle_sm_call' name';';
+
+ablDeclaration : wmeRegistration
+    | actionRegistration
+    | wmeDeclaration
+    | propertyDeclaration
+    | ablVariableDeclaration;
+
+//Behaving Entity
+behavingEntity : 'behaving_entity' name '{' teamNeeded? decisionCycleSMCallDeclaration? conflictDecl* ablDeclaration* behaviourDefinition*  initialTree '}';
+
 
 //NAME
 name : CHARS;

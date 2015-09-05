@@ -36,4 +36,10 @@ exports.basicStepTests = require('./basicStepTests');
 exports.primitiveActTests = require('./primitiveActTests');
 exports.goalStepTests = require('./goalStepTests');
 exports.behaviourStepTests = require('./behaviourStepTests');
-
+exports.testExpressionTests = require('./testExpressionTests');
+exports.constantDeclarationTests = require('./constantDeclarationTests');
+exports.specificityTests = require('./specificityTests');
+exports.behaviourDefinitionTests = require('./behaviourDefinitionTests');
+exports.decisionCycleTests = require('./decisionCycleTests');
+exports.behavingEntityTests = require('./behavingEntityTests');
+exports.ablDeclarationTests = require('./ablDeclarationTests');

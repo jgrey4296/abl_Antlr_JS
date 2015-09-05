@@ -39,6 +39,8 @@ SUBGOAL : 'subgoal';
 SPAWNGOAL : 'spawngoal';
 JOINTNEG : 'joint_goal_success_negotiation';
 JOINT : 'joint';
+ATOMIC : 'atomic';
+ADAPTIVE : 'adaptive';
 
 STAR : '*';
 BOOL : 'True' | 'False';

@@ -119,7 +119,6 @@ JGListener.prototype.enterTeamNeeded = function(ctx){
    @method enterConflictDecl
  */
 JGListener.prototype.enterConflictDecl = function(ctx){
-    console.log("conflict Dec:");
     var secondObj = [];
     for(var i = 1; i < ctx.name().length; i++) {
         if(ctx.name(i).getText() != '<missing undefined>'){
@@ -857,11 +856,11 @@ JGListener.prototype.exitBehaviourStep = function(ctx){
         step : undefined
     };
 
-    var prevType = this.parsedStack[this.parsedStack.length-1].type;
+    var prev = this.parsedStack[this.parsedStack.length-1];
     
-    if(this.parsedStack.length > 0 && (prevType === "basicStep"
-                                       || prevType === "goalStep"
-                                      || prevType === "primitiveAct")){
+    if(this.parsedStack.length > 0 && prev && (prev.type === "basicStep"
+                                       || prev.type === "goalStep"
+                                      || prev.type === "primitiveAct")){
         outObj.step = this.parsedStack.pop();
     }
 
@@ -873,5 +872,173 @@ JGListener.prototype.exitBehaviourStep = function(ctx){
     this.parsedStack.push(outObj);
     
 };
+
+JGListener.prototype.exitSpecificity = function(ctx){
+    var outObj = {
+        type : "specificity",
+        value : undefined
+    };
+
+    if(ctx.ablLiteral()
+       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+        outObj.value = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+
+};
+
+
+
+JGListener.prototype.exitBehaviourModifier = function(ctx){
+    var prev = this.parsedStack[this.parsedStack.length-1];
+
+    if(["precondition","specificity","contextCondition","entryCondition","numberNeededForSuccess","teamMemberSpecifier","successCondition"].indexOf(prev.type) > -1){
+        this.parsedStack.push({
+            type : "behaviourModifier",
+            value : this.parsedStack.pop()
+        });
+    }        
+};
+
+
+JGListener.prototype.exitBehaviourDefinition = function(ctx){
+    var outObj = {
+        type : 'behaviourDefinition',
+        name : undefined,
+        behType : undefined,
+        joint : false,
+        atomic : false,
+        adaptive : false,
+        params : [],
+        modifiers : [],
+        variables : [],
+    };
+
+    while(this.parsedStack.length > 0 && (this.parsedStack[this.parsedStack.length-1].type === "behaviourModifier" || this.parsedStack[this.parsedStack.length-1].type === "ablVariableDeclaration" || this.parsedStack[this.parsedStack.length-1].type === "behaviourStep" )){
+        var prev = this.parsedStack.pop();
+        if(prev.type === "behaviourModifier"){
+            outObj.modifiers.unshift(prev);
+        }else{
+            outObj.variables.unshift(prev);
+        }
+    }
+
+    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "params"){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.SEQ()){
+        outObj.behType = "sequential";
+    }else if(ctx.PAR()){
+        outObj.behType = "parallel";
+    }else if(ctx.COLL()){
+        outObj.behType = "collection";
+    }
+
+    
+    if(ctx.JOINT().length > 0){
+        outObj.joint = true;
+    }
+    if(ctx.ATOMIC().length > 0){
+        outObj.atomic = true;
+    }
+    if(ctx.ADAPTIVE().length > 0){
+        outObj.adaptive = true;
+    }
+    
+
+    if(outObj.name !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+JGListener.prototype.exitInitialTree = function(ctx){
+    var outObj = {
+        type : "initialTree",
+        steps : []
+    };
+
+    while(this.parsedStack.length > 0
+          && this.parsedStack[this.parsedStack.length-1].type === "behaviourStep"){
+        outObj.steps.push(this.parsedStack.pop());
+    }
+
+    if(outObj.steps.length > 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitDecisionCycleSMCallDeclaration = function(ctx){
+    if(ctx.name()){
+        this.parsedStack.push({
+            type : "decisionCycleSMCall",
+            name : ctx.name().getText()
+        });
+    }
+};
+
+JGListener.prototype.exitAblDeclaration = function(ctx){
+    var outObj = {
+        type : 'ablDeclaration',
+        declare : undefined
+    };
+
+    if(this.parsedStack.length === 0) return;
+    
+    var prev = this.parsedStack[this.parsedStack.length-1];
+
+    if(prev.type === "wmeRegistration"
+       || prev.type === "actionRegistration"
+       || prev.type === "wmeDeclaration"
+       || prev.type === "propertyDeclaration"
+       || prev.type === "ablVariableDeclaration"){
+        outObj.declare = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    };
+};
+
+JGListener.prototype.exitBehavingEntity = function(ctx){
+    var outObj = {
+        type : "behavingEntity",
+        teamNeeded : undefined,
+        decisionCycle : undefined,
+        conflicts : [],
+        declarations : [],
+        behaviours : [],
+        intitialTree : undefined
+    };
+
+    if(this.parsedStack.length > 0
+       && this.parsedStack[this.parsedStack.length-1].type === "initialTree"){
+        outObj.initialTree = this.parsedStack.pop();
+    }
+
+    while(this.parsedStack.length > 0){
+        var current = this.parsedStack.pop();
+        if(current.type === "initialTree"){
+            outObj.initialTree = current;
+        }else if(current.type === "behaviourDefinition"){
+            outObj.behaviours.unshift(current);
+        }else if(current.type === "ablDeclaration"){
+            outObj.declarations.unshift(current);
+        }else if(current.type === "conflictDecl"){
+            outObj.conflicts.unshift(current);
+        }else if(current.type === "decisionCycleSMCallDeclaration"){
+            outObj.decisionCycle = current;
+        }else if(current.type === "teamNeeded"){
+            outObj.teamNeeded = current;
+        }else{
+            console.warn("Did not recognise:",current);
+        }
+    };
+    
+    this.parsedStack.push(outObj);
+    
+};
+
 
 exports.JGListener = JGListener;

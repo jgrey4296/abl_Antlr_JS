@@ -5,144 +5,188 @@ var ABLListener = require('./ABLListener').ABLListener;
 var grammarFileName = "ABL.g4";
 
 var serializedATN = ["\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
-    "\3I\u018b\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4",
+    "\3O\u01ee\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4",
     "\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t",
     "\20\4\21\t\21\4\22\t\22\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27",
     "\t\27\4\30\t\30\4\31\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4",
     "\36\t\36\4\37\t\37\4 \t \4!\t!\4\"\t\"\4#\t#\4$\t$\4%\t%\4&\t&\4\'\t",
-    "\'\4(\t(\4)\t)\4*\t*\4+\t+\4,\t,\4-\t-\4.\t.\3\2\5\2^\n\2\3\2\7\2a\n",
-    "\2\f\2\16\2d\13\2\3\2\3\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4\5\4o\n\4\3\4\3",
-    "\4\3\5\3\5\3\5\7\5v\n\5\f\5\16\5y\13\5\3\6\3\6\3\6\3\6\3\7\3\7\3\7\6",
-    "\7\u0082\n\7\r\7\16\7\u0083\3\7\3\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\t",
-    "\6\t\u0090\n\t\r\t\16\t\u0091\3\n\3\n\3\n\3\n\3\n\5\n\u0099\n\n\3\13",
-    "\3\13\5\13\u009d\n\13\3\f\3\f\5\f\u00a1\n\f\3\f\3\f\7\f\u00a5\n\f\f",
-    "\f\16\f\u00a8\13\f\3\f\3\f\3\r\3\r\5\r\u00ae\n\r\3\r\5\r\u00b1\n\r\3",
-    "\r\5\r\u00b4\n\r\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\16\3\17\3\17\3",
-    "\17\3\17\7\17\u00c2\n\17\f\17\16\17\u00c5\13\17\3\17\3\17\3\20\3\20",
-    "\3\20\3\20\5\20\u00cd\n\20\3\20\3\20\7\20\u00d1\n\20\f\20\16\20\u00d4",
-    "\13\20\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\22\3\22\3\23\3\23\3\23\3",
-    "\23\3\24\3\24\3\24\5\24\u00e6\n\24\3\24\5\24\u00e9\n\24\3\24\3\24\3",
-    "\24\7\24\u00ee\n\24\f\24\16\24\u00f1\13\24\3\24\3\24\3\25\5\25\u00f6",
-    "\n\25\3\25\3\25\3\25\3\25\5\25\u00fc\n\25\3\26\5\26\u00ff\n\26\3\26",
-    "\3\26\3\26\3\27\3\27\3\27\3\27\5\27\u0108\n\27\3\30\3\30\3\31\3\31\3",
-    "\31\3\31\7\31\u0110\n\31\f\31\16\31\u0113\13\31\3\32\3\32\3\32\3\32",
-    "\3\33\3\33\3\33\6\33\u011c\n\33\r\33\16\33\u011d\3\33\3\33\3\34\3\34",
-    "\3\35\3\35\3\35\3\36\3\36\3\36\3\37\3\37\3\37\3 \3 \3 \3!\3!\3!\3\"",
-    "\3\"\3\"\3\"\3#\3#\6#\u0139\n#\r#\16#\u013a\3$\3$\3$\3%\3%\5%\u0142",
-    "\n%\3&\3&\3&\3&\3\'\3\'\3\'\3\'\3\'\3\'\3\'\3\'\3\'\3\'\3\'\3\'\5\'",
-    "\u0154\n\'\3(\3(\3(\3)\3)\3)\3)\3)\3*\5*\u015f\n*\3*\3*\3*\5*\u0164",
-    "\n*\3*\3*\5*\u0168\n*\3*\3*\3+\3+\3+\3+\3+\7+\u0171\n+\f+\16+\u0174",
-    "\13+\3+\3+\5+\u0178\n+\3+\3+\3+\5+\u017d\n+\3,\3,\3-\3-\3-\7-\u0184",
-    "\n-\f-\16-\u0187\13-\3.\3.\3.\2\2/\2\4\6\b\n\f\16\20\22\24\26\30\32",
-    "\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\2\t\3\2\61\62\3\2\"(\3",
-    "\2 !\3\2\33\34\3\2*+\3\2\63\65\3\2=>\u0190\2]\3\2\2\2\4g\3\2\2\2\6k",
-    "\3\2\2\2\bw\3\2\2\2\nz\3\2\2\2\f~\3\2\2\2\16\u0087\3\2\2\2\20\u008f",
-    "\3\2\2\2\22\u0098\3\2\2\2\24\u009c\3\2\2\2\26\u009e\3\2\2\2\30\u00b3",
-    "\3\2\2\2\32\u00b5\3\2\2\2\34\u00bd\3\2\2\2\36\u00c8\3\2\2\2 \u00d7\3",
-    "\2\2\2\"\u00dc\3\2\2\2$\u00de\3\2\2\2&\u00e5\3\2\2\2(\u00f5\3\2\2\2",
-    "*\u00fe\3\2\2\2,\u0107\3\2\2\2.\u0109\3\2\2\2\60\u010b\3\2\2\2\62\u0114",
-    "\3\2\2\2\64\u0118\3\2\2\2\66\u0121\3\2\2\28\u0123\3\2\2\2:\u0126\3\2",
-    "\2\2<\u0129\3\2\2\2>\u012c\3\2\2\2@\u012f\3\2\2\2B\u0132\3\2\2\2D\u0136",
-    "\3\2\2\2F\u013c\3\2\2\2H\u013f\3\2\2\2J\u0143\3\2\2\2L\u0153\3\2\2\2",
-    "N\u0155\3\2\2\2P\u0158\3\2\2\2R\u015e\3\2\2\2T\u0177\3\2\2\2V\u017e",
-    "\3\2\2\2X\u0180\3\2\2\2Z\u0188\3\2\2\2\\^\5\4\3\2]\\\3\2\2\2]^\3\2\2",
-    "\2^b\3\2\2\2_a\5\6\4\2`_\3\2\2\2ad\3\2\2\2b`\3\2\2\2bc\3\2\2\2ce\3\2",
-    "\2\2db\3\2\2\2ef\7\2\2\3f\3\3\2\2\2gh\7\3\2\2hi\7D\2\2ij\7\4\2\2j\5",
-    "\3\2\2\2kl\7\5\2\2ln\7D\2\2mo\7A\2\2nm\3\2\2\2no\3\2\2\2op\3\2\2\2p",
-    "q\7\4\2\2q\7\3\2\2\2rs\7\6\2\2st\7D\2\2tv\7\4\2\2ur\3\2\2\2vy\3\2\2",
-    "\2wu\3\2\2\2wx\3\2\2\2x\t\3\2\2\2yw\3\2\2\2z{\7?\2\2{|\t\2\2\2|}\7\4",
-    "\2\2}\13\3\2\2\2~\177\7\7\2\2\177\u0081\5V,\2\u0080\u0082\5V,\2\u0081",
-    "\u0080\3\2\2\2\u0082\u0083\3\2\2\2\u0083\u0081\3\2\2\2\u0083\u0084\3",
-    "\2\2\2\u0084\u0085\3\2\2\2\u0085\u0086\7\4\2\2\u0086\r\3\2\2\2\u0087",
-    "\u0088\7\b\2\2\u0088\u0089\7\t\2\2\u0089\u008a\7D\2\2\u008a\u008b\7",
-    "\n\2\2\u008b\u008c\7D\2\2\u008c\u008d\7\4\2\2\u008d\17\3\2\2\2\u008e",
-    "\u0090\5\16\b\2\u008f\u008e\3\2\2\2\u0090\u0091\3\2\2\2\u0091\u008f",
-    "\3\2\2\2\u0091\u0092\3\2\2\2\u0092\21\3\2\2\2\u0093\u0099\7G\2\2\u0094",
-    "\u0099\7F\2\2\u0095\u0099\5Z.\2\u0096\u0099\7B\2\2\u0097\u0099\7C\2",
-    "\2\u0098\u0093\3\2\2\2\u0098\u0094\3\2\2\2\u0098\u0095\3\2\2\2\u0098",
-    "\u0096\3\2\2\2\u0098\u0097\3\2\2\2\u0099\23\3\2\2\2\u009a\u009d\5V,",
-    "\2\u009b\u009d\5\22\n\2\u009c\u009a\3\2\2\2\u009c\u009b\3\2\2\2\u009d",
-    "\25\3\2\2\2\u009e\u00a0\7\13\2\2\u009f\u00a1\5\30\r\2\u00a0\u009f\3",
-    "\2\2\2\u00a0\u00a1\3\2\2\2\u00a1\u00a6\3\2\2\2\u00a2\u00a3\7\f\2\2\u00a3",
-    "\u00a5\5\30\r\2\u00a4\u00a2\3\2\2\2\u00a5\u00a8\3\2\2\2\u00a6\u00a4",
-    "\3\2\2\2\u00a6\u00a7\3\2\2\2\u00a7\u00a9\3\2\2\2\u00a8\u00a6\3\2\2\2",
-    "\u00a9\u00aa\7\r\2\2\u00aa\27\3\2\2\2\u00ab\u00ad\7D\2\2\u00ac\u00ae",
-    "\5\24\13\2\u00ad\u00ac\3\2\2\2\u00ad\u00ae\3\2\2\2\u00ae\u00b4\3\2\2",
-    "\2\u00af\u00b1\7D\2\2\u00b0\u00af\3\2\2\2\u00b0\u00b1\3\2\2\2\u00b1",
-    "\u00b2\3\2\2\2\u00b2\u00b4\5\24\13\2\u00b3\u00ab\3\2\2\2\u00b3\u00b0",
-    "\3\2\2\2\u00b4\31\3\2\2\2\u00b5\u00b6\7\b\2\2\u00b6\u00b7\7\16\2\2\u00b7",
-    "\u00b8\7D\2\2\u00b8\u00b9\5\26\f\2\u00b9\u00ba\7\n\2\2\u00ba\u00bb\7",
-    "D\2\2\u00bb\u00bc\7\4\2\2\u00bc\33\3\2\2\2\u00bd\u00be\7D\2\2\u00be",
-    "\u00c3\5V,\2\u00bf\u00c0\7\f\2\2\u00c0\u00c2\5V,\2\u00c1\u00bf\3\2\2",
-    "\2\u00c2\u00c5\3\2\2\2\u00c3\u00c1\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4",
-    "\u00c6\3\2\2\2\u00c5\u00c3\3\2\2\2\u00c6\u00c7\7\4\2\2\u00c7\35\3\2",
-    "\2\2\u00c8\u00c9\7\t\2\2\u00c9\u00cc\7D\2\2\u00ca\u00cb\7\17\2\2\u00cb",
-    "\u00cd\7D\2\2\u00cc\u00ca\3\2\2\2\u00cc\u00cd\3\2\2\2\u00cd\u00ce\3",
-    "\2\2\2\u00ce\u00d2\7\20\2\2\u00cf\u00d1\5\34\17\2\u00d0\u00cf\3\2\2",
-    "\2\u00d1\u00d4\3\2\2\2\u00d2\u00d0\3\2\2\2\u00d2\u00d3\3\2\2\2\u00d3",
-    "\u00d5\3\2\2\2\u00d4\u00d2\3\2\2\2\u00d5\u00d6\7\21\2\2\u00d6\37\3\2",
-    "\2\2\u00d7\u00d8\7\22\2\2\u00d8\u00d9\7D\2\2\u00d9\u00da\5V,\2\u00da",
-    "\u00db\7\4\2\2\u00db!\3\2\2\2\u00dc\u00dd\t\3\2\2\u00dd#\3\2\2\2\u00de",
-    "\u00df\5V,\2\u00df\u00e0\5\"\22\2\u00e0\u00e1\5\24\13\2\u00e1%\3\2\2",
-    "\2\u00e2\u00e3\5V,\2\u00e3\u00e4\7\23\2\2\u00e4\u00e6\3\2\2\2\u00e5",
-    "\u00e2\3\2\2\2\u00e5\u00e6\3\2\2\2\u00e6\u00e8\3\2\2\2\u00e7\u00e9\7",
-    ")\2\2\u00e8\u00e7\3\2\2\2\u00e8\u00e9\3\2\2\2\u00e9\u00ea\3\2\2\2\u00ea",
-    "\u00eb\7\13\2\2\u00eb\u00ef\7D\2\2\u00ec\u00ee\5$\23\2\u00ed\u00ec\3",
-    "\2\2\2\u00ee\u00f1\3\2\2\2\u00ef\u00ed\3\2\2\2\u00ef\u00f0\3\2\2\2\u00f0",
-    "\u00f2\3\2\2\2\u00f1\u00ef\3\2\2\2\u00f2\u00f3\7\r\2\2\u00f3\'\3\2\2",
-    "\2\u00f4\u00f6\7)\2\2\u00f5\u00f4\3\2\2\2\u00f5\u00f6\3\2\2\2\u00f6",
-    "\u00f7\3\2\2\2\u00f7\u00fb\5\24\13\2\u00f8\u00f9\5\"\22\2\u00f9\u00fa",
-    "\5\24\13\2\u00fa\u00fc\3\2\2\2\u00fb\u00f8\3\2\2\2\u00fb\u00fc\3\2\2",
-    "\2\u00fc)\3\2\2\2\u00fd\u00ff\7)\2\2\u00fe\u00fd\3\2\2\2\u00fe\u00ff",
-    "\3\2\2\2\u00ff\u0100\3\2\2\2\u0100\u0101\5V,\2\u0101\u0102\5\26\f\2",
-    "\u0102+\3\2\2\2\u0103\u0108\7B\2\2\u0104\u0108\5V,\2\u0105\u0108\5*",
-    "\26\2\u0106\u0108\5(\25\2\u0107\u0103\3\2\2\2\u0107\u0104\3\2\2\2\u0107",
-    "\u0105\3\2\2\2\u0107\u0106\3\2\2\2\u0108-\3\2\2\2\u0109\u010a\t\4\2",
-    "\2\u010a/\3\2\2\2\u010b\u0111\5,\27\2\u010c\u010d\5.\30\2\u010d\u010e",
-    "\5,\27\2\u010e\u0110\3\2\2\2\u010f\u010c\3\2\2\2\u0110\u0113\3\2\2\2",
-    "\u0111\u010f\3\2\2\2\u0111\u0112\3\2\2\2\u0112\61\3\2\2\2\u0113\u0111",
-    "\3\2\2\2\u0114\u0115\7\13\2\2\u0115\u0116\5\60\31\2\u0116\u0117\7\r",
-    "\2\2\u0117\63\3\2\2\2\u0118\u011b\7\20\2\2\u0119\u011c\5&\24\2\u011a",
-    "\u011c\5\62\32\2\u011b\u0119\3\2\2\2\u011b\u011a\3\2\2\2\u011c\u011d",
-    "\3\2\2\2\u011d\u011b\3\2\2\2\u011d\u011e\3\2\2\2\u011e\u011f\3\2\2\2",
-    "\u011f\u0120\7\21\2\2\u0120\65\3\2\2\2\u0121\u0122\5\64\33\2\u0122\67",
-    "\3\2\2\2\u0123\u0124\7\24\2\2\u0124\u0125\5\66\34\2\u01259\3\2\2\2\u0126",
-    "\u0127\7\25\2\2\u0127\u0128\5\66\34\2\u0128;\3\2\2\2\u0129\u012a\7\26",
-    "\2\2\u012a\u012b\5\66\34\2\u012b=\3\2\2\2\u012c\u012d\7\27\2\2\u012d",
-    "\u012e\5\66\34\2\u012e?\3\2\2\2\u012f\u0130\7\30\2\2\u0130\u0131\5\66",
-    "\34\2\u0131A\3\2\2\2\u0132\u0133\7\31\2\2\u0133\u0134\5\22\n\2\u0134",
-    "\u0135\7\4\2\2\u0135C\3\2\2\2\u0136\u0138\7\32\2\2\u0137\u0139\5V,\2",
-    "\u0138\u0137\3\2\2\2\u0139\u013a\3\2\2\2\u013a\u0138\3\2\2\2\u013a\u013b",
-    "\3\2\2\2\u013bE\3\2\2\2\u013c\u013d\t\5\2\2\u013d\u013e\5\22\n\2\u013e",
-    "G\3\2\2\2\u013f\u0141\7\35\2\2\u0140\u0142\t\6\2\2\u0141\u0140\3\2\2",
-    "\2\u0141\u0142\3\2\2\2\u0142I\3\2\2\2\u0143\u0144\7\22\2\2\u0144\u0145",
-    "\5V,\2\u0145\u0146\5\24\13\2\u0146K\3\2\2\2\u0147\u0154\7,\2\2\u0148",
-    "\u0154\7-\2\2\u0149\u0154\7.\2\2\u014a\u0154\7/\2\2\u014b\u014c\7\60",
-    "\2\2\u014c\u0154\5V,\2\u014d\u0154\7\61\2\2\u014e\u0154\7\62\2\2\u014f",
-    "\u0154\5F$\2\u0150\u0154\5H%\2\u0151\u0154\5J&\2\u0152\u0154\5@!\2\u0153",
-    "\u0147\3\2\2\2\u0153\u0148\3\2\2\2\u0153\u0149\3\2\2\2\u0153\u014a\3",
-    "\2\2\2\u0153\u014b\3\2\2\2\u0153\u014d\3\2\2\2\u0153\u014e\3\2\2\2\u0153",
-    "\u014f\3\2\2\2\u0153\u0150\3\2\2\2\u0153\u0151\3\2\2\2\u0153\u0152\3",
-    "\2\2\2\u0154M\3\2\2\2\u0155\u0156\t\7\2\2\u0156\u0157\7\4\2\2\u0157",
-    "O\3\2\2\2\u0158\u0159\7\36\2\2\u0159\u015a\5V,\2\u015a\u015b\5\26\f",
-    "\2\u015b\u015c\7\4\2\2\u015cQ\3\2\2\2\u015d\u015f\7@\2\2\u015e\u015d",
-    "\3\2\2\2\u015e\u015f\3\2\2\2\u015f\u0160\3\2\2\2\u0160\u0161\t\b\2\2",
-    "\u0161\u0163\5V,\2\u0162\u0164\5\26\f\2\u0163\u0162\3\2\2\2\u0163\u0164",
-    "\3\2\2\2\u0164\u0167\3\2\2\2\u0165\u0166\7\37\2\2\u0166\u0168\5V,\2",
-    "\u0167\u0165\3\2\2\2\u0167\u0168\3\2\2\2\u0168\u0169\3\2\2\2\u0169\u016a",
-    "\7\4\2\2\u016aS\3\2\2\2\u016b\u016c\7\n\2\2\u016c\u016d\7\13\2\2\u016d",
-    "\u0172\5L\'\2\u016e\u016f\7\f\2\2\u016f\u0171\5L\'\2\u0170\u016e\3\2",
-    "\2\2\u0171\u0174\3\2\2\2\u0172\u0170\3\2\2\2\u0172\u0173\3\2\2\2\u0173",
-    "\u0175\3\2\2\2\u0174\u0172\3\2\2\2\u0175\u0176\7\r\2\2\u0176\u0178\3",
-    "\2\2\2\u0177\u016b\3\2\2\2\u0177\u0178\3\2\2\2\u0178\u017c\3\2\2\2\u0179",
-    "\u017d\5R*\2\u017a\u017d\5P)\2\u017b\u017d\5N(\2\u017c\u0179\3\2\2\2",
-    "\u017c\u017a\3\2\2\2\u017c\u017b\3\2\2\2\u017dU\3\2\2\2\u017e\u017f",
-    "\7E\2\2\u017fW\3\2\2\2\u0180\u0185\5V,\2\u0181\u0182\7\f\2\2\u0182\u0184",
-    "\5V,\2\u0183\u0181\3\2\2\2\u0184\u0187\3\2\2\2\u0185\u0183\3\2\2\2\u0185",
-    "\u0186\3\2\2\2\u0186Y\3\2\2\2\u0187\u0185\3\2\2\2\u0188\u0189\7H\2\2",
-    "\u0189[\3\2\2\2&]bnw\u0083\u0091\u0098\u009c\u00a0\u00a6\u00ad\u00b0",
-    "\u00b3\u00c3\u00cc\u00d2\u00e5\u00e8\u00ef\u00f5\u00fb\u00fe\u0107\u0111",
-    "\u011b\u011d\u013a\u0141\u0153\u015e\u0163\u0167\u0172\u0177\u017c\u0185"].join("");
+    "\'\4(\t(\4)\t)\4*\t*\4+\t+\4,\t,\4-\t-\4.\t.\4/\t/\4\60\t\60\4\61\t",
+    "\61\4\62\t\62\4\63\t\63\4\64\t\64\4\65\t\65\3\2\5\2l\n\2\3\2\7\2o\n",
+    "\2\f\2\16\2r\13\2\3\2\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4\5\4\177",
+    "\n\4\3\4\3\4\3\5\3\5\3\5\7\5\u0086\n\5\f\5\16\5\u0089\13\5\3\6\3\6\3",
+    "\6\3\6\3\7\3\7\3\7\6\7\u0092\n\7\r\7\16\7\u0093\3\7\3\7\3\b\3\b\3\b",
+    "\3\b\3\b\3\b\3\b\3\t\6\t\u00a0\n\t\r\t\16\t\u00a1\3\n\3\n\3\n\3\n\3",
+    "\n\5\n\u00a9\n\n\3\13\3\13\5\13\u00ad\n\13\3\f\3\f\5\f\u00b1\n\f\3\f",
+    "\3\f\7\f\u00b5\n\f\f\f\16\f\u00b8\13\f\3\f\3\f\3\r\3\r\5\r\u00be\n\r",
+    "\3\r\5\r\u00c1\n\r\3\r\5\r\u00c4\n\r\3\16\3\16\3\16\3\16\3\16\3\16\3",
+    "\16\3\16\3\17\3\17\3\17\3\17\7\17\u00d2\n\17\f\17\16\17\u00d5\13\17",
+    "\3\17\3\17\3\20\3\20\3\20\3\20\5\20\u00dd\n\20\3\20\3\20\7\20\u00e1",
+    "\n\20\f\20\16\20\u00e4\13\20\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\22",
+    "\3\22\3\23\3\23\3\23\3\23\3\24\3\24\3\24\5\24\u00f6\n\24\3\24\5\24\u00f9",
+    "\n\24\3\24\3\24\3\24\7\24\u00fe\n\24\f\24\16\24\u0101\13\24\3\24\3\24",
+    "\3\25\5\25\u0106\n\25\3\25\3\25\3\25\3\25\5\25\u010c\n\25\3\26\5\26",
+    "\u010f\n\26\3\26\3\26\3\26\3\27\3\27\3\27\3\27\5\27\u0118\n\27\3\30",
+    "\3\30\3\31\3\31\3\31\3\31\7\31\u0120\n\31\f\31\16\31\u0123\13\31\3\32",
+    "\3\32\3\32\3\32\3\33\3\33\3\33\6\33\u012c\n\33\r\33\16\33\u012d\3\33",
+    "\3\33\3\34\3\34\3\35\3\35\3\35\3\36\3\36\3\36\3\37\3\37\3\37\3 \3 \3",
+    " \3!\3!\3!\3\"\3\"\3\"\3\"\3#\3#\6#\u0149\n#\r#\16#\u014a\3$\3$\3$\3",
+    "$\3%\3%\3%\3%\3%\3%\3%\5%\u0158\n%\3&\3&\3&\3\'\3\'\5\'\u015f\n\'\3",
+    "(\3(\3(\3(\3)\3)\3)\3)\3)\3)\3)\3)\3)\3)\3)\3)\5)\u0171\n)\3*\3*\3*",
+    "\3+\3+\3+\3+\3+\3,\5,\u017c\n,\3,\3,\3,\5,\u0181\n,\3,\3,\5,\u0185\n",
+    ",\3,\3,\3-\3-\3-\3-\3-\7-\u018e\n-\f-\16-\u0191\13-\3-\3-\5-\u0195\n",
+    "-\3-\3-\3-\5-\u019a\n-\3.\7.\u019d\n.\f.\16.\u01a0\13.\3.\3.\3.\3.\3",
+    ".\3.\3.\3.\7.\u01aa\n.\f.\16.\u01ad\13.\3/\3/\3/\7/\u01b2\n/\f/\16/",
+    "\u01b5\13/\3/\3/\3\60\3\60\3\60\3\60\3\61\3\61\3\61\3\61\3\61\5\61\u01c2",
+    "\n\61\3\62\3\62\3\62\3\62\5\62\u01c8\n\62\3\62\5\62\u01cb\n\62\3\62",
+    "\7\62\u01ce\n\62\f\62\16\62\u01d1\13\62\3\62\7\62\u01d4\n\62\f\62\16",
+    "\62\u01d7\13\62\3\62\7\62\u01da\n\62\f\62\16\62\u01dd\13\62\3\62\3\62",
+    "\3\62\3\63\3\63\3\64\3\64\3\64\7\64\u01e7\n\64\f\64\16\64\u01ea\13\64",
+    "\3\65\3\65\3\65\2\2\66\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(",
+    "*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`bdfh\2\13\3\2\65\66\3\2&,\3\2$",
+    "%\3\2\34\35\3\2./\3\2\679\3\2AB\3\2DF\3\2=?\u0200\2k\3\2\2\2\4w\3\2",
+    "\2\2\6{\3\2\2\2\b\u0087\3\2\2\2\n\u008a\3\2\2\2\f\u008e\3\2\2\2\16\u0097",
+    "\3\2\2\2\20\u009f\3\2\2\2\22\u00a8\3\2\2\2\24\u00ac\3\2\2\2\26\u00ae",
+    "\3\2\2\2\30\u00c3\3\2\2\2\32\u00c5\3\2\2\2\34\u00cd\3\2\2\2\36\u00d8",
+    "\3\2\2\2 \u00e7\3\2\2\2\"\u00ec\3\2\2\2$\u00ee\3\2\2\2&\u00f5\3\2\2",
+    "\2(\u0105\3\2\2\2*\u010e\3\2\2\2,\u0117\3\2\2\2.\u0119\3\2\2\2\60\u011b",
+    "\3\2\2\2\62\u0124\3\2\2\2\64\u0128\3\2\2\2\66\u0131\3\2\2\28\u0133\3",
+    "\2\2\2:\u0136\3\2\2\2<\u0139\3\2\2\2>\u013c\3\2\2\2@\u013f\3\2\2\2B",
+    "\u0142\3\2\2\2D\u0146\3\2\2\2F\u014c\3\2\2\2H\u0157\3\2\2\2J\u0159\3",
+    "\2\2\2L\u015c\3\2\2\2N\u0160\3\2\2\2P\u0170\3\2\2\2R\u0172\3\2\2\2T",
+    "\u0175\3\2\2\2V\u017b\3\2\2\2X\u0194\3\2\2\2Z\u019e\3\2\2\2\\\u01ae",
+    "\3\2\2\2^\u01b8\3\2\2\2`\u01c1\3\2\2\2b\u01c3\3\2\2\2d\u01e1\3\2\2\2",
+    "f\u01e3\3\2\2\2h\u01eb\3\2\2\2jl\5\4\3\2kj\3\2\2\2kl\3\2\2\2lp\3\2\2",
+    "\2mo\5\6\4\2nm\3\2\2\2or\3\2\2\2pn\3\2\2\2pq\3\2\2\2qs\3\2\2\2rp\3\2",
+    "\2\2st\5\b\5\2tu\5b\62\2uv\7\2\2\3v\3\3\2\2\2wx\7\3\2\2xy\7J\2\2yz\7",
+    "\4\2\2z\5\3\2\2\2{|\7\5\2\2|~\7J\2\2}\177\7G\2\2~}\3\2\2\2~\177\3\2",
+    "\2\2\177\u0080\3\2\2\2\u0080\u0081\7\4\2\2\u0081\7\3\2\2\2\u0082\u0083",
+    "\7\6\2\2\u0083\u0084\7J\2\2\u0084\u0086\7\4\2\2\u0085\u0082\3\2\2\2",
+    "\u0086\u0089\3\2\2\2\u0087\u0085\3\2\2\2\u0087\u0088\3\2\2\2\u0088\t",
+    "\3\2\2\2\u0089\u0087\3\2\2\2\u008a\u008b\7C\2\2\u008b\u008c\t\2\2\2",
+    "\u008c\u008d\7\4\2\2\u008d\13\3\2\2\2\u008e\u008f\7\7\2\2\u008f\u0091",
+    "\5d\63\2\u0090\u0092\5d\63\2\u0091\u0090\3\2\2\2\u0092\u0093\3\2\2\2",
+    "\u0093\u0091\3\2\2\2\u0093\u0094\3\2\2\2\u0094\u0095\3\2\2\2\u0095\u0096",
+    "\7\4\2\2\u0096\r\3\2\2\2\u0097\u0098\7\b\2\2\u0098\u0099\7\t\2\2\u0099",
+    "\u009a\7J\2\2\u009a\u009b\7\n\2\2\u009b\u009c\7J\2\2\u009c\u009d\7\4",
+    "\2\2\u009d\17\3\2\2\2\u009e\u00a0\5\16\b\2\u009f\u009e\3\2\2\2\u00a0",
+    "\u00a1\3\2\2\2\u00a1\u009f\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2\21\3\2",
+    "\2\2\u00a3\u00a9\7M\2\2\u00a4\u00a9\7L\2\2\u00a5\u00a9\5h\65\2\u00a6",
+    "\u00a9\7H\2\2\u00a7\u00a9\7I\2\2\u00a8\u00a3\3\2\2\2\u00a8\u00a4\3\2",
+    "\2\2\u00a8\u00a5\3\2\2\2\u00a8\u00a6\3\2\2\2\u00a8\u00a7\3\2\2\2\u00a9",
+    "\23\3\2\2\2\u00aa\u00ad\5d\63\2\u00ab\u00ad\5\22\n\2\u00ac\u00aa\3\2",
+    "\2\2\u00ac\u00ab\3\2\2\2\u00ad\25\3\2\2\2\u00ae\u00b0\7\13\2\2\u00af",
+    "\u00b1\5\30\r\2\u00b0\u00af\3\2\2\2\u00b0\u00b1\3\2\2\2\u00b1\u00b6",
+    "\3\2\2\2\u00b2\u00b3\7\f\2\2\u00b3\u00b5\5\30\r\2\u00b4\u00b2\3\2\2",
+    "\2\u00b5\u00b8\3\2\2\2\u00b6\u00b4\3\2\2\2\u00b6\u00b7\3\2\2\2\u00b7",
+    "\u00b9\3\2\2\2\u00b8\u00b6\3\2\2\2\u00b9\u00ba\7\r\2\2\u00ba\27\3\2",
+    "\2\2\u00bb\u00bd\7J\2\2\u00bc\u00be\5\24\13\2\u00bd\u00bc\3\2\2\2\u00bd",
+    "\u00be\3\2\2\2\u00be\u00c4\3\2\2\2\u00bf\u00c1\7J\2\2\u00c0\u00bf\3",
+    "\2\2\2\u00c0\u00c1\3\2\2\2\u00c1\u00c2\3\2\2\2\u00c2\u00c4\5\24\13\2",
+    "\u00c3\u00bb\3\2\2\2\u00c3\u00c0\3\2\2\2\u00c4\31\3\2\2\2\u00c5\u00c6",
+    "\7\b\2\2\u00c6\u00c7\7\16\2\2\u00c7\u00c8\7J\2\2\u00c8\u00c9\5\26\f",
+    "\2\u00c9\u00ca\7\n\2\2\u00ca\u00cb\7J\2\2\u00cb\u00cc\7\4\2\2\u00cc",
+    "\33\3\2\2\2\u00cd\u00ce\7J\2\2\u00ce\u00d3\5d\63\2\u00cf\u00d0\7\f\2",
+    "\2\u00d0\u00d2\5d\63\2\u00d1\u00cf\3\2\2\2\u00d2\u00d5\3\2\2\2\u00d3",
+    "\u00d1\3\2\2\2\u00d3\u00d4\3\2\2\2\u00d4\u00d6\3\2\2\2\u00d5\u00d3\3",
+    "\2\2\2\u00d6\u00d7\7\4\2\2\u00d7\35\3\2\2\2\u00d8\u00d9\7\t\2\2\u00d9",
+    "\u00dc\7J\2\2\u00da\u00db\7\17\2\2\u00db\u00dd\7J\2\2\u00dc\u00da\3",
+    "\2\2\2\u00dc\u00dd\3\2\2\2\u00dd\u00de\3\2\2\2\u00de\u00e2\7\20\2\2",
+    "\u00df\u00e1\5\34\17\2\u00e0\u00df\3\2\2\2\u00e1\u00e4\3\2\2\2\u00e2",
+    "\u00e0\3\2\2\2\u00e2\u00e3\3\2\2\2\u00e3\u00e5\3\2\2\2\u00e4\u00e2\3",
+    "\2\2\2\u00e5\u00e6\7\21\2\2\u00e6\37\3\2\2\2\u00e7\u00e8\7\22\2\2\u00e8",
+    "\u00e9\7J\2\2\u00e9\u00ea\5d\63\2\u00ea\u00eb\7\4\2\2\u00eb!\3\2\2\2",
+    "\u00ec\u00ed\t\3\2\2\u00ed#\3\2\2\2\u00ee\u00ef\5d\63\2\u00ef\u00f0",
+    "\5\"\22\2\u00f0\u00f1\5\24\13\2\u00f1%\3\2\2\2\u00f2\u00f3\5d\63\2\u00f3",
+    "\u00f4\7\23\2\2\u00f4\u00f6\3\2\2\2\u00f5\u00f2\3\2\2\2\u00f5\u00f6",
+    "\3\2\2\2\u00f6\u00f8\3\2\2\2\u00f7\u00f9\7-\2\2\u00f8\u00f7\3\2\2\2",
+    "\u00f8\u00f9\3\2\2\2\u00f9\u00fa\3\2\2\2\u00fa\u00fb\7\13\2\2\u00fb",
+    "\u00ff\7J\2\2\u00fc\u00fe\5$\23\2\u00fd\u00fc\3\2\2\2\u00fe\u0101\3",
+    "\2\2\2\u00ff\u00fd\3\2\2\2\u00ff\u0100\3\2\2\2\u0100\u0102\3\2\2\2\u0101",
+    "\u00ff\3\2\2\2\u0102\u0103\7\r\2\2\u0103\'\3\2\2\2\u0104\u0106\7-\2",
+    "\2\u0105\u0104\3\2\2\2\u0105\u0106\3\2\2\2\u0106\u0107\3\2\2\2\u0107",
+    "\u010b\5\24\13\2\u0108\u0109\5\"\22\2\u0109\u010a\5\24\13\2\u010a\u010c",
+    "\3\2\2\2\u010b\u0108\3\2\2\2\u010b\u010c\3\2\2\2\u010c)\3\2\2\2\u010d",
+    "\u010f\7-\2\2\u010e\u010d\3\2\2\2\u010e\u010f\3\2\2\2\u010f\u0110\3",
+    "\2\2\2\u0110\u0111\5d\63\2\u0111\u0112\5\26\f\2\u0112+\3\2\2\2\u0113",
+    "\u0118\7H\2\2\u0114\u0118\5d\63\2\u0115\u0118\5*\26\2\u0116\u0118\5",
+    "(\25\2\u0117\u0113\3\2\2\2\u0117\u0114\3\2\2\2\u0117\u0115\3\2\2\2\u0117",
+    "\u0116\3\2\2\2\u0118-\3\2\2\2\u0119\u011a\t\4\2\2\u011a/\3\2\2\2\u011b",
+    "\u0121\5,\27\2\u011c\u011d\5.\30\2\u011d\u011e\5,\27\2\u011e\u0120\3",
+    "\2\2\2\u011f\u011c\3\2\2\2\u0120\u0123\3\2\2\2\u0121\u011f\3\2\2\2\u0121",
+    "\u0122\3\2\2\2\u0122\61\3\2\2\2\u0123\u0121\3\2\2\2\u0124\u0125\7\13",
+    "\2\2\u0125\u0126\5\60\31\2\u0126\u0127\7\r\2\2\u0127\63\3\2\2\2\u0128",
+    "\u012b\7\20\2\2\u0129\u012c\5&\24\2\u012a\u012c\5\62\32\2\u012b\u0129",
+    "\3\2\2\2\u012b\u012a\3\2\2\2\u012c\u012d\3\2\2\2\u012d\u012b\3\2\2\2",
+    "\u012d\u012e\3\2\2\2\u012e\u012f\3\2\2\2\u012f\u0130\7\21\2\2\u0130",
+    "\65\3\2\2\2\u0131\u0132\5\64\33\2\u0132\67\3\2\2\2\u0133\u0134\7\24",
+    "\2\2\u0134\u0135\5\66\34\2\u01359\3\2\2\2\u0136\u0137\7\25\2\2\u0137",
+    "\u0138\5\66\34\2\u0138;\3\2\2\2\u0139\u013a\7\26\2\2\u013a\u013b\5\66",
+    "\34\2\u013b=\3\2\2\2\u013c\u013d\7\27\2\2\u013d\u013e\5\66\34\2\u013e",
+    "?\3\2\2\2\u013f\u0140\7\30\2\2\u0140\u0141\5\66\34\2\u0141A\3\2\2\2",
+    "\u0142\u0143\7\31\2\2\u0143\u0144\5\22\n\2\u0144\u0145\7\4\2\2\u0145",
+    "C\3\2\2\2\u0146\u0148\7\32\2\2\u0147\u0149\5d\63\2\u0148\u0147\3\2\2",
+    "\2\u0149\u014a\3\2\2\2\u014a\u0148\3\2\2\2\u014a\u014b\3\2\2\2\u014b",
+    "E\3\2\2\2\u014c\u014d\7\33\2\2\u014d\u014e\5\22\n\2\u014e\u014f\7\4",
+    "\2\2\u014fG\3\2\2\2\u0150\u0158\58\35\2\u0151\u0158\5F$\2\u0152\u0158",
+    "\5:\36\2\u0153\u0158\5<\37\2\u0154\u0158\5B\"\2\u0155\u0158\5D#\2\u0156",
+    "\u0158\5> \2\u0157\u0150\3\2\2\2\u0157\u0151\3\2\2\2\u0157\u0152\3\2",
+    "\2\2\u0157\u0153\3\2\2\2\u0157\u0154\3\2\2\2\u0157\u0155\3\2\2\2\u0157",
+    "\u0156\3\2\2\2\u0158I\3\2\2\2\u0159\u015a\t\5\2\2\u015a\u015b\5\22\n",
+    "\2\u015bK\3\2\2\2\u015c\u015e\7\36\2\2\u015d\u015f\t\6\2\2\u015e\u015d",
+    "\3\2\2\2\u015e\u015f\3\2\2\2\u015fM\3\2\2\2\u0160\u0161\7\22\2\2\u0161",
+    "\u0162\5d\63\2\u0162\u0163\5\24\13\2\u0163O\3\2\2\2\u0164\u0171\7\60",
+    "\2\2\u0165\u0171\7\61\2\2\u0166\u0171\7\62\2\2\u0167\u0171\7\63\2\2",
+    "\u0168\u0169\7\64\2\2\u0169\u0171\5d\63\2\u016a\u0171\7\65\2\2\u016b",
+    "\u0171\7\66\2\2\u016c\u0171\5J&\2\u016d\u0171\5L\'\2\u016e\u0171\5N",
+    "(\2\u016f\u0171\5@!\2\u0170\u0164\3\2\2\2\u0170\u0165\3\2\2\2\u0170",
+    "\u0166\3\2\2\2\u0170\u0167\3\2\2\2\u0170\u0168\3\2\2\2\u0170\u016a\3",
+    "\2\2\2\u0170\u016b\3\2\2\2\u0170\u016c\3\2\2\2\u0170\u016d\3\2\2\2\u0170",
+    "\u016e\3\2\2\2\u0170\u016f\3\2\2\2\u0171Q\3\2\2\2\u0172\u0173\t\7\2",
+    "\2\u0173\u0174\7\4\2\2\u0174S\3\2\2\2\u0175\u0176\7\37\2\2\u0176\u0177",
+    "\5d\63\2\u0177\u0178\5\26\f\2\u0178\u0179\7\4\2\2\u0179U\3\2\2\2\u017a",
+    "\u017c\7D\2\2\u017b\u017a\3\2\2\2\u017b\u017c\3\2\2\2\u017c\u017d\3",
+    "\2\2\2\u017d\u017e\t\b\2\2\u017e\u0180\5d\63\2\u017f\u0181\5\26\f\2",
+    "\u0180\u017f\3\2\2\2\u0180\u0181\3\2\2\2\u0181\u0184\3\2\2\2\u0182\u0183",
+    "\7 \2\2\u0183\u0185\5d\63\2\u0184\u0182\3\2\2\2\u0184\u0185\3\2\2\2",
+    "\u0185\u0186\3\2\2\2\u0186\u0187\7\4\2\2\u0187W\3\2\2\2\u0188\u0189",
+    "\7\n\2\2\u0189\u018a\7\13\2\2\u018a\u018f\5P)\2\u018b\u018c\7\f\2\2",
+    "\u018c\u018e\5P)\2\u018d\u018b\3\2\2\2\u018e\u0191\3\2\2\2\u018f\u018d",
+    "\3\2\2\2\u018f\u0190\3\2\2\2\u0190\u0192\3\2\2\2\u0191\u018f\3\2\2\2",
+    "\u0192\u0193\7\r\2\2\u0193\u0195\3\2\2\2\u0194\u0188\3\2\2\2\u0194\u0195",
+    "\3\2\2\2\u0195\u0199\3\2\2\2\u0196\u019a\5V,\2\u0197\u019a\5T+\2\u0198",
+    "\u019a\5R*\2\u0199\u0196\3\2\2\2\u0199\u0197\3\2\2\2\u0199\u0198\3\2",
+    "\2\2\u019aY\3\2\2\2\u019b\u019d\t\t\2\2\u019c\u019b\3\2\2\2\u019d\u01a0",
+    "\3\2\2\2\u019e\u019c\3\2\2\2\u019e\u019f\3\2\2\2\u019f\u01a1\3\2\2\2",
+    "\u01a0\u019e\3\2\2\2\u01a1\u01a2\t\n\2\2\u01a2\u01a3\7@\2\2\u01a3\u01a4",
+    "\5d\63\2\u01a4\u01a5\5\26\f\2\u01a5\u01ab\7\20\2\2\u01a6\u01aa\5H%\2",
+    "\u01a7\u01aa\5\34\17\2\u01a8\u01aa\5X-\2\u01a9\u01a6\3\2\2\2\u01a9\u01a7",
+    "\3\2\2\2\u01a9\u01a8\3\2\2\2\u01aa\u01ad\3\2\2\2\u01ab\u01a9\3\2\2\2",
+    "\u01ab\u01ac\3\2\2\2\u01ac[\3\2\2\2\u01ad\u01ab\3\2\2\2\u01ae\u01af",
+    "\7!\2\2\u01af\u01b3\7\20\2\2\u01b0\u01b2\5X-\2\u01b1\u01b0\3\2\2\2\u01b2",
+    "\u01b5\3\2\2\2\u01b3\u01b1\3\2\2\2\u01b3\u01b4\3\2\2\2\u01b4\u01b6\3",
+    "\2\2\2\u01b5\u01b3\3\2\2\2\u01b6\u01b7\7\21\2\2\u01b7]\3\2\2\2\u01b8",
+    "\u01b9\7\"\2\2\u01b9\u01ba\5d\63\2\u01ba\u01bb\7\4\2\2\u01bb_\3\2\2",
+    "\2\u01bc\u01c2\5\16\b\2\u01bd\u01c2\5\32\16\2\u01be\u01c2\5\36\20\2",
+    "\u01bf\u01c2\5 \21\2\u01c0\u01c2\5\34\17\2\u01c1\u01bc\3\2\2\2\u01c1",
+    "\u01bd\3\2\2\2\u01c1\u01be\3\2\2\2\u01c1\u01bf\3\2\2\2\u01c1\u01c0\3",
+    "\2\2\2\u01c2a\3\2\2\2\u01c3\u01c4\7#\2\2\u01c4\u01c5\5d\63\2\u01c5\u01c7",
+    "\7\20\2\2\u01c6\u01c8\5\n\6\2\u01c7\u01c6\3\2\2\2\u01c7\u01c8\3\2\2",
+    "\2\u01c8\u01ca\3\2\2\2\u01c9\u01cb\5^\60\2\u01ca\u01c9\3\2\2\2\u01ca",
+    "\u01cb\3\2\2\2\u01cb\u01cf\3\2\2\2\u01cc\u01ce\5\f\7\2\u01cd\u01cc\3",
+    "\2\2\2\u01ce\u01d1\3\2\2\2\u01cf\u01cd\3\2\2\2\u01cf\u01d0\3\2\2\2\u01d0",
+    "\u01d5\3\2\2\2\u01d1\u01cf\3\2\2\2\u01d2\u01d4\5`\61\2\u01d3\u01d2\3",
+    "\2\2\2\u01d4\u01d7\3\2\2\2\u01d5\u01d3\3\2\2\2\u01d5\u01d6\3\2\2\2\u01d6",
+    "\u01db\3\2\2\2\u01d7\u01d5\3\2\2\2\u01d8\u01da\5Z.\2\u01d9\u01d8\3\2",
+    "\2\2\u01da\u01dd\3\2\2\2\u01db\u01d9\3\2\2\2\u01db\u01dc\3\2\2\2\u01dc",
+    "\u01de\3\2\2\2\u01dd\u01db\3\2\2\2\u01de\u01df\5\\/\2\u01df\u01e0\7",
+    "\21\2\2\u01e0c\3\2\2\2\u01e1\u01e2\7K\2\2\u01e2e\3\2\2\2\u01e3\u01e8",
+    "\5d\63\2\u01e4\u01e5\7\f\2\2\u01e5\u01e7\5d\63\2\u01e6\u01e4\3\2\2\2",
+    "\u01e7\u01ea\3\2\2\2\u01e8\u01e6\3\2\2\2\u01e8\u01e9\3\2\2\2\u01e9g",
+    "\3\2\2\2\u01ea\u01e8\3\2\2\2\u01eb\u01ec\7N\2\2\u01eci\3\2\2\2\61kp",
+    "~\u0087\u0093\u00a1\u00a8\u00ac\u00b0\u00b6\u00bd\u00c0\u00c3\u00d3",
+    "\u00dc\u00e2\u00f5\u00f8\u00ff\u0105\u010b\u010e\u0117\u0121\u012b\u012d",
+    "\u014a\u0157\u015e\u0170\u017b\u0180\u0184\u018f\u0194\u0199\u019e\u01a9",
+    "\u01ab\u01b3\u01c1\u01c7\u01ca\u01cf\u01d5\u01db\u01e8"].join("");
 
 
 var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
@@ -156,30 +200,33 @@ var literalNames = [ 'null', "'package'", "';'", "'import'", "'constants'",
                      "','", "')'", "'action'", "'extends'", "'{'", "'}'", 
                      "'property'", "'='", "'precondition'", "'context_condition'", 
                      "'entry_condition'", "'success_condition'", "'success_test'", 
-                     "'number_needed_for_success'", "'teammembers'", "'priority'", 
-                     "'priority_modifier'", "'persistent'", "'act'", "'at'", 
-                     "'&&'", "'||'", "'::'", "'>'", "'>='", "'<'", "'<='", 
-                     "'=='", "'!='", "'!'", "'when_fails'", "'when_succeeds'", 
-                     "'ignore_failure'", "'effect_only'", "'team_effect_only'", 
-                     "'post'", "'post_to'", "'team_needed_for_success'", 
+                     "'number_needed_for_success'", "'teammembers'", "'specificity'", 
+                     "'priority'", "'priority_modifier'", "'persistent'", 
+                     "'act'", "'at'", "'initial_tree'", "'decision_cycle_sm_call'", 
+                     "'behaving_entity'", "'&&'", "'||'", "'::'", "'>'", 
+                     "'>='", "'<'", "'<='", "'=='", "'!='", "'!'", "'when_fails'", 
+                     "'when_succeeds'", "'ignore_failure'", "'effect_only'", 
+                     "'team_effect_only'", "'post'", "'post_to'", "'team_needed_for_success'", 
                      "'one_needed_for_success'", "'fail'", "'succeed'", 
                      "'wait'", "'move_step'", "'delete_step'", "'add_step'", 
                      "'sequential'", "'parallel'", "'collection'", 'null', 
                      "'subgoal'", "'spawngoal'", "'joint_goal_success_negotiation'", 
-                     "'joint'", "'*'", 'null', "'Null'" ];
+                     "'joint'", "'atomic'", "'adaptive'", "'*'", 'null', 
+                     "'Null'" ];
 
 var symbolicNames = [ 'null', 'null', 'null', 'null', 'null', 'null', 'null', 
                       'null', 'null', 'null', 'null', 'null', 'null', 'null', 
                       'null', 'null', 'null', 'null', 'null', 'null', 'null', 
                       'null', 'null', 'null', 'null', 'null', 'null', 'null', 
-                      'null', 'null', "AND", "OR", "BIND", "GT", "GE", "LT", 
-                      "LE", "EQ", "NE", "BANG", "WHEN_FAILS", "WHEN_SUCCEEDS", 
-                      "IGNORE_FAILURE", "EFFECT_ONLY", "TEAM_EFFECT_ONLY", 
-                      "POST", "POST_TO", "TEAMNEEDED", "ONENEEDED", "FAIL", 
-                      "SUCCEED", "WAIT", "MOVESTEP", "DELETESTEP", "ADDSTEP", 
-                      "SEQ", "PAR", "COLL", "BEH", "SUBGOAL", "SPAWNGOAL", 
-                      "JOINTNEG", "JOINT", "STAR", "BOOL", "NULL", "TYPE", 
-                      "CHARS", "FLOAT", "INT", "STRING", "WS" ];
+                      'null', 'null', 'null', 'null', 'null', 'null', "AND", 
+                      "OR", "BIND", "GT", "GE", "LT", "LE", "EQ", "NE", 
+                      "BANG", "WHEN_FAILS", "WHEN_SUCCEEDS", "IGNORE_FAILURE", 
+                      "EFFECT_ONLY", "TEAM_EFFECT_ONLY", "POST", "POST_TO", 
+                      "TEAMNEEDED", "ONENEEDED", "FAIL", "SUCCEED", "WAIT", 
+                      "MOVESTEP", "DELETESTEP", "ADDSTEP", "SEQ", "PAR", 
+                      "COLL", "BEH", "SUBGOAL", "SPAWNGOAL", "JOINTNEG", 
+                      "JOINT", "ATOMIC", "ADAPTIVE", "STAR", "BOOL", "NULL", 
+                      "TYPE", "CHARS", "FLOAT", "INT", "STRING", "WS" ];
 
 var ruleNames =  [ "prog", "g_package", "g_import", "constants", "teamNeeded", 
                    "conflictDecl", "wmeRegistration", "wmeRegistration_plural", 
@@ -190,9 +237,11 @@ var ruleNames =  [ "prog", "g_package", "g_import", "constants", "teamNeeded",
                    "wmeTestSequence", "testExpression", "precondition", 
                    "contextCondition", "entryCondition", "successCondition", 
                    "successTest", "numberNeededForSuccess", "teamMemberSpecifier", 
-                   "priorityModifier", "persistence", "namedProperty", "stepModifier", 
-                   "basicStep", "primitiveAct", "goalStep", "behaviourStep", 
-                   "name", "nameList", "string" ];
+                   "specificity", "behaviourModifier", "priorityModifier", 
+                   "persistence", "namedProperty", "stepModifier", "basicStep", 
+                   "primitiveAct", "goalStep", "behaviourStep", "behaviourDefinition", 
+                   "initialTree", "decisionCycleSMCallDeclaration", "ablDeclaration", 
+                   "behavingEntity", "name", "nameList", "string" ];
 
 function ABLParser (input) {
 	antlr4.Parser.call(this, input);
@@ -242,48 +291,54 @@ ABLParser.T__25 = 26;
 ABLParser.T__26 = 27;
 ABLParser.T__27 = 28;
 ABLParser.T__28 = 29;
-ABLParser.AND = 30;
-ABLParser.OR = 31;
-ABLParser.BIND = 32;
-ABLParser.GT = 33;
-ABLParser.GE = 34;
-ABLParser.LT = 35;
-ABLParser.LE = 36;
-ABLParser.EQ = 37;
-ABLParser.NE = 38;
-ABLParser.BANG = 39;
-ABLParser.WHEN_FAILS = 40;
-ABLParser.WHEN_SUCCEEDS = 41;
-ABLParser.IGNORE_FAILURE = 42;
-ABLParser.EFFECT_ONLY = 43;
-ABLParser.TEAM_EFFECT_ONLY = 44;
-ABLParser.POST = 45;
-ABLParser.POST_TO = 46;
-ABLParser.TEAMNEEDED = 47;
-ABLParser.ONENEEDED = 48;
-ABLParser.FAIL = 49;
-ABLParser.SUCCEED = 50;
-ABLParser.WAIT = 51;
-ABLParser.MOVESTEP = 52;
-ABLParser.DELETESTEP = 53;
-ABLParser.ADDSTEP = 54;
-ABLParser.SEQ = 55;
-ABLParser.PAR = 56;
-ABLParser.COLL = 57;
-ABLParser.BEH = 58;
-ABLParser.SUBGOAL = 59;
-ABLParser.SPAWNGOAL = 60;
-ABLParser.JOINTNEG = 61;
-ABLParser.JOINT = 62;
-ABLParser.STAR = 63;
-ABLParser.BOOL = 64;
-ABLParser.NULL = 65;
-ABLParser.TYPE = 66;
-ABLParser.CHARS = 67;
-ABLParser.FLOAT = 68;
-ABLParser.INT = 69;
-ABLParser.STRING = 70;
-ABLParser.WS = 71;
+ABLParser.T__29 = 30;
+ABLParser.T__30 = 31;
+ABLParser.T__31 = 32;
+ABLParser.T__32 = 33;
+ABLParser.AND = 34;
+ABLParser.OR = 35;
+ABLParser.BIND = 36;
+ABLParser.GT = 37;
+ABLParser.GE = 38;
+ABLParser.LT = 39;
+ABLParser.LE = 40;
+ABLParser.EQ = 41;
+ABLParser.NE = 42;
+ABLParser.BANG = 43;
+ABLParser.WHEN_FAILS = 44;
+ABLParser.WHEN_SUCCEEDS = 45;
+ABLParser.IGNORE_FAILURE = 46;
+ABLParser.EFFECT_ONLY = 47;
+ABLParser.TEAM_EFFECT_ONLY = 48;
+ABLParser.POST = 49;
+ABLParser.POST_TO = 50;
+ABLParser.TEAMNEEDED = 51;
+ABLParser.ONENEEDED = 52;
+ABLParser.FAIL = 53;
+ABLParser.SUCCEED = 54;
+ABLParser.WAIT = 55;
+ABLParser.MOVESTEP = 56;
+ABLParser.DELETESTEP = 57;
+ABLParser.ADDSTEP = 58;
+ABLParser.SEQ = 59;
+ABLParser.PAR = 60;
+ABLParser.COLL = 61;
+ABLParser.BEH = 62;
+ABLParser.SUBGOAL = 63;
+ABLParser.SPAWNGOAL = 64;
+ABLParser.JOINTNEG = 65;
+ABLParser.JOINT = 66;
+ABLParser.ATOMIC = 67;
+ABLParser.ADAPTIVE = 68;
+ABLParser.STAR = 69;
+ABLParser.BOOL = 70;
+ABLParser.NULL = 71;
+ABLParser.TYPE = 72;
+ABLParser.CHARS = 73;
+ABLParser.FLOAT = 74;
+ABLParser.INT = 75;
+ABLParser.STRING = 76;
+ABLParser.WS = 77;
 
 ABLParser.RULE_prog = 0;
 ABLParser.RULE_g_package = 1;
@@ -319,17 +374,24 @@ ABLParser.RULE_successCondition = 30;
 ABLParser.RULE_successTest = 31;
 ABLParser.RULE_numberNeededForSuccess = 32;
 ABLParser.RULE_teamMemberSpecifier = 33;
-ABLParser.RULE_priorityModifier = 34;
-ABLParser.RULE_persistence = 35;
-ABLParser.RULE_namedProperty = 36;
-ABLParser.RULE_stepModifier = 37;
-ABLParser.RULE_basicStep = 38;
-ABLParser.RULE_primitiveAct = 39;
-ABLParser.RULE_goalStep = 40;
-ABLParser.RULE_behaviourStep = 41;
-ABLParser.RULE_name = 42;
-ABLParser.RULE_nameList = 43;
-ABLParser.RULE_string = 44;
+ABLParser.RULE_specificity = 34;
+ABLParser.RULE_behaviourModifier = 35;
+ABLParser.RULE_priorityModifier = 36;
+ABLParser.RULE_persistence = 37;
+ABLParser.RULE_namedProperty = 38;
+ABLParser.RULE_stepModifier = 39;
+ABLParser.RULE_basicStep = 40;
+ABLParser.RULE_primitiveAct = 41;
+ABLParser.RULE_goalStep = 42;
+ABLParser.RULE_behaviourStep = 43;
+ABLParser.RULE_behaviourDefinition = 44;
+ABLParser.RULE_initialTree = 45;
+ABLParser.RULE_decisionCycleSMCallDeclaration = 46;
+ABLParser.RULE_ablDeclaration = 47;
+ABLParser.RULE_behavingEntity = 48;
+ABLParser.RULE_name = 49;
+ABLParser.RULE_nameList = 50;
+ABLParser.RULE_string = 51;
 
 function ProgContext(parser, parent, invokingState) {
 	if(parent===undefined) {
@@ -346,6 +408,14 @@ function ProgContext(parser, parent, invokingState) {
 
 ProgContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 ProgContext.prototype.constructor = ProgContext;
+
+ProgContext.prototype.constants = function() {
+    return this.getTypedRuleContext(ConstantsContext,0);
+};
+
+ProgContext.prototype.behavingEntity = function() {
+    return this.getTypedRuleContext(BehavingEntityContext,0);
+};
 
 ProgContext.prototype.EOF = function() {
     return this.getToken(ABLParser.EOF, 0);
@@ -390,24 +460,28 @@ ABLParser.prototype.prog = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 91;
+        this.state = 105;
         _la = this._input.LA(1);
         if(_la===ABLParser.T__0) {
-            this.state = 90;
+            this.state = 104;
             this.g_package();
         }
 
-        this.state = 96;
+        this.state = 110;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.T__2) {
-            this.state = 93;
+            this.state = 107;
             this.g_import();
-            this.state = 98;
+            this.state = 112;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
-        this.state = 99;
+        this.state = 113;
+        this.constants();
+        this.state = 114;
+        this.behavingEntity();
+        this.state = 115;
         this.match(ABLParser.EOF);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -466,11 +540,11 @@ ABLParser.prototype.g_package = function() {
     this.enterRule(localctx, 2, ABLParser.RULE_g_package);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 101;
+        this.state = 117;
         this.match(ABLParser.T__0);
-        this.state = 102;
+        this.state = 118;
         this.match(ABLParser.TYPE);
-        this.state = 103;
+        this.state = 119;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -534,18 +608,18 @@ ABLParser.prototype.g_import = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 105;
+        this.state = 121;
         this.match(ABLParser.T__2);
-        this.state = 106;
+        this.state = 122;
         this.match(ABLParser.TYPE);
-        this.state = 108;
+        this.state = 124;
         _la = this._input.LA(1);
         if(_la===ABLParser.STAR) {
-            this.state = 107;
+            this.state = 123;
             this.match(ABLParser.STAR);
         }
 
-        this.state = 110;
+        this.state = 126;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -613,17 +687,17 @@ ABLParser.prototype.constants = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 117;
+        this.state = 133;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.T__3) {
-            this.state = 112;
+            this.state = 128;
             this.match(ABLParser.T__3);
-            this.state = 113;
+            this.state = 129;
             this.match(ABLParser.TYPE);
-            this.state = 114;
+            this.state = 130;
             this.match(ABLParser.T__1);
-            this.state = 119;
+            this.state = 135;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
@@ -693,9 +767,9 @@ ABLParser.prototype.teamNeeded = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 120;
+        this.state = 136;
         this.match(ABLParser.JOINTNEG);
-        this.state = 121;
+        this.state = 137;
         _la = this._input.LA(1);
         if(!(_la===ABLParser.TEAMNEEDED || _la===ABLParser.ONENEEDED)) {
         this._errHandler.recoverInline(this);
@@ -703,7 +777,7 @@ ABLParser.prototype.teamNeeded = function() {
         else {
             this.consume();
         }
-        this.state = 122;
+        this.state = 138;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -770,21 +844,21 @@ ABLParser.prototype.conflictDecl = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 124;
+        this.state = 140;
         this.match(ABLParser.T__4);
-        this.state = 125;
+        this.state = 141;
         this.name();
-        this.state = 127; 
+        this.state = 143; 
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
-            this.state = 126;
+            this.state = 142;
             this.name();
-            this.state = 129; 
+            this.state = 145; 
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         } while(_la===ABLParser.CHARS);
-        this.state = 131;
+        this.state = 147;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -851,17 +925,17 @@ ABLParser.prototype.wmeRegistration = function() {
     this.enterRule(localctx, 12, ABLParser.RULE_wmeRegistration);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 133;
+        this.state = 149;
         this.match(ABLParser.T__5);
-        this.state = 134;
+        this.state = 150;
         this.match(ABLParser.T__6);
-        this.state = 135;
+        this.state = 151;
         this.match(ABLParser.TYPE);
-        this.state = 136;
+        this.state = 152;
         this.match(ABLParser.T__7);
-        this.state = 137;
+        this.state = 153;
         this.match(ABLParser.TYPE);
-        this.state = 138;
+        this.state = 154;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -928,13 +1002,13 @@ ABLParser.prototype.wmeRegistration_plural = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 141; 
+        this.state = 157; 
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
-            this.state = 140;
+            this.state = 156;
             this.wmeRegistration();
-            this.state = 143; 
+            this.state = 159; 
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         } while(_la===ABLParser.T__5);
@@ -1010,31 +1084,31 @@ ABLParser.prototype.ablLiteral = function() {
     var localctx = new AblLiteralContext(this, this._ctx, this.state);
     this.enterRule(localctx, 16, ABLParser.RULE_ablLiteral);
     try {
-        this.state = 150;
+        this.state = 166;
         switch(this._input.LA(1)) {
         case ABLParser.INT:
             this.enterOuterAlt(localctx, 1);
-            this.state = 145;
+            this.state = 161;
             this.match(ABLParser.INT);
             break;
         case ABLParser.FLOAT:
             this.enterOuterAlt(localctx, 2);
-            this.state = 146;
+            this.state = 162;
             this.match(ABLParser.FLOAT);
             break;
         case ABLParser.STRING:
             this.enterOuterAlt(localctx, 3);
-            this.state = 147;
+            this.state = 163;
             this.string();
             break;
         case ABLParser.BOOL:
             this.enterOuterAlt(localctx, 4);
-            this.state = 148;
+            this.state = 164;
             this.match(ABLParser.BOOL);
             break;
         case ABLParser.NULL:
             this.enterOuterAlt(localctx, 5);
-            this.state = 149;
+            this.state = 165;
             this.match(ABLParser.NULL);
             break;
         default:
@@ -1100,11 +1174,11 @@ ABLParser.prototype.ablExpression = function() {
     var localctx = new AblExpressionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 18, ABLParser.RULE_ablExpression);
     try {
-        this.state = 154;
+        this.state = 170;
         switch(this._input.LA(1)) {
         case ABLParser.CHARS:
             this.enterOuterAlt(localctx, 1);
-            this.state = 152;
+            this.state = 168;
             this.name();
             break;
         case ABLParser.BOOL:
@@ -1113,7 +1187,7 @@ ABLParser.prototype.ablExpression = function() {
         case ABLParser.INT:
         case ABLParser.STRING:
             this.enterOuterAlt(localctx, 2);
-            this.state = 153;
+            this.state = 169;
             this.ablLiteral();
             break;
         default:
@@ -1184,28 +1258,28 @@ ABLParser.prototype.params = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 156;
+        this.state = 172;
         this.match(ABLParser.T__8);
-        this.state = 158;
+        this.state = 174;
         _la = this._input.LA(1);
-        if(((((_la - 64)) & ~0x1f) == 0 && ((1 << (_la - 64)) & ((1 << (ABLParser.BOOL - 64)) | (1 << (ABLParser.NULL - 64)) | (1 << (ABLParser.TYPE - 64)) | (1 << (ABLParser.CHARS - 64)) | (1 << (ABLParser.FLOAT - 64)) | (1 << (ABLParser.INT - 64)) | (1 << (ABLParser.STRING - 64)))) !== 0)) {
-            this.state = 157;
+        if(((((_la - 70)) & ~0x1f) == 0 && ((1 << (_la - 70)) & ((1 << (ABLParser.BOOL - 70)) | (1 << (ABLParser.NULL - 70)) | (1 << (ABLParser.TYPE - 70)) | (1 << (ABLParser.CHARS - 70)) | (1 << (ABLParser.FLOAT - 70)) | (1 << (ABLParser.INT - 70)) | (1 << (ABLParser.STRING - 70)))) !== 0)) {
+            this.state = 173;
             this.param();
         }
 
-        this.state = 164;
+        this.state = 180;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.T__9) {
-            this.state = 160;
+            this.state = 176;
             this.match(ABLParser.T__9);
-            this.state = 161;
+            this.state = 177;
             this.param();
-            this.state = 166;
+            this.state = 182;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
-        this.state = 167;
+        this.state = 183;
         this.match(ABLParser.T__10);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1268,17 +1342,17 @@ ABLParser.prototype.param = function() {
     this.enterRule(localctx, 22, ABLParser.RULE_param);
     var _la = 0; // Token type
     try {
-        this.state = 177;
+        this.state = 193;
         var la_ = this._interp.adaptivePredict(this._input,12,this._ctx);
         switch(la_) {
         case 1:
             this.enterOuterAlt(localctx, 1);
-            this.state = 169;
+            this.state = 185;
             this.match(ABLParser.TYPE);
-            this.state = 171;
+            this.state = 187;
             _la = this._input.LA(1);
-            if(((((_la - 64)) & ~0x1f) == 0 && ((1 << (_la - 64)) & ((1 << (ABLParser.BOOL - 64)) | (1 << (ABLParser.NULL - 64)) | (1 << (ABLParser.CHARS - 64)) | (1 << (ABLParser.FLOAT - 64)) | (1 << (ABLParser.INT - 64)) | (1 << (ABLParser.STRING - 64)))) !== 0)) {
-                this.state = 170;
+            if(((((_la - 70)) & ~0x1f) == 0 && ((1 << (_la - 70)) & ((1 << (ABLParser.BOOL - 70)) | (1 << (ABLParser.NULL - 70)) | (1 << (ABLParser.CHARS - 70)) | (1 << (ABLParser.FLOAT - 70)) | (1 << (ABLParser.INT - 70)) | (1 << (ABLParser.STRING - 70)))) !== 0)) {
+                this.state = 186;
                 this.ablExpression();
             }
 
@@ -1286,14 +1360,14 @@ ABLParser.prototype.param = function() {
 
         case 2:
             this.enterOuterAlt(localctx, 2);
-            this.state = 174;
+            this.state = 190;
             _la = this._input.LA(1);
             if(_la===ABLParser.TYPE) {
-                this.state = 173;
+                this.state = 189;
                 this.match(ABLParser.TYPE);
             }
 
-            this.state = 176;
+            this.state = 192;
             this.ablExpression();
             break;
 
@@ -1367,19 +1441,19 @@ ABLParser.prototype.actionRegistration = function() {
     this.enterRule(localctx, 24, ABLParser.RULE_actionRegistration);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 179;
+        this.state = 195;
         this.match(ABLParser.T__5);
-        this.state = 180;
+        this.state = 196;
         this.match(ABLParser.T__11);
-        this.state = 181;
+        this.state = 197;
         this.match(ABLParser.TYPE);
-        this.state = 182;
+        this.state = 198;
         this.params();
-        this.state = 183;
+        this.state = 199;
         this.match(ABLParser.T__7);
-        this.state = 184;
+        this.state = 200;
         this.match(ABLParser.TYPE);
-        this.state = 185;
+        this.state = 201;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1450,23 +1524,23 @@ ABLParser.prototype.ablVariableDeclaration = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 187;
+        this.state = 203;
         this.match(ABLParser.TYPE);
-        this.state = 188;
+        this.state = 204;
         this.name();
-        this.state = 193;
+        this.state = 209;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.T__9) {
-            this.state = 189;
+            this.state = 205;
             this.match(ABLParser.T__9);
-            this.state = 190;
+            this.state = 206;
             this.name();
-            this.state = 195;
+            this.state = 211;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
-        this.state = 196;
+        this.state = 212;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1545,32 +1619,32 @@ ABLParser.prototype.wmeDeclaration = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 198;
+        this.state = 214;
         this.match(ABLParser.T__6);
-        this.state = 199;
+        this.state = 215;
         this.match(ABLParser.TYPE);
-        this.state = 202;
+        this.state = 218;
         _la = this._input.LA(1);
         if(_la===ABLParser.T__12) {
-            this.state = 200;
+            this.state = 216;
             this.match(ABLParser.T__12);
-            this.state = 201;
+            this.state = 217;
             this.match(ABLParser.TYPE);
         }
 
-        this.state = 204;
+        this.state = 220;
         this.match(ABLParser.T__13);
-        this.state = 208;
+        this.state = 224;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.TYPE) {
-            this.state = 205;
+            this.state = 221;
             this.ablVariableDeclaration();
-            this.state = 210;
+            this.state = 226;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
-        this.state = 211;
+        this.state = 227;
         this.match(ABLParser.T__14);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1633,13 +1707,13 @@ ABLParser.prototype.propertyDeclaration = function() {
     this.enterRule(localctx, 30, ABLParser.RULE_propertyDeclaration);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 213;
+        this.state = 229;
         this.match(ABLParser.T__15);
-        this.state = 214;
+        this.state = 230;
         this.match(ABLParser.TYPE);
-        this.state = 215;
+        this.state = 231;
         this.name();
-        this.state = 216;
+        this.state = 232;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1723,9 +1797,9 @@ ABLParser.prototype.operator = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 218;
+        this.state = 234;
         _la = this._input.LA(1);
-        if(!(((((_la - 32)) & ~0x1f) == 0 && ((1 << (_la - 32)) & ((1 << (ABLParser.BIND - 32)) | (1 << (ABLParser.GT - 32)) | (1 << (ABLParser.GE - 32)) | (1 << (ABLParser.LT - 32)) | (1 << (ABLParser.LE - 32)) | (1 << (ABLParser.EQ - 32)) | (1 << (ABLParser.NE - 32)))) !== 0))) {
+        if(!(((((_la - 36)) & ~0x1f) == 0 && ((1 << (_la - 36)) & ((1 << (ABLParser.BIND - 36)) | (1 << (ABLParser.GT - 36)) | (1 << (ABLParser.GE - 36)) | (1 << (ABLParser.LT - 36)) | (1 << (ABLParser.LE - 36)) | (1 << (ABLParser.EQ - 36)) | (1 << (ABLParser.NE - 36)))) !== 0))) {
         this._errHandler.recoverInline(this);
         }
         else {
@@ -1796,11 +1870,11 @@ ABLParser.prototype.wmeFieldTest = function() {
     this.enterRule(localctx, 34, ABLParser.RULE_wmeFieldTest);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 220;
+        this.state = 236;
         this.name();
-        this.state = 221;
+        this.state = 237;
         this.operator();
-        this.state = 222;
+        this.state = 238;
         this.ablExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1879,37 +1953,37 @@ ABLParser.prototype.wmeTest = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 227;
+        this.state = 243;
         _la = this._input.LA(1);
         if(_la===ABLParser.CHARS) {
-            this.state = 224;
+            this.state = 240;
             this.name();
-            this.state = 225;
+            this.state = 241;
             this.match(ABLParser.T__16);
         }
 
-        this.state = 230;
+        this.state = 246;
         _la = this._input.LA(1);
         if(_la===ABLParser.BANG) {
-            this.state = 229;
+            this.state = 245;
             this.match(ABLParser.BANG);
         }
 
-        this.state = 232;
+        this.state = 248;
         this.match(ABLParser.T__8);
-        this.state = 233;
+        this.state = 249;
         this.match(ABLParser.TYPE);
-        this.state = 237;
+        this.state = 253;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.CHARS) {
-            this.state = 234;
+            this.state = 250;
             this.wmeFieldTest();
-            this.state = 239;
+            this.state = 255;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
-        this.state = 240;
+        this.state = 256;
         this.match(ABLParser.T__10);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -1984,21 +2058,21 @@ ABLParser.prototype.binaryOp = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 243;
+        this.state = 259;
         _la = this._input.LA(1);
         if(_la===ABLParser.BANG) {
-            this.state = 242;
+            this.state = 258;
             this.match(ABLParser.BANG);
         }
 
-        this.state = 245;
+        this.state = 261;
         this.ablExpression();
-        this.state = 249;
+        this.state = 265;
         _la = this._input.LA(1);
-        if(((((_la - 32)) & ~0x1f) == 0 && ((1 << (_la - 32)) & ((1 << (ABLParser.BIND - 32)) | (1 << (ABLParser.GT - 32)) | (1 << (ABLParser.GE - 32)) | (1 << (ABLParser.LT - 32)) | (1 << (ABLParser.LE - 32)) | (1 << (ABLParser.EQ - 32)) | (1 << (ABLParser.NE - 32)))) !== 0)) {
-            this.state = 246;
+        if(((((_la - 36)) & ~0x1f) == 0 && ((1 << (_la - 36)) & ((1 << (ABLParser.BIND - 36)) | (1 << (ABLParser.GT - 36)) | (1 << (ABLParser.GE - 36)) | (1 << (ABLParser.LT - 36)) | (1 << (ABLParser.LE - 36)) | (1 << (ABLParser.EQ - 36)) | (1 << (ABLParser.NE - 36)))) !== 0)) {
+            this.state = 262;
             this.operator();
-            this.state = 247;
+            this.state = 263;
             this.ablExpression();
         }
 
@@ -2068,16 +2142,16 @@ ABLParser.prototype.javaMethod = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 252;
+        this.state = 268;
         _la = this._input.LA(1);
         if(_la===ABLParser.BANG) {
-            this.state = 251;
+            this.state = 267;
             this.match(ABLParser.BANG);
         }
 
-        this.state = 254;
+        this.state = 270;
         this.name();
-        this.state = 255;
+        this.state = 271;
         this.params();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2147,30 +2221,30 @@ ABLParser.prototype.clause = function() {
     var localctx = new ClauseContext(this, this._ctx, this.state);
     this.enterRule(localctx, 42, ABLParser.RULE_clause);
     try {
-        this.state = 261;
+        this.state = 277;
         var la_ = this._interp.adaptivePredict(this._input,22,this._ctx);
         switch(la_) {
         case 1:
             this.enterOuterAlt(localctx, 1);
-            this.state = 257;
+            this.state = 273;
             this.match(ABLParser.BOOL);
             break;
 
         case 2:
             this.enterOuterAlt(localctx, 2);
-            this.state = 258;
+            this.state = 274;
             this.name();
             break;
 
         case 3:
             this.enterOuterAlt(localctx, 3);
-            this.state = 259;
+            this.state = 275;
             this.javaMethod();
             break;
 
         case 4:
             this.enterOuterAlt(localctx, 4);
-            this.state = 260;
+            this.state = 276;
             this.binaryOp();
             break;
 
@@ -2237,7 +2311,7 @@ ABLParser.prototype.booleanHelper = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 263;
+        this.state = 279;
         _la = this._input.LA(1);
         if(!(_la===ABLParser.AND || _la===ABLParser.OR)) {
         this._errHandler.recoverInline(this);
@@ -2321,17 +2395,17 @@ ABLParser.prototype.mixedCall = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 265;
+        this.state = 281;
         this.clause();
-        this.state = 271;
+        this.state = 287;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.AND || _la===ABLParser.OR) {
-            this.state = 266;
+            this.state = 282;
             this.booleanHelper();
-            this.state = 267;
+            this.state = 283;
             this.clause();
-            this.state = 273;
+            this.state = 289;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
@@ -2392,11 +2466,11 @@ ABLParser.prototype.conditionalExpression = function() {
     this.enterRule(localctx, 48, ABLParser.RULE_conditionalExpression);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 274;
+        this.state = 290;
         this.match(ABLParser.T__8);
-        this.state = 275;
+        this.state = 291;
         this.mixedCall();
-        this.state = 276;
+        this.state = 292;
         this.match(ABLParser.T__10);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2474,31 +2548,31 @@ ABLParser.prototype.wmeTestSequence = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 278;
+        this.state = 294;
         this.match(ABLParser.T__13);
-        this.state = 281; 
+        this.state = 297; 
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
-            this.state = 281;
+            this.state = 297;
             var la_ = this._interp.adaptivePredict(this._input,24,this._ctx);
             switch(la_) {
             case 1:
-                this.state = 279;
+                this.state = 295;
                 this.wmeTest();
                 break;
 
             case 2:
-                this.state = 280;
+                this.state = 296;
                 this.conditionalExpression();
                 break;
 
             }
-            this.state = 283; 
+            this.state = 299; 
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         } while(_la===ABLParser.T__8 || _la===ABLParser.BANG || _la===ABLParser.CHARS);
-        this.state = 285;
+        this.state = 301;
         this.match(ABLParser.T__14);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2557,7 +2631,7 @@ ABLParser.prototype.testExpression = function() {
     this.enterRule(localctx, 52, ABLParser.RULE_testExpression);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 287;
+        this.state = 303;
         this.wmeTestSequence();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2616,9 +2690,9 @@ ABLParser.prototype.precondition = function() {
     this.enterRule(localctx, 54, ABLParser.RULE_precondition);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 289;
+        this.state = 305;
         this.match(ABLParser.T__17);
-        this.state = 290;
+        this.state = 306;
         this.testExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2677,9 +2751,9 @@ ABLParser.prototype.contextCondition = function() {
     this.enterRule(localctx, 56, ABLParser.RULE_contextCondition);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 292;
+        this.state = 308;
         this.match(ABLParser.T__18);
-        this.state = 293;
+        this.state = 309;
         this.testExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2738,9 +2812,9 @@ ABLParser.prototype.entryCondition = function() {
     this.enterRule(localctx, 58, ABLParser.RULE_entryCondition);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 295;
+        this.state = 311;
         this.match(ABLParser.T__19);
-        this.state = 296;
+        this.state = 312;
         this.testExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2799,9 +2873,9 @@ ABLParser.prototype.successCondition = function() {
     this.enterRule(localctx, 60, ABLParser.RULE_successCondition);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 298;
+        this.state = 314;
         this.match(ABLParser.T__20);
-        this.state = 299;
+        this.state = 315;
         this.testExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2860,9 +2934,9 @@ ABLParser.prototype.successTest = function() {
     this.enterRule(localctx, 62, ABLParser.RULE_successTest);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 301;
+        this.state = 317;
         this.match(ABLParser.T__21);
-        this.state = 302;
+        this.state = 318;
         this.testExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2921,11 +2995,11 @@ ABLParser.prototype.numberNeededForSuccess = function() {
     this.enterRule(localctx, 64, ABLParser.RULE_numberNeededForSuccess);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 304;
+        this.state = 320;
         this.match(ABLParser.T__22);
-        this.state = 305;
+        this.state = 321;
         this.ablLiteral();
-        this.state = 306;
+        this.state = 322;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -2992,18 +3066,201 @@ ABLParser.prototype.teamMemberSpecifier = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 308;
+        this.state = 324;
         this.match(ABLParser.T__23);
-        this.state = 310; 
+        this.state = 326; 
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
-            this.state = 309;
+            this.state = 325;
             this.name();
-            this.state = 312; 
+            this.state = 328; 
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         } while(_la===ABLParser.CHARS);
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function SpecificityContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_specificity;
+    return this;
+}
+
+SpecificityContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+SpecificityContext.prototype.constructor = SpecificityContext;
+
+SpecificityContext.prototype.ablLiteral = function() {
+    return this.getTypedRuleContext(AblLiteralContext,0);
+};
+
+SpecificityContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterSpecificity(this);
+	}
+};
+
+SpecificityContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitSpecificity(this);
+	}
+};
+
+
+
+
+ABLParser.SpecificityContext = SpecificityContext;
+
+ABLParser.prototype.specificity = function() {
+
+    var localctx = new SpecificityContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 68, ABLParser.RULE_specificity);
+    try {
+        this.enterOuterAlt(localctx, 1);
+        this.state = 330;
+        this.match(ABLParser.T__24);
+        this.state = 331;
+        this.ablLiteral();
+        this.state = 332;
+        this.match(ABLParser.T__1);
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function BehaviourModifierContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_behaviourModifier;
+    return this;
+}
+
+BehaviourModifierContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+BehaviourModifierContext.prototype.constructor = BehaviourModifierContext;
+
+BehaviourModifierContext.prototype.precondition = function() {
+    return this.getTypedRuleContext(PreconditionContext,0);
+};
+
+BehaviourModifierContext.prototype.specificity = function() {
+    return this.getTypedRuleContext(SpecificityContext,0);
+};
+
+BehaviourModifierContext.prototype.contextCondition = function() {
+    return this.getTypedRuleContext(ContextConditionContext,0);
+};
+
+BehaviourModifierContext.prototype.entryCondition = function() {
+    return this.getTypedRuleContext(EntryConditionContext,0);
+};
+
+BehaviourModifierContext.prototype.numberNeededForSuccess = function() {
+    return this.getTypedRuleContext(NumberNeededForSuccessContext,0);
+};
+
+BehaviourModifierContext.prototype.teamMemberSpecifier = function() {
+    return this.getTypedRuleContext(TeamMemberSpecifierContext,0);
+};
+
+BehaviourModifierContext.prototype.successCondition = function() {
+    return this.getTypedRuleContext(SuccessConditionContext,0);
+};
+
+BehaviourModifierContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterBehaviourModifier(this);
+	}
+};
+
+BehaviourModifierContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitBehaviourModifier(this);
+	}
+};
+
+
+
+
+ABLParser.BehaviourModifierContext = BehaviourModifierContext;
+
+ABLParser.prototype.behaviourModifier = function() {
+
+    var localctx = new BehaviourModifierContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 70, ABLParser.RULE_behaviourModifier);
+    try {
+        this.state = 341;
+        switch(this._input.LA(1)) {
+        case ABLParser.T__17:
+            this.enterOuterAlt(localctx, 1);
+            this.state = 334;
+            this.precondition();
+            break;
+        case ABLParser.T__24:
+            this.enterOuterAlt(localctx, 2);
+            this.state = 335;
+            this.specificity();
+            break;
+        case ABLParser.T__18:
+            this.enterOuterAlt(localctx, 3);
+            this.state = 336;
+            this.contextCondition();
+            break;
+        case ABLParser.T__19:
+            this.enterOuterAlt(localctx, 4);
+            this.state = 337;
+            this.entryCondition();
+            break;
+        case ABLParser.T__22:
+            this.enterOuterAlt(localctx, 5);
+            this.state = 338;
+            this.numberNeededForSuccess();
+            break;
+        case ABLParser.T__23:
+            this.enterOuterAlt(localctx, 6);
+            this.state = 339;
+            this.teamMemberSpecifier();
+            break;
+        case ABLParser.T__20:
+            this.enterOuterAlt(localctx, 7);
+            this.state = 340;
+            this.successCondition();
+            break;
+        default:
+            throw new antlr4.error.NoViableAltException(this);
+        }
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
 	        localctx.exception = re;
@@ -3058,19 +3315,19 @@ ABLParser.PriorityModifierContext = PriorityModifierContext;
 ABLParser.prototype.priorityModifier = function() {
 
     var localctx = new PriorityModifierContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 68, ABLParser.RULE_priorityModifier);
+    this.enterRule(localctx, 72, ABLParser.RULE_priorityModifier);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 314;
+        this.state = 343;
         _la = this._input.LA(1);
-        if(!(_la===ABLParser.T__24 || _la===ABLParser.T__25)) {
+        if(!(_la===ABLParser.T__25 || _la===ABLParser.T__26)) {
         this._errHandler.recoverInline(this);
         }
         else {
             this.consume();
         }
-        this.state = 315;
+        this.state = 344;
         this.ablLiteral();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3130,16 +3387,16 @@ ABLParser.PersistenceContext = PersistenceContext;
 ABLParser.prototype.persistence = function() {
 
     var localctx = new PersistenceContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 70, ABLParser.RULE_persistence);
+    this.enterRule(localctx, 74, ABLParser.RULE_persistence);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 317;
-        this.match(ABLParser.T__26);
-        this.state = 319;
+        this.state = 346;
+        this.match(ABLParser.T__27);
+        this.state = 348;
         _la = this._input.LA(1);
         if(_la===ABLParser.WHEN_FAILS || _la===ABLParser.WHEN_SUCCEEDS) {
-            this.state = 318;
+            this.state = 347;
             _la = this._input.LA(1);
             if(!(_la===ABLParser.WHEN_FAILS || _la===ABLParser.WHEN_SUCCEEDS)) {
             this._errHandler.recoverInline(this);
@@ -3207,14 +3464,14 @@ ABLParser.NamedPropertyContext = NamedPropertyContext;
 ABLParser.prototype.namedProperty = function() {
 
     var localctx = new NamedPropertyContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 72, ABLParser.RULE_namedProperty);
+    this.enterRule(localctx, 76, ABLParser.RULE_namedProperty);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 321;
+        this.state = 350;
         this.match(ABLParser.T__15);
-        this.state = 322;
+        this.state = 351;
         this.name();
-        this.state = 323;
+        this.state = 352;
         this.ablExpression();
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3314,66 +3571,66 @@ ABLParser.StepModifierContext = StepModifierContext;
 ABLParser.prototype.stepModifier = function() {
 
     var localctx = new StepModifierContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 74, ABLParser.RULE_stepModifier);
+    this.enterRule(localctx, 78, ABLParser.RULE_stepModifier);
     try {
-        this.state = 337;
+        this.state = 366;
         switch(this._input.LA(1)) {
         case ABLParser.IGNORE_FAILURE:
             this.enterOuterAlt(localctx, 1);
-            this.state = 325;
+            this.state = 354;
             this.match(ABLParser.IGNORE_FAILURE);
             break;
         case ABLParser.EFFECT_ONLY:
             this.enterOuterAlt(localctx, 2);
-            this.state = 326;
+            this.state = 355;
             this.match(ABLParser.EFFECT_ONLY);
             break;
         case ABLParser.TEAM_EFFECT_ONLY:
             this.enterOuterAlt(localctx, 3);
-            this.state = 327;
+            this.state = 356;
             this.match(ABLParser.TEAM_EFFECT_ONLY);
             break;
         case ABLParser.POST:
             this.enterOuterAlt(localctx, 4);
-            this.state = 328;
+            this.state = 357;
             this.match(ABLParser.POST);
             break;
         case ABLParser.POST_TO:
             this.enterOuterAlt(localctx, 5);
-            this.state = 329;
+            this.state = 358;
             this.match(ABLParser.POST_TO);
-            this.state = 330;
+            this.state = 359;
             this.name();
             break;
         case ABLParser.TEAMNEEDED:
             this.enterOuterAlt(localctx, 6);
-            this.state = 331;
+            this.state = 360;
             this.match(ABLParser.TEAMNEEDED);
             break;
         case ABLParser.ONENEEDED:
             this.enterOuterAlt(localctx, 7);
-            this.state = 332;
+            this.state = 361;
             this.match(ABLParser.ONENEEDED);
             break;
-        case ABLParser.T__24:
         case ABLParser.T__25:
+        case ABLParser.T__26:
             this.enterOuterAlt(localctx, 8);
-            this.state = 333;
+            this.state = 362;
             this.priorityModifier();
             break;
-        case ABLParser.T__26:
+        case ABLParser.T__27:
             this.enterOuterAlt(localctx, 9);
-            this.state = 334;
+            this.state = 363;
             this.persistence();
             break;
         case ABLParser.T__15:
             this.enterOuterAlt(localctx, 10);
-            this.state = 335;
+            this.state = 364;
             this.namedProperty();
             break;
         case ABLParser.T__21:
             this.enterOuterAlt(localctx, 11);
-            this.state = 336;
+            this.state = 365;
             this.successTest();
             break;
         default:
@@ -3441,19 +3698,19 @@ ABLParser.BasicStepContext = BasicStepContext;
 ABLParser.prototype.basicStep = function() {
 
     var localctx = new BasicStepContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 76, ABLParser.RULE_basicStep);
+    this.enterRule(localctx, 80, ABLParser.RULE_basicStep);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 339;
+        this.state = 368;
         _la = this._input.LA(1);
-        if(!(((((_la - 49)) & ~0x1f) == 0 && ((1 << (_la - 49)) & ((1 << (ABLParser.FAIL - 49)) | (1 << (ABLParser.SUCCEED - 49)) | (1 << (ABLParser.WAIT - 49)))) !== 0))) {
+        if(!(((((_la - 53)) & ~0x1f) == 0 && ((1 << (_la - 53)) & ((1 << (ABLParser.FAIL - 53)) | (1 << (ABLParser.SUCCEED - 53)) | (1 << (ABLParser.WAIT - 53)))) !== 0))) {
         this._errHandler.recoverInline(this);
         }
         else {
             this.consume();
         }
-        this.state = 340;
+        this.state = 369;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3513,16 +3770,16 @@ ABLParser.PrimitiveActContext = PrimitiveActContext;
 ABLParser.prototype.primitiveAct = function() {
 
     var localctx = new PrimitiveActContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 78, ABLParser.RULE_primitiveAct);
+    this.enterRule(localctx, 82, ABLParser.RULE_primitiveAct);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 342;
-        this.match(ABLParser.T__27);
-        this.state = 343;
+        this.state = 371;
+        this.match(ABLParser.T__28);
+        this.state = 372;
         this.name();
-        this.state = 344;
+        this.state = 373;
         this.params();
-        this.state = 345;
+        this.state = 374;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3601,18 +3858,18 @@ ABLParser.GoalStepContext = GoalStepContext;
 ABLParser.prototype.goalStep = function() {
 
     var localctx = new GoalStepContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 80, ABLParser.RULE_goalStep);
+    this.enterRule(localctx, 84, ABLParser.RULE_goalStep);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 348;
+        this.state = 377;
         _la = this._input.LA(1);
         if(_la===ABLParser.JOINT) {
-            this.state = 347;
+            this.state = 376;
             this.match(ABLParser.JOINT);
         }
 
-        this.state = 350;
+        this.state = 379;
         _la = this._input.LA(1);
         if(!(_la===ABLParser.SUBGOAL || _la===ABLParser.SPAWNGOAL)) {
         this._errHandler.recoverInline(this);
@@ -3620,25 +3877,25 @@ ABLParser.prototype.goalStep = function() {
         else {
             this.consume();
         }
-        this.state = 351;
+        this.state = 380;
         this.name();
-        this.state = 353;
+        this.state = 382;
         _la = this._input.LA(1);
         if(_la===ABLParser.T__8) {
-            this.state = 352;
+            this.state = 381;
             this.params();
         }
 
-        this.state = 357;
+        this.state = 386;
         _la = this._input.LA(1);
-        if(_la===ABLParser.T__28) {
-            this.state = 355;
-            this.match(ABLParser.T__28);
-            this.state = 356;
+        if(_la===ABLParser.T__29) {
+            this.state = 384;
+            this.match(ABLParser.T__29);
+            this.state = 385;
             this.name();
         }
 
-        this.state = 359;
+        this.state = 388;
         this.match(ABLParser.T__1);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3713,56 +3970,683 @@ ABLParser.BehaviourStepContext = BehaviourStepContext;
 ABLParser.prototype.behaviourStep = function() {
 
     var localctx = new BehaviourStepContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 82, ABLParser.RULE_behaviourStep);
+    this.enterRule(localctx, 86, ABLParser.RULE_behaviourStep);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 373;
+        this.state = 402;
         _la = this._input.LA(1);
         if(_la===ABLParser.T__7) {
-            this.state = 361;
+            this.state = 390;
             this.match(ABLParser.T__7);
-            this.state = 362;
+            this.state = 391;
             this.match(ABLParser.T__8);
-            this.state = 363;
+            this.state = 392;
             this.stepModifier();
-            this.state = 368;
+            this.state = 397;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
             while(_la===ABLParser.T__9) {
-                this.state = 364;
+                this.state = 393;
                 this.match(ABLParser.T__9);
-                this.state = 365;
+                this.state = 394;
                 this.stepModifier();
-                this.state = 370;
+                this.state = 399;
                 this._errHandler.sync(this);
                 _la = this._input.LA(1);
             }
-            this.state = 371;
+            this.state = 400;
             this.match(ABLParser.T__10);
         }
 
-        this.state = 378;
+        this.state = 407;
         switch(this._input.LA(1)) {
         case ABLParser.SUBGOAL:
         case ABLParser.SPAWNGOAL:
         case ABLParser.JOINT:
-            this.state = 375;
+            this.state = 404;
             this.goalStep();
             break;
-        case ABLParser.T__27:
-            this.state = 376;
+        case ABLParser.T__28:
+            this.state = 405;
             this.primitiveAct();
             break;
         case ABLParser.FAIL:
         case ABLParser.SUCCEED:
         case ABLParser.WAIT:
-            this.state = 377;
+            this.state = 406;
             this.basicStep();
             break;
         default:
             throw new antlr4.error.NoViableAltException(this);
         }
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function BehaviourDefinitionContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_behaviourDefinition;
+    return this;
+}
+
+BehaviourDefinitionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+BehaviourDefinitionContext.prototype.constructor = BehaviourDefinitionContext;
+
+BehaviourDefinitionContext.prototype.BEH = function() {
+    return this.getToken(ABLParser.BEH, 0);
+};
+
+BehaviourDefinitionContext.prototype.name = function() {
+    return this.getTypedRuleContext(NameContext,0);
+};
+
+BehaviourDefinitionContext.prototype.params = function() {
+    return this.getTypedRuleContext(ParamsContext,0);
+};
+
+BehaviourDefinitionContext.prototype.SEQ = function() {
+    return this.getToken(ABLParser.SEQ, 0);
+};
+
+BehaviourDefinitionContext.prototype.PAR = function() {
+    return this.getToken(ABLParser.PAR, 0);
+};
+
+BehaviourDefinitionContext.prototype.COLL = function() {
+    return this.getToken(ABLParser.COLL, 0);
+};
+
+BehaviourDefinitionContext.prototype.behaviourModifier = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(BehaviourModifierContext);
+    } else {
+        return this.getTypedRuleContext(BehaviourModifierContext,i);
+    }
+};
+
+BehaviourDefinitionContext.prototype.ablVariableDeclaration = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(AblVariableDeclarationContext);
+    } else {
+        return this.getTypedRuleContext(AblVariableDeclarationContext,i);
+    }
+};
+
+BehaviourDefinitionContext.prototype.behaviourStep = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(BehaviourStepContext);
+    } else {
+        return this.getTypedRuleContext(BehaviourStepContext,i);
+    }
+};
+
+BehaviourDefinitionContext.prototype.JOINT = function(i) {
+	if(i===undefined) {
+		i = null;
+	}
+    if(i===null) {
+        return this.getTokens(ABLParser.JOINT);
+    } else {
+        return this.getToken(ABLParser.JOINT, i);
+    }
+};
+
+
+BehaviourDefinitionContext.prototype.ATOMIC = function(i) {
+	if(i===undefined) {
+		i = null;
+	}
+    if(i===null) {
+        return this.getTokens(ABLParser.ATOMIC);
+    } else {
+        return this.getToken(ABLParser.ATOMIC, i);
+    }
+};
+
+
+BehaviourDefinitionContext.prototype.ADAPTIVE = function(i) {
+	if(i===undefined) {
+		i = null;
+	}
+    if(i===null) {
+        return this.getTokens(ABLParser.ADAPTIVE);
+    } else {
+        return this.getToken(ABLParser.ADAPTIVE, i);
+    }
+};
+
+
+BehaviourDefinitionContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterBehaviourDefinition(this);
+	}
+};
+
+BehaviourDefinitionContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitBehaviourDefinition(this);
+	}
+};
+
+
+
+
+ABLParser.BehaviourDefinitionContext = BehaviourDefinitionContext;
+
+ABLParser.prototype.behaviourDefinition = function() {
+
+    var localctx = new BehaviourDefinitionContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 88, ABLParser.RULE_behaviourDefinition);
+    var _la = 0; // Token type
+    try {
+        this.enterOuterAlt(localctx, 1);
+        this.state = 412;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        while(((((_la - 66)) & ~0x1f) == 0 && ((1 << (_la - 66)) & ((1 << (ABLParser.JOINT - 66)) | (1 << (ABLParser.ATOMIC - 66)) | (1 << (ABLParser.ADAPTIVE - 66)))) !== 0)) {
+            this.state = 409;
+            _la = this._input.LA(1);
+            if(!(((((_la - 66)) & ~0x1f) == 0 && ((1 << (_la - 66)) & ((1 << (ABLParser.JOINT - 66)) | (1 << (ABLParser.ATOMIC - 66)) | (1 << (ABLParser.ADAPTIVE - 66)))) !== 0))) {
+            this._errHandler.recoverInline(this);
+            }
+            else {
+                this.consume();
+            }
+            this.state = 414;
+            this._errHandler.sync(this);
+            _la = this._input.LA(1);
+        }
+        this.state = 415;
+        _la = this._input.LA(1);
+        if(!(((((_la - 59)) & ~0x1f) == 0 && ((1 << (_la - 59)) & ((1 << (ABLParser.SEQ - 59)) | (1 << (ABLParser.PAR - 59)) | (1 << (ABLParser.COLL - 59)))) !== 0))) {
+        this._errHandler.recoverInline(this);
+        }
+        else {
+            this.consume();
+        }
+        this.state = 416;
+        this.match(ABLParser.BEH);
+        this.state = 417;
+        this.name();
+        this.state = 418;
+        this.params();
+        this.state = 419;
+        this.match(ABLParser.T__13);
+        this.state = 425;
+        this._errHandler.sync(this);
+        var _alt = this._interp.adaptivePredict(this._input,38,this._ctx)
+        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
+            if(_alt===1) {
+                this.state = 423;
+                switch(this._input.LA(1)) {
+                case ABLParser.T__17:
+                case ABLParser.T__18:
+                case ABLParser.T__19:
+                case ABLParser.T__20:
+                case ABLParser.T__22:
+                case ABLParser.T__23:
+                case ABLParser.T__24:
+                    this.state = 420;
+                    this.behaviourModifier();
+                    break;
+                case ABLParser.TYPE:
+                    this.state = 421;
+                    this.ablVariableDeclaration();
+                    break;
+                case ABLParser.T__7:
+                case ABLParser.T__28:
+                case ABLParser.FAIL:
+                case ABLParser.SUCCEED:
+                case ABLParser.WAIT:
+                case ABLParser.SUBGOAL:
+                case ABLParser.SPAWNGOAL:
+                case ABLParser.JOINT:
+                    this.state = 422;
+                    this.behaviourStep();
+                    break;
+                default:
+                    throw new antlr4.error.NoViableAltException(this);
+                } 
+            }
+            this.state = 427;
+            this._errHandler.sync(this);
+            _alt = this._interp.adaptivePredict(this._input,38,this._ctx);
+        }
+
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function InitialTreeContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_initialTree;
+    return this;
+}
+
+InitialTreeContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+InitialTreeContext.prototype.constructor = InitialTreeContext;
+
+InitialTreeContext.prototype.behaviourStep = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(BehaviourStepContext);
+    } else {
+        return this.getTypedRuleContext(BehaviourStepContext,i);
+    }
+};
+
+InitialTreeContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterInitialTree(this);
+	}
+};
+
+InitialTreeContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitInitialTree(this);
+	}
+};
+
+
+
+
+ABLParser.InitialTreeContext = InitialTreeContext;
+
+ABLParser.prototype.initialTree = function() {
+
+    var localctx = new InitialTreeContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 90, ABLParser.RULE_initialTree);
+    var _la = 0; // Token type
+    try {
+        this.enterOuterAlt(localctx, 1);
+        this.state = 428;
+        this.match(ABLParser.T__30);
+        this.state = 429;
+        this.match(ABLParser.T__13);
+        this.state = 433;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        while(_la===ABLParser.T__7 || _la===ABLParser.T__28 || ((((_la - 53)) & ~0x1f) == 0 && ((1 << (_la - 53)) & ((1 << (ABLParser.FAIL - 53)) | (1 << (ABLParser.SUCCEED - 53)) | (1 << (ABLParser.WAIT - 53)) | (1 << (ABLParser.SUBGOAL - 53)) | (1 << (ABLParser.SPAWNGOAL - 53)) | (1 << (ABLParser.JOINT - 53)))) !== 0)) {
+            this.state = 430;
+            this.behaviourStep();
+            this.state = 435;
+            this._errHandler.sync(this);
+            _la = this._input.LA(1);
+        }
+        this.state = 436;
+        this.match(ABLParser.T__14);
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function DecisionCycleSMCallDeclarationContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_decisionCycleSMCallDeclaration;
+    return this;
+}
+
+DecisionCycleSMCallDeclarationContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+DecisionCycleSMCallDeclarationContext.prototype.constructor = DecisionCycleSMCallDeclarationContext;
+
+DecisionCycleSMCallDeclarationContext.prototype.name = function() {
+    return this.getTypedRuleContext(NameContext,0);
+};
+
+DecisionCycleSMCallDeclarationContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterDecisionCycleSMCallDeclaration(this);
+	}
+};
+
+DecisionCycleSMCallDeclarationContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitDecisionCycleSMCallDeclaration(this);
+	}
+};
+
+
+
+
+ABLParser.DecisionCycleSMCallDeclarationContext = DecisionCycleSMCallDeclarationContext;
+
+ABLParser.prototype.decisionCycleSMCallDeclaration = function() {
+
+    var localctx = new DecisionCycleSMCallDeclarationContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 92, ABLParser.RULE_decisionCycleSMCallDeclaration);
+    try {
+        this.enterOuterAlt(localctx, 1);
+        this.state = 438;
+        this.match(ABLParser.T__31);
+        this.state = 439;
+        this.name();
+        this.state = 440;
+        this.match(ABLParser.T__1);
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function AblDeclarationContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_ablDeclaration;
+    return this;
+}
+
+AblDeclarationContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+AblDeclarationContext.prototype.constructor = AblDeclarationContext;
+
+AblDeclarationContext.prototype.wmeRegistration = function() {
+    return this.getTypedRuleContext(WmeRegistrationContext,0);
+};
+
+AblDeclarationContext.prototype.actionRegistration = function() {
+    return this.getTypedRuleContext(ActionRegistrationContext,0);
+};
+
+AblDeclarationContext.prototype.wmeDeclaration = function() {
+    return this.getTypedRuleContext(WmeDeclarationContext,0);
+};
+
+AblDeclarationContext.prototype.propertyDeclaration = function() {
+    return this.getTypedRuleContext(PropertyDeclarationContext,0);
+};
+
+AblDeclarationContext.prototype.ablVariableDeclaration = function() {
+    return this.getTypedRuleContext(AblVariableDeclarationContext,0);
+};
+
+AblDeclarationContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterAblDeclaration(this);
+	}
+};
+
+AblDeclarationContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitAblDeclaration(this);
+	}
+};
+
+
+
+
+ABLParser.AblDeclarationContext = AblDeclarationContext;
+
+ABLParser.prototype.ablDeclaration = function() {
+
+    var localctx = new AblDeclarationContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 94, ABLParser.RULE_ablDeclaration);
+    try {
+        this.state = 447;
+        var la_ = this._interp.adaptivePredict(this._input,40,this._ctx);
+        switch(la_) {
+        case 1:
+            this.enterOuterAlt(localctx, 1);
+            this.state = 442;
+            this.wmeRegistration();
+            break;
+
+        case 2:
+            this.enterOuterAlt(localctx, 2);
+            this.state = 443;
+            this.actionRegistration();
+            break;
+
+        case 3:
+            this.enterOuterAlt(localctx, 3);
+            this.state = 444;
+            this.wmeDeclaration();
+            break;
+
+        case 4:
+            this.enterOuterAlt(localctx, 4);
+            this.state = 445;
+            this.propertyDeclaration();
+            break;
+
+        case 5:
+            this.enterOuterAlt(localctx, 5);
+            this.state = 446;
+            this.ablVariableDeclaration();
+            break;
+
+        }
+    } catch (re) {
+    	if(re instanceof antlr4.error.RecognitionException) {
+	        localctx.exception = re;
+	        this._errHandler.reportError(this, re);
+	        this._errHandler.recover(this, re);
+	    } else {
+	    	throw re;
+	    }
+    } finally {
+        this.exitRule();
+    }
+    return localctx;
+};
+
+function BehavingEntityContext(parser, parent, invokingState) {
+	if(parent===undefined) {
+	    parent = null;
+	}
+	if(invokingState===undefined || invokingState===null) {
+		invokingState = -1;
+	}
+	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    this.parser = parser;
+    this.ruleIndex = ABLParser.RULE_behavingEntity;
+    return this;
+}
+
+BehavingEntityContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+BehavingEntityContext.prototype.constructor = BehavingEntityContext;
+
+BehavingEntityContext.prototype.name = function() {
+    return this.getTypedRuleContext(NameContext,0);
+};
+
+BehavingEntityContext.prototype.initialTree = function() {
+    return this.getTypedRuleContext(InitialTreeContext,0);
+};
+
+BehavingEntityContext.prototype.teamNeeded = function() {
+    return this.getTypedRuleContext(TeamNeededContext,0);
+};
+
+BehavingEntityContext.prototype.decisionCycleSMCallDeclaration = function() {
+    return this.getTypedRuleContext(DecisionCycleSMCallDeclarationContext,0);
+};
+
+BehavingEntityContext.prototype.conflictDecl = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(ConflictDeclContext);
+    } else {
+        return this.getTypedRuleContext(ConflictDeclContext,i);
+    }
+};
+
+BehavingEntityContext.prototype.ablDeclaration = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(AblDeclarationContext);
+    } else {
+        return this.getTypedRuleContext(AblDeclarationContext,i);
+    }
+};
+
+BehavingEntityContext.prototype.behaviourDefinition = function(i) {
+    if(i===undefined) {
+        i = null;
+    }
+    if(i===null) {
+        return this.getTypedRuleContexts(BehaviourDefinitionContext);
+    } else {
+        return this.getTypedRuleContext(BehaviourDefinitionContext,i);
+    }
+};
+
+BehavingEntityContext.prototype.enterRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.enterBehavingEntity(this);
+	}
+};
+
+BehavingEntityContext.prototype.exitRule = function(listener) {
+    if(listener instanceof ABLListener ) {
+        listener.exitBehavingEntity(this);
+	}
+};
+
+
+
+
+ABLParser.BehavingEntityContext = BehavingEntityContext;
+
+ABLParser.prototype.behavingEntity = function() {
+
+    var localctx = new BehavingEntityContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 96, ABLParser.RULE_behavingEntity);
+    var _la = 0; // Token type
+    try {
+        this.enterOuterAlt(localctx, 1);
+        this.state = 449;
+        this.match(ABLParser.T__32);
+        this.state = 450;
+        this.name();
+        this.state = 451;
+        this.match(ABLParser.T__13);
+        this.state = 453;
+        _la = this._input.LA(1);
+        if(_la===ABLParser.JOINTNEG) {
+            this.state = 452;
+            this.teamNeeded();
+        }
+
+        this.state = 456;
+        _la = this._input.LA(1);
+        if(_la===ABLParser.T__31) {
+            this.state = 455;
+            this.decisionCycleSMCallDeclaration();
+        }
+
+        this.state = 461;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        while(_la===ABLParser.T__4) {
+            this.state = 458;
+            this.conflictDecl();
+            this.state = 463;
+            this._errHandler.sync(this);
+            _la = this._input.LA(1);
+        }
+        this.state = 467;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        while((((_la) & ~0x1f) == 0 && ((1 << _la) & ((1 << ABLParser.T__5) | (1 << ABLParser.T__6) | (1 << ABLParser.T__15))) !== 0) || _la===ABLParser.TYPE) {
+            this.state = 464;
+            this.ablDeclaration();
+            this.state = 469;
+            this._errHandler.sync(this);
+            _la = this._input.LA(1);
+        }
+        this.state = 473;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        while(((((_la - 59)) & ~0x1f) == 0 && ((1 << (_la - 59)) & ((1 << (ABLParser.SEQ - 59)) | (1 << (ABLParser.PAR - 59)) | (1 << (ABLParser.COLL - 59)) | (1 << (ABLParser.JOINT - 59)) | (1 << (ABLParser.ATOMIC - 59)) | (1 << (ABLParser.ADAPTIVE - 59)))) !== 0)) {
+            this.state = 470;
+            this.behaviourDefinition();
+            this.state = 475;
+            this._errHandler.sync(this);
+            _la = this._input.LA(1);
+        }
+        this.state = 476;
+        this.initialTree();
+        this.state = 477;
+        this.match(ABLParser.T__14);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
 	        localctx.exception = re;
@@ -3817,10 +4701,10 @@ ABLParser.NameContext = NameContext;
 ABLParser.prototype.name = function() {
 
     var localctx = new NameContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 84, ABLParser.RULE_name);
+    this.enterRule(localctx, 98, ABLParser.RULE_name);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 380;
+        this.state = 479;
         this.match(ABLParser.CHARS);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -3883,21 +4767,21 @@ ABLParser.NameListContext = NameListContext;
 ABLParser.prototype.nameList = function() {
 
     var localctx = new NameListContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 86, ABLParser.RULE_nameList);
+    this.enterRule(localctx, 100, ABLParser.RULE_nameList);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 382;
+        this.state = 481;
         this.name();
-        this.state = 387;
+        this.state = 486;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ABLParser.T__9) {
-            this.state = 383;
+            this.state = 482;
             this.match(ABLParser.T__9);
-            this.state = 384;
+            this.state = 483;
             this.name();
-            this.state = 389;
+            this.state = 488;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
@@ -3955,10 +4839,10 @@ ABLParser.StringContext = StringContext;
 ABLParser.prototype.string = function() {
 
     var localctx = new StringContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 88, ABLParser.RULE_string);
+    this.enterRule(localctx, 102, ABLParser.RULE_string);
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 390;
+        this.state = 489;
         this.match(ABLParser.STRING);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {

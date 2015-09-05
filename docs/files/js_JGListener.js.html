@@ -45,13 +45,35 @@
                                 <li><a href="../classes/UnitTests.ablLiteralTests.html">UnitTests.ablLiteralTests</a></li>
                                 <li><a href="../classes/UnitTests.ABLVariableDeclarationTests.html">UnitTests.ABLVariableDeclarationTests</a></li>
                                 <li><a href="../classes/UnitTests.actionRegistrationTests.html">UnitTests.actionRegistrationTests</a></li>
+                                <li><a href="../classes/UnitTests.basicStepTests.html">UnitTests.basicStepTests</a></li>
+                                <li><a href="../classes/UnitTests.behavingEntityTests.html">UnitTests.behavingEntityTests</a></li>
+                                <li><a href="../classes/UnitTests.behaviourDefinitionTests.html">UnitTests.behaviourDefinitionTests</a></li>
+                                <li><a href="../classes/UnitTests.behaviourModifierTests.html">UnitTests.behaviourModifierTests</a></li>
+                                <li><a href="../classes/UnitTests.binaryOpTests.html">UnitTests.binaryOpTests</a></li>
+                                <li><a href="../classes/UnitTests.clauseTests.html">UnitTests.clauseTests</a></li>
+                                <li><a href="../classes/UnitTests.conditionalExpressionTests.html">UnitTests.conditionalExpressionTests</a></li>
                                 <li><a href="../classes/UnitTests.conflictDeclarationTests.html">UnitTests.conflictDeclarationTests</a></li>
                                 <li><a href="../classes/UnitTests.constantDeclarationTests.html">UnitTests.constantDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.contextConditionTests.html">UnitTests.contextConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.entryConditionTests.html">UnitTests.entryConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.goalStepTests.html">UnitTests.goalStepTests</a></li>
                                 <li><a href="../classes/UnitTests.importDeclarationTests.html">UnitTests.importDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.javaMethod.html">UnitTests.javaMethod</a></li>
+                                <li><a href="../classes/UnitTests.namedPropertyTests.html">UnitTests.namedPropertyTests</a></li>
+                                <li><a href="../classes/UnitTests.numberNeededforSuccessTests.html">UnitTests.numberNeededforSuccessTests</a></li>
+                                <li><a href="../classes/UnitTests.operatorTests.html">UnitTests.operatorTests</a></li>
                                 <li><a href="../classes/UnitTests.packageImportTests.html">UnitTests.packageImportTests</a></li>
                                 <li><a href="../classes/UnitTests.paramsTests.html">UnitTests.paramsTests</a></li>
+                                <li><a href="../classes/UnitTests.persistenceTests.html">UnitTests.persistenceTests</a></li>
                                 <li><a href="../classes/UnitTests.preconditionTests.html">UnitTests.preconditionTests</a></li>
+                                <li><a href="../classes/UnitTests.primitiveActTests.html">UnitTests.primitiveActTests</a></li>
+                                <li><a href="../classes/UnitTests.priorityModifierTests.html">UnitTests.priorityModifierTests</a></li>
                                 <li><a href="../classes/UnitTests.propertyDeclarationTests.html">UnitTests.propertyDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.specificityTests.html">UnitTests.specificityTests</a></li>
+                                <li><a href="../classes/UnitTests.stepModifierTests.html">UnitTests.stepModifierTests</a></li>
+                                <li><a href="../classes/UnitTests.successConditionTests.html">UnitTests.successConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.successTestTests.html">UnitTests.successTestTests</a></li>
+                                <li><a href="../classes/UnitTests.teamMemberSpecifierTests.html">UnitTests.teamMemberSpecifierTests</a></li>
                                 <li><a href="../classes/UnitTests.teamNeededForSuccessTests.html">UnitTests.teamNeededForSuccessTests</a></li>
                                 <li><a href="../classes/UnitTests.TEMPLATE.html">UnitTests.TEMPLATE</a></li>
                                 <li><a href="../classes/UnitTests.testExpressionTests.html">UnitTests.testExpressionTests</a></li>
@@ -105,10 +127,12 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+
 /**
    @module ABLParser
  */
 var ABLListener = require(&#x27;./ABLListener&#x27;);
+
 
 /**
    The JGListener constructor
@@ -161,26 +185,25 @@ JGListener.prototype.enterG_package = function(ctx){
    @method enterG_import
 */
 JGListener.prototype.enterG_import = function(ctx){
-    //console.log(&quot;import name:&quot;, ctx.name().getText());
-    for(var x in ctx.TYPE()){
-        var importName = ctx.TYPE()[x].getText();
-        var star = false;
-        if(ctx.STAR()){
-            star = true;
-            //remove the dot from the name:
-            if(importName[importName.length-1] === &quot;.&quot;){
-                importName = importName.slice(0,-1);
-            }
-        }
+    var outObj = {
+        type : &#x27;importDeclaration&#x27;,
+        starred : false,
+        name : undefined
+    };
 
-        if(importName !== &#x27;&lt;missing undefined&gt;&#x27;){
-            this.parsedStack.push({
-                name : importName,
-                type : &quot;importDeclaration&quot;,
-                starred : star,
-            });
-        }
+    if(ctx.TYPE() &amp;&amp; ctx.TYPE().getText() !== &quot;&lt;missing undefined&gt;&quot;){
+        outObj.name = ctx.TYPE().getText();
     }
+    
+    if(ctx.STAR()){
+        outObj.starred = true;
+        outObj.name = outObj.name.slice(0,-1);
+    }
+
+    if(outObj.name !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
 };
 
 /**
@@ -225,7 +248,6 @@ JGListener.prototype.enterTeamNeeded = function(ctx){
    @method enterConflictDecl
  */
 JGListener.prototype.enterConflictDecl = function(ctx){
-    console.log(&quot;conflict Dec:&quot;);
     var secondObj = [];
     for(var i = 1; i &lt; ctx.name().length; i++) {
         if(ctx.name(i).getText() != &#x27;&lt;missing undefined&gt;&#x27;){
@@ -259,8 +281,896 @@ JGListener.prototype.enterWmeRegistration = function(ctx){
     }
 };
 
-exports.JGListener = JGListener;
+/**
+   parse individual parameter
+   @method exitParam
+ */
+JGListener.prototype.exitParam = function(ctx){
+    var outObj = {
+        type : &quot;param&quot;,
+        varType : undefined,
+        value : undefined
+    };
+    
+    if(ctx.TYPE()){
+        outObj.varType = ctx.TYPE().getText();
+    }
 
+    if(ctx.ablExpression()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablExpression&quot;){
+        outObj.value = this.parsedStack.pop();
+    }
+
+    
+    if(outObj.varType !== undefined || outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+
+/**
+   Parse parameters
+   @method exitParams
+ */
+JGListener.prototype.exitParams = function(ctx){
+    var outObj = {
+        type :&quot;params&quot;,
+        params: [],
+    };
+
+    //transfer all individual param into the params array
+    while(this.parsedStack.length &gt; 0 &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;param&quot;){
+        outObj.params.unshift(this.parsedStack.pop());
+    };
+
+
+    
+    this.parsedStack.push(outObj);
+};
+
+
+/**
+   Parse an action registration
+   EXIT method to be able to scoop up params
+   @method exitActionRegistration
+ */
+JGListener.prototype.exitActionRegistration = function(ctx){
+    var outObj = {
+        type : &quot;actionRegistration&quot;,
+        name : undefined,
+        target : undefined,
+        params : undefined
+    };
+
+    if(ctx.TYPE(0) &amp;&amp; ctx.TYPE(1)){
+        outObj.name = ctx.TYPE(0).getText();
+        outObj.target = ctx.TYPE(1).getText();
+        outObj.params = this.parsedStack.pop().params;
+        this.parsedStack.push(outObj);
+    }
+};
+
+
+/**
+   Parse a variable declaration
+   @method enterAblVariableDeclaration
+ */
+JGListener.prototype.enterAblVariableDeclaration = function(ctx){
+    for(var i = 0; i &lt; ctx.name().length; i++){
+        var outObj = {
+            type : &quot;ablVariableDeclaration&quot;,
+            name : ctx.name(i).getText(),
+            varType : ctx.TYPE().getText()
+        };
+    
+        this.parsedStack.push(outObj);
+    }
+};
+
+/**
+   Parse, from the exit, a wme Declaration
+   @method exitWMEDeclaration
+ */
+JGListener.prototype.exitWmeDeclaration = function(ctx){
+    var extendedFromName,collectedVariables;
+    collectedVariables = [];
+    while(this.parsedStack[this.parsedStack.length-1]
+          &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablVariableDeclaration&quot;){
+        collectedVariables.push(this.parsedStack.pop());
+    }
+    if(ctx.TYPE(1)){
+        extendedFromName = ctx.TYPE(1).getText();
+    }
+
+    
+    if(ctx.TYPE(0)){
+        this.parsedStack.push({
+            type : &quot;wmeDeclaration&quot;,
+            name : ctx.TYPE(0).getText(),
+            extendedFrom : extendedFromName,
+            variables : collectedVariables
+        });
+    }
+};
+
+
+JGListener.prototype.enterPropertyDeclaration = function(ctx){
+    if(ctx.name() &amp;&amp; ctx.TYPE()){
+        this.parsedStack.push({
+            type : &quot;propertyDeclaration&quot;,
+            name : ctx.name().getText(),
+            varType : ctx.TYPE().getText()
+        });
+    }    
+};
+
+JGListener.prototype.enterAblLiteral = function(ctx){
+    var outObj = {
+        type : &#x27;ablLiteral&#x27;,
+        value : undefined,
+        varType : undefined
+    };
+
+    if(ctx.INT()){
+        outObj.varType = &#x27;int&#x27;;
+        outObj.value = ctx.INT().getText();
+    }else if(ctx.FLOAT()){
+        outObj.varType = &#x27;float&#x27;;
+        outObj.value = ctx.FLOAT().getText();
+    }else if(ctx.string()){
+        outObj.varType = &#x27;string&#x27;;
+        outObj.value = ctx.string().getText();
+    }else if(ctx.BOOL()){
+        outObj.varType = &#x27;bool&#x27;;
+        outObj.value = ctx.BOOL().getText();
+    }else if(ctx.NULL()){
+        outObj.varType = &#x27;null&#x27;;
+        outObj.value = ctx.NULL().getText();
+    }
+
+    if(outObj.value !== undefined &amp;&amp;
+       outObj.varType !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+
+//an EXIT method to take advantage of ablLiteral Parsing
+JGListener.prototype.exitAblExpression = function(ctx){
+    var outObj = {
+        type : &#x27;ablExpression&#x27;,
+        varType : undefined,
+        value : undefined        
+    };
+
+    if(ctx.name()){
+        outObj.value = ctx.name().getText();
+        outObj.varType = &quot;name&quot;;
+        this.parsedStack.push(outObj);
+    }else if(ctx.ablLiteral()
+             &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablLiteral&quot;){
+        outObj.value = this.parsedStack.pop();
+        outObj.varType = &quot;ablLiteral&quot;;
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.enterOperator = function(ctx){
+    var outObj = {
+        type : &quot;operator&quot;,
+        opType : undefined
+    };
+
+    if(ctx.BIND()){
+        outObj.opType = &quot;_bind&quot;;
+    }else if(ctx.GT()){
+        outObj.opType = &quot;greaterThan&quot;;
+    }else if(ctx.GE()){
+        outObj.opType = &quot;greaterEqual&quot;;
+    }else if(ctx.LT()){
+        outObj.opType = &quot;lessThan&quot;;
+    }else if(ctx.LE()){
+        outObj.opType = &quot;lessEqual&quot;;
+    }else if(ctx.EQ()){
+        outObj.opType = &quot;equal&quot;;
+    }else if(ctx.NE()){
+        outObj.opType = &quot;notEqual&quot;;
+    }
+
+    if(outObj.opType !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitWmeFieldTest = function(ctx){
+    var outObj = {
+        type : &quot;wmeFieldTest&quot;,
+        name : undefined,
+        operator : undefined,
+        expression : undefined
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.ablExpression() &amp;&amp;
+       this.parsedStack[this.parsedStack.length-1].type === &quot;ablExpression&quot;){
+        outObj.expression = this.parsedStack.pop();
+    }
+
+    if(ctx.operator() &amp;&amp;
+       this.parsedStack[this.parsedStack.length-1].type === &quot;operator&quot;){
+        outObj.operator = this.parsedStack.pop();
+    }
+
+    if(ctx.name() &amp;&amp; ctx.operator() &amp;&amp; ctx.ablExpression()){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+//As usual: exit to use pre-parsed sections
+JGListener.prototype.exitWmeTest = function(ctx){
+    var outObj = {
+        type : &quot;wmeTest&quot;,
+        bang : false,
+        name : undefined,
+        wmeType : undefined,
+        fieldTests : []
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.TYPE()){
+        outObj.wmeType = ctx.TYPE().getText();
+    }
+    
+    if(ctx.BANG()){
+        outObj.bang = true;
+    }
+
+    if(ctx.wmeFieldTest()){
+        while(this.parsedStack[this.parsedStack.length-1]
+              &amp;&amp; this.parsedStack[this.parsedStack.length-1].type == &quot;wmeFieldTest&quot;){
+            outObj.fieldTests.push(this.parsedStack.pop());
+        }
+    }
+    
+    if(outObj.wmeType !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+//Binary Op:
+JGListener.prototype.exitBinaryOp = function(ctx){
+    var outObj = {
+        type : &quot;binaryOp&quot;,
+        bang : false,
+        expressions : [],
+        operator : undefined
+    };
+
+    if(ctx.BANG()){
+        outObj.bang = true;
+    }
+
+    if(ctx.operator() &amp;&amp; ctx.ablExpression().length === 2
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablExpression&quot;
+       &amp;&amp; this.parsedStack[this.parsedStack.length-2].type === &quot;operator&quot;){
+        outObj.expressions[1] = this.parsedStack.pop();
+        outObj.operator = this.parsedStack.pop();
+    }
+
+    if(ctx.ablExpression(0)
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1]){
+        outObj.expressions[0] = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitJavaMethod = function(ctx){
+    var outObj = {
+        type : &quot;javaMethod&quot;,
+        bang : false,
+        name : undefined,
+        params : undefined,
+    };
+
+    if(ctx.BANG()){
+        outObj.bang = true;
+    }
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.params() &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;params&quot;){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(outObj.name &amp;&amp; outObj.params){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitClause = function(ctx){
+    var outObj = {
+        type : &#x27;clause&#x27;,
+        child : undefined
+    };
+
+    if(ctx.BOOL()){
+        if(ctx.BOOL().getText() === &quot;True&quot;){
+            outObj.child = true;
+        }else{
+            outObj.child = false;
+        }
+    }else if(ctx.name()){
+        outObj.child = ctx.name().getText();
+    }else if(ctx.javaMethod()
+             &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;javaMethod&quot;){
+        outObj.child = this.parsedStack.pop();
+    }else if(ctx.binaryOp()
+             &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;binaryOp&quot;){
+        outObj.child = this.parsedStack.pop();
+    }    
+
+    if(outObj.child !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+JGListener.prototype.enterBooleanHelper = function(ctx){
+    var outObj = {
+        type : &quot;booleanHelper&quot;,
+        value : undefined
+    };
+
+    if(ctx.AND()){
+        outObj.value = &quot;and&quot;;
+        this.parsedStack.push(outObj);
+    }else{
+        outObj.value = &quot;or&quot;;
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitMixedCall = function(ctx){
+    var outObj = {
+        type : &quot;mixedCall&quot;,
+        clauses : [],
+    };
+
+    while(this.parsedStack.length &gt; 1 &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;clause&quot; &amp;&amp; this.parsedStack[this.parsedStack.length-2].type === &quot;booleanHelper&quot;){
+        var clause = this.parsedStack.pop();
+        var op = this.parsedStack.pop();
+        outObj.clauses.unshift([clause,op.value]);
+    }
+
+    if(this.parsedStack.length &gt;= 1 &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;clause&quot;){
+        outObj.clauses.unshift([this.parsedStack.pop(),&quot;default&quot;]);
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitConditionalExpression = function(ctx){
+    if(this.parsedStack.length &gt; 0 &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;mixedCall&quot;){
+        this.parsedStack[this.parsedStack.length-1].type = &quot;conditionalExpression&quot;;
+    }
+};
+
+JGListener.prototype.exitWmeTestSequence = function(ctx){
+    var outObj = {
+        type : &quot;wmeTestSequence&quot;,
+        clauses : []
+    };
+
+    while(this.parsedStack.length &gt; 0
+          &amp;&amp; (this.parsedStack[this.parsedStack.length-1].type === &quot;wmeTest&quot; || this.parsedStack[this.parsedStack.length-1].type === &quot;conditionalExpression&quot;)){
+        outObj.clauses.unshift(this.parsedStack.pop());
+    }
+    
+    if(outObj.clauses.length &gt; 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitTestExpression = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;wmeTestSequence&quot;){
+        this.parsedStack[this.parsedStack.length-1].type = &quot;testExpression&quot;;
+    }
+
+};
+
+JGListener.prototype.exitPrecondition = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;precondition&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitContextCondition = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;contextCondition&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitEntryCondition = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;entryCondition&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitSuccessCondition = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;successCondition&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitStateCondition = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;stateCondition&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+
+JGListener.prototype.exitSuccessTest = function(ctx){
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;testExpression&quot;){
+        this.parsedStack.push({
+            type : &quot;successTest&quot;,
+            testExpression : this.parsedStack.pop()
+        });
+    }
+};
+
+JGListener.prototype.exitNumberNeededForSuccess = function(ctx){
+    if(ctx.ablLiteral()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablLiteral&quot;){
+        this.parsedStack.push({
+            type : &quot;numberNeededForSuccess&quot;,
+            value : this.parsedStack.pop()
+        });
+    }    
+};
+
+JGListener.prototype.exitTeamMemberSpecifier = function(ctx){
+    var outObj = {
+        type : &quot;teamMemberSpecifier&quot;,
+        names : []
+    };
+
+    for(var i = 0; i &lt; ctx.name().length; i++){
+        outObj.names.push(ctx.name(i).getText());
+    }
+
+    if(outObj.names.length &gt; 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitPriorityModifier = function(ctx){
+    var outObj = {
+        type : &quot;priorityModifier&quot;,
+        value : undefined
+    };
+
+    if(ctx.ablLiteral()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablLiteral&quot;){
+        outObj.value = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitPersistence = function(ctx){
+    var outObj = {
+        type : &quot;persistence&quot;,
+        value : undefined
+    };
+
+    if(ctx.WHEN_FAILS()){
+        outObj.value = &quot;whenFails&quot;;
+    }else if(ctx.WHEN_SUCCEEDS()){
+        outObj.value = &quot;whenSucceeds&quot;;
+    }
+
+    this.parsedStack.push(outObj);
+};
+
+
+JGListener.prototype.exitNamedProperty = function(ctx){
+    var outObj = {
+        type : &quot;namedProperty&quot;,
+        name : undefined,
+        value : undefined
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.ablExpression()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablExpression&quot;){
+        outObj.value = this.parsedStack.pop();
+    }
+
+    if(outObj.name !== undefined
+       &amp;&amp; outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitStepModifier = function(ctx){
+    var outObj = {
+        type : &#x27;stepModifier&#x27;,
+        modType : undefined,
+        modValue : undefined
+    };
+
+    var prevValue;
+    if(this.parsedStack.length &gt; 0){
+        prevValue = this.parsedStack[this.parsedStack.length-1];
+    }
+
+    if(ctx.IGNORE_FAILURE()){
+        outObj.modType = &quot;ignoreFailure&quot;;
+        outObj.modValue = 0;
+    }else if(ctx.EFFECT_ONLY()){
+        outObj.modType = &quot;effectOnly&quot;;
+        outObj.modValue = 0;
+    }else if(ctx.TEAM_EFFECT_ONLY()){
+        outObj.modType = &quot;teamEffectOnly&quot;;
+        outObj.modValue = 0;        
+    }else if(ctx.POST()){
+        outObj.modType = &quot;post&quot;;
+        outObj.modValue = 0;
+    }else if(ctx.POST_TO() &amp;&amp; ctx.name()){
+        outObj.modType = &quot;postTo&quot;;
+        outObj.modValue = ctx.name().getText();
+    }else if(ctx.TEAMNEEDED()){
+        outObj.modType = &quot;teamNeeded&quot;;
+        outObj.modValue = 0;
+    }else if(ctx.ONENEEDED()){
+        outObj.modType = &quot;oneNeeded&quot;;
+        outObj.modValue = 0;
+    }else if(ctx.priorityModifier()){
+        if(prevValue &amp;&amp; prevValue.type === &quot;priorityModifier&quot;){
+            this.parsedStack.pop();
+            outObj.modType = &quot;priorityModifier&quot;;
+            outObj.modValue = prevValue;
+        }
+    }else if(ctx.persistence()){
+        if(prevValue &amp;&amp; prevValue.type === &quot;persistence&quot;){
+            this.parsedStack.pop();
+            outObj.modType = &quot;persistence&quot;;
+            outObj.modValue = prevValue;
+        }
+    }else if(ctx.namedProperty()){
+        if(prevValue &amp;&amp; prevValue.type === &quot;namedProperty&quot;){
+            this.parsedStack.pop();
+            outObj.modType = &quot;namedProperty&quot;;
+            outObj.modValue = prevValue;
+        }           
+    }else if(ctx.successTest()){
+        if(prevValue &amp;&amp; prevValue.type === &quot;successTest&quot;){
+            this.parsedStack.pop();
+            outObj.modType = &quot;successTest&quot;;
+            outObj.modValue = prevValue;
+        }
+    }
+
+    
+    if(outObj.modType !== undefined
+       &amp;&amp; outObj.modValue !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+JGListener.prototype.enterBasicStep = function(ctx){
+    var outObj = {
+        type : &quot;basicStep&quot;,
+        value : undefined
+    };
+
+    if(ctx.FAIL()){
+        outObj.value = &quot;fail&quot;;
+    }else if(ctx.SUCCEED()){
+        outObj.value = &quot;succeed&quot;;
+    }else if(ctx.WAIT()){
+        outObj.value = &quot;wait&quot;;
+    }
+
+    if(outObj.value !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitPrimitiveAct = function(ctx){
+    var outObj = {
+        type : &quot;primitiveAct&quot;,
+        name : undefined,
+        params : undefined
+    };
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.params()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;params&quot;){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(outObj.name !== undefined
+       &amp;&amp; outObj.params !== undefined){
+        this.parsedStack.push(outObj);
+    }
+};
+
+
+JGListener.prototype.exitGoalStep = function(ctx){
+    var outObj = {
+        type : &#x27;goalStep&#x27;,
+        joint : false,
+        goalType : undefined,
+        at : undefined,
+        goalName : undefined,
+        params : undefined
+    };
+
+    if(ctx.JOINT()){
+        outObj.joint = true;
+    }
+
+    if(ctx.SUBGOAL()){
+        outObj.goalType = &quot;sub&quot;;
+    }else if(ctx.SPAWNGOAL()){
+        outObj.goalType = &quot;spawn&quot;;
+    }
+
+    if(ctx.name(0)){
+        outObj.goalName = ctx.name(0).getText();
+    }
+
+    if(ctx.name(1)){
+        outObj.at = ctx.name(1).getText();
+    }
+
+    if(this.parsedStack[this.parsedStack.length-1].type === &quot;params&quot;){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(outObj.goalName !== undefined
+       &amp;&amp; outObj.goalType !== undefined){
+        this.parsedStack.push(outObj);
+    }
+    
+};
+
+JGListener.prototype.exitBehaviourStep = function(ctx){
+    var outObj = {
+        type : &quot;behaviourStep&quot;,
+        modifiers : [],
+        step : undefined
+    };
+
+    var prev = this.parsedStack[this.parsedStack.length-1];
+    
+    if(this.parsedStack.length &gt; 0 &amp;&amp; prev &amp;&amp; (prev.type === &quot;basicStep&quot;
+                                       || prev.type === &quot;goalStep&quot;
+                                      || prev.type === &quot;primitiveAct&quot;)){
+        outObj.step = this.parsedStack.pop();
+    }
+
+    while(this.parsedStack.length &gt; 0
+          &amp;&amp; this.parsedStack[this.parsedStack.length-1].type == &quot;stepModifier&quot;){
+        outObj.modifiers.unshift(this.parsedStack.pop());
+    }
+
+    this.parsedStack.push(outObj);
+    
+};
+
+JGListener.prototype.exitSpecificity = function(ctx){
+    var outObj = {
+        type : &quot;specificity&quot;,
+        value : undefined
+    };
+
+    if(ctx.ablLiteral()
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;ablLiteral&quot;){
+        outObj.value = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    }
+
+};
+
+
+
+JGListener.prototype.exitBehaviourModifier = function(ctx){
+    var prev = this.parsedStack[this.parsedStack.length-1];
+
+    if([&quot;precondition&quot;,&quot;specificity&quot;,&quot;contextCondition&quot;,&quot;entryCondition&quot;,&quot;numberNeededForSuccess&quot;,&quot;teamMemberSpecifier&quot;,&quot;successCondition&quot;].indexOf(prev.type) &gt; -1){
+        this.parsedStack.push({
+            type : &quot;behaviourModifier&quot;,
+            value : this.parsedStack.pop()
+        });
+    }        
+};
+
+
+JGListener.prototype.exitBehaviourDefinition = function(ctx){
+    var outObj = {
+        type : &#x27;behaviourDefinition&#x27;,
+        name : undefined,
+        behType : undefined,
+        joint : false,
+        atomic : false,
+        adaptive : false,
+        params : [],
+        modifiers : [],
+        variables : [],
+    };
+
+    while(this.parsedStack.length &gt; 0 &amp;&amp; (this.parsedStack[this.parsedStack.length-1].type === &quot;behaviourModifier&quot; || this.parsedStack[this.parsedStack.length-1].type === &quot;ablVariableDeclaration&quot; || this.parsedStack[this.parsedStack.length-1].type === &quot;behaviourStep&quot; )){
+        var prev = this.parsedStack.pop();
+        if(prev.type === &quot;behaviourModifier&quot;){
+            outObj.modifiers.unshift(prev);
+        }else{
+            outObj.variables.unshift(prev);
+        }
+    }
+
+    if(this.parsedStack.length &gt; 0 &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;params&quot;){
+        outObj.params = this.parsedStack.pop().params;
+    }
+
+    if(ctx.name()){
+        outObj.name = ctx.name().getText();
+    }
+
+    if(ctx.SEQ()){
+        outObj.behType = &quot;sequential&quot;;
+    }else if(ctx.PAR()){
+        outObj.behType = &quot;parallel&quot;;
+    }else if(ctx.COLL()){
+        outObj.behType = &quot;collection&quot;;
+    }
+
+    
+    if(ctx.JOINT().length &gt; 0){
+        outObj.joint = true;
+    }
+    if(ctx.ATOMIC().length &gt; 0){
+        outObj.atomic = true;
+    }
+    if(ctx.ADAPTIVE().length &gt; 0){
+        outObj.adaptive = true;
+    }
+    
+
+    if(outObj.name !== undefined){
+        this.parsedStack.push(outObj);
+    }    
+};
+
+JGListener.prototype.exitInitialTree = function(ctx){
+    var outObj = {
+        type : &quot;initialTree&quot;,
+        steps : []
+    };
+
+    while(this.parsedStack.length &gt; 0
+          &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;behaviourStep&quot;){
+        outObj.steps.push(this.parsedStack.pop());
+    }
+
+    if(outObj.steps.length &gt; 0){
+        this.parsedStack.push(outObj);
+    }
+};
+
+JGListener.prototype.exitDecisionCycleSMCallDeclaration = function(ctx){
+    if(ctx.name()){
+        this.parsedStack.push({
+            type : &quot;decisionCycleSMCall&quot;,
+            name : ctx.name().getText()
+        });
+    }
+};
+
+JGListener.prototype.exitAblDeclaration = function(ctx){
+    var outObj = {
+        type : &#x27;ablDeclaration&#x27;,
+        declare : undefined
+    };
+
+    if(this.parsedStack.length === 0) return;
+    
+    var prev = this.parsedStack[this.parsedStack.length-1];
+
+    if(prev.type === &quot;wmeRegistration&quot;
+       || prev.type === &quot;actionRegistration&quot;
+       || prev.type === &quot;wmeDeclaration&quot;
+       || prev.type === &quot;propertyDeclaration&quot;
+       || prev.type === &quot;ablVariableDeclaration&quot;){
+        outObj.declare = this.parsedStack.pop();
+        this.parsedStack.push(outObj);
+    };
+};
+
+JGListener.prototype.exitBehavingEntity = function(ctx){
+    var outObj = {
+        type : &quot;behavingEntity&quot;,
+        teamNeeded : undefined,
+        decisionCycle : undefined,
+        conflicts : [],
+        declarations : [],
+        behaviours : [],
+        intitialTree : undefined
+    };
+
+    if(this.parsedStack.length &gt; 0
+       &amp;&amp; this.parsedStack[this.parsedStack.length-1].type === &quot;initialTree&quot;){
+        outObj.initialTree = this.parsedStack.pop();
+    }
+
+    while(this.parsedStack.length &gt; 0){
+        var current = this.parsedStack.pop();
+        if(current.type === &quot;initialTree&quot;){
+            outObj.initialTree = current;
+        }else if(current.type === &quot;behaviourDefinition&quot;){
+            outObj.behaviours.unshift(current);
+        }else if(current.type === &quot;ablDeclaration&quot;){
+            outObj.declarations.unshift(current);
+        }else if(current.type === &quot;conflictDecl&quot;){
+            outObj.conflicts.unshift(current);
+        }else if(current.type === &quot;decisionCycleSMCallDeclaration&quot;){
+            outObj.decisionCycle = current;
+        }else if(current.type === &quot;teamNeeded&quot;){
+            outObj.teamNeeded = current;
+        }else{
+            console.warn(&quot;Did not recognise:&quot;,current);
+        }
+    };
+    
+    this.parsedStack.push(outObj);
+    
+};
+
+
+exports.JGListener = JGListener;
 
     </pre>
 </div>

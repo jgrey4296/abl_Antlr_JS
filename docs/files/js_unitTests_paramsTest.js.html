@@ -45,13 +45,35 @@
                                 <li><a href="../classes/UnitTests.ablLiteralTests.html">UnitTests.ablLiteralTests</a></li>
                                 <li><a href="../classes/UnitTests.ABLVariableDeclarationTests.html">UnitTests.ABLVariableDeclarationTests</a></li>
                                 <li><a href="../classes/UnitTests.actionRegistrationTests.html">UnitTests.actionRegistrationTests</a></li>
+                                <li><a href="../classes/UnitTests.basicStepTests.html">UnitTests.basicStepTests</a></li>
+                                <li><a href="../classes/UnitTests.behavingEntityTests.html">UnitTests.behavingEntityTests</a></li>
+                                <li><a href="../classes/UnitTests.behaviourDefinitionTests.html">UnitTests.behaviourDefinitionTests</a></li>
+                                <li><a href="../classes/UnitTests.behaviourModifierTests.html">UnitTests.behaviourModifierTests</a></li>
+                                <li><a href="../classes/UnitTests.binaryOpTests.html">UnitTests.binaryOpTests</a></li>
+                                <li><a href="../classes/UnitTests.clauseTests.html">UnitTests.clauseTests</a></li>
+                                <li><a href="../classes/UnitTests.conditionalExpressionTests.html">UnitTests.conditionalExpressionTests</a></li>
                                 <li><a href="../classes/UnitTests.conflictDeclarationTests.html">UnitTests.conflictDeclarationTests</a></li>
                                 <li><a href="../classes/UnitTests.constantDeclarationTests.html">UnitTests.constantDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.contextConditionTests.html">UnitTests.contextConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.entryConditionTests.html">UnitTests.entryConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.goalStepTests.html">UnitTests.goalStepTests</a></li>
                                 <li><a href="../classes/UnitTests.importDeclarationTests.html">UnitTests.importDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.javaMethod.html">UnitTests.javaMethod</a></li>
+                                <li><a href="../classes/UnitTests.namedPropertyTests.html">UnitTests.namedPropertyTests</a></li>
+                                <li><a href="../classes/UnitTests.numberNeededforSuccessTests.html">UnitTests.numberNeededforSuccessTests</a></li>
+                                <li><a href="../classes/UnitTests.operatorTests.html">UnitTests.operatorTests</a></li>
                                 <li><a href="../classes/UnitTests.packageImportTests.html">UnitTests.packageImportTests</a></li>
                                 <li><a href="../classes/UnitTests.paramsTests.html">UnitTests.paramsTests</a></li>
+                                <li><a href="../classes/UnitTests.persistenceTests.html">UnitTests.persistenceTests</a></li>
                                 <li><a href="../classes/UnitTests.preconditionTests.html">UnitTests.preconditionTests</a></li>
+                                <li><a href="../classes/UnitTests.primitiveActTests.html">UnitTests.primitiveActTests</a></li>
+                                <li><a href="../classes/UnitTests.priorityModifierTests.html">UnitTests.priorityModifierTests</a></li>
                                 <li><a href="../classes/UnitTests.propertyDeclarationTests.html">UnitTests.propertyDeclarationTests</a></li>
+                                <li><a href="../classes/UnitTests.specificityTests.html">UnitTests.specificityTests</a></li>
+                                <li><a href="../classes/UnitTests.stepModifierTests.html">UnitTests.stepModifierTests</a></li>
+                                <li><a href="../classes/UnitTests.successConditionTests.html">UnitTests.successConditionTests</a></li>
+                                <li><a href="../classes/UnitTests.successTestTests.html">UnitTests.successTestTests</a></li>
+                                <li><a href="../classes/UnitTests.teamMemberSpecifierTests.html">UnitTests.teamMemberSpecifierTests</a></li>
                                 <li><a href="../classes/UnitTests.teamNeededForSuccessTests.html">UnitTests.teamNeededForSuccessTests</a></li>
                                 <li><a href="../classes/UnitTests.TEMPLATE.html">UnitTests.TEMPLATE</a></li>
                                 <li><a href="../classes/UnitTests.testExpressionTests.html">UnitTests.testExpressionTests</a></li>
@@ -128,8 +150,10 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === &quot;params&quot;);
-        test.ok(result[0].names.length === 1);
-        test.ok(result[0].names[0] === &quot;Test&quot;);
+        test.ok(result[0].params.length === 1);
+        test.ok(result[0].params[0].type === &quot;param&quot;);
+        test.ok(result[0].params[0].varType === &quot;Test&quot;);
+        test.ok(result[0].params[0].value === undefined);
         
         test.done();
     },
@@ -145,10 +169,16 @@ exports.paramsTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === &quot;params&quot;);
-        test.ok(result[0].names.length === 3);
-        test.ok(result[0].names[0] === &quot;Test&quot;);
-        test.ok(result[0].names[1] === &quot;Blah&quot;);
-        test.ok(result[0].names[2] === &quot;Bloo&quot;);        
+        test.ok(result[0].params.length === 3);
+        test.ok(result[0].params[0].type === &quot;param&quot;);
+        test.ok(result[0].params[0].varType === &quot;Test&quot;);
+        test.ok(result[0].params[0].value === undefined);
+        test.ok(result[0].params[1].type === &quot;param&quot;);
+        test.ok(result[0].params[1].varType === &quot;Blah&quot;);
+        test.ok(result[0].params[1].value === undefined);
+        test.ok(result[0].params[2].type === &quot;param&quot;);
+        test.ok(result[0].params[2].varType === &quot;Bloo&quot;);
+        test.ok(result[0].params[2].value === undefined);
         test.done();
     },
 
@@ -161,12 +191,76 @@ exports.paramsTests = {
         var startRule = &quot;params&quot;;
         var result = ABLModule.parse(parseString,startRule);
 
-        test.ok(result.length === 0);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === &quot;params&quot;);
+        test.ok(result[0].params.length === 0);
         test.done();
     },
-    
-    
 
+    /**
+       check that both types and names are a recognised
+       @method paramsOfTYPEandName
+     */
+    paramsOfTYPEandName : function(test){
+        var parseString = &quot;( String blah)&quot;;
+        var startRule = &quot;params&quot;;
+        var result = ABLModule.parse(parseString,startRule);
+        
+        test.ok(result.length === 1);
+        test.ok(result[0].type === &quot;params&quot;);
+        test.ok(result[0].params.length === 1);
+        test.ok(result[0].params[0].type === &quot;param&quot;);
+        test.ok(result[0].params[0].varType === &quot;String&quot;);
+        test.ok(result[0].params[0].value.type === &quot;ablExpression&quot;);
+        test.ok(result[0].params[0].value.varType === &quot;name&quot;);
+        test.ok(result[0].params[0].value.value === &quot;blah&quot;);
+        
+        test.done();
+    },
+
+
+    /**
+       check that multiples of types and names are recognised
+       @method paramsOfTYPEandNameMULTIPLE
+     */
+    paramsOfTYPEandNameMULTIPLE : function(test){
+        var parseString = &quot;( String blah, Something else, One more)&quot;;
+        var startRule = &quot;params&quot;;
+        var result = ABLModule.parse(parseString,startRule);
+        
+        test.ok(result.length === 1);
+        test.ok(result[0].type === &quot;params&quot;);
+
+        test.ok(result[0].params.length === 3);
+        
+        test.ok(result[0].params[0].type === &quot;param&quot;);
+        test.ok(result[0].params[0].varType === &quot;String&quot;);
+        test.ok(result[0].params[0].value.type === &quot;ablExpression&quot;);
+        test.ok(result[0].params[0].value.varType === &quot;name&quot;);
+        test.ok(result[0].params[0].value.value === &quot;blah&quot;);
+
+
+        test.ok(result[0].params[1].type === &quot;param&quot;);
+        test.ok(result[0].params[1].varType === &quot;Something&quot;);
+        test.ok(result[0].params[1].value.type === &quot;ablExpression&quot;);
+        test.ok(result[0].params[1].value.varType === &quot;name&quot;);
+        test.ok(result[0].params[1].value.value === &quot;else&quot;);
+
+        
+        test.ok(result[0].params[2].type === &quot;param&quot;);
+        test.ok(result[0].params[2].varType === &quot;One&quot;);
+        test.ok(result[0].params[2].value.type === &quot;ablExpression&quot;);
+        test.ok(result[0].params[2].value.varType === &quot;name&quot;);
+        test.ok(result[0].params[2].value.value === &quot;more&quot;);
+
+        
+        test.done();
+    },
+
+    //add in tests where there isnt a type
+
+    //TODO: TEST expressions / literals
+    
 };
 
     </pre>

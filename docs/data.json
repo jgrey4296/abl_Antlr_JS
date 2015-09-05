@@ -91,9 +91,7 @@
         },
         "js/unitTests/WMETestTest.js": {
             "name": "js/unitTests/WMETestTest.js",
-            "modules": {
-                "UnitTests": 1
-            },
+            "modules": {},
             "classes": {
                 "UnitTests.wmeTestTest": 1
             },
@@ -109,12 +107,83 @@
             "fors": {},
             "namespaces": {}
         },
+        "js/unitTests/ablDeclarationTests.js": {
+            "name": "js/unitTests/ablDeclarationTests.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
         "js/unitTests/actionRegistrationTests.js": {
             "name": "js/unitTests/actionRegistrationTests.js",
             "modules": {},
             "classes": {
                 "UnitTests.actionRegistrationTests": 1
             },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/basicStepTests.js": {
+            "name": "js/unitTests/basicStepTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.basicStepTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/behavingEntityTests.js": {
+            "name": "js/unitTests/behavingEntityTests.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/behaviourDefinitionTests.js": {
+            "name": "js/unitTests/behaviourDefinitionTests.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/behaviourModifierTests.js": {
+            "name": "js/unitTests/behaviourModifierTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.behaviourModifierTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/behaviourStepTests.js": {
+            "name": "js/unitTests/behaviourStepTests.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/binaryOpTests.js": {
+            "name": "js/unitTests/binaryOpTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.binaryOpTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/clauseTests.js": {
+            "name": "js/unitTests/clauseTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.clauseTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/conditionalExpressionTests.js": {
+            "name": "js/unitTests/conditionalExpressionTests.js",
+            "modules": {},
+            "classes": {},
             "fors": {},
             "namespaces": {}
         },
@@ -136,11 +205,101 @@
             "fors": {},
             "namespaces": {}
         },
+        "js/unitTests/contextConditionTests.js": {
+            "name": "js/unitTests/contextConditionTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.contextConditionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/decisionCycleTests.js": {
+            "name": "js/unitTests/decisionCycleTests.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/entryConditionTests.js": {
+            "name": "js/unitTests/entryConditionTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.entryConditionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/goalStepTests.js": {
+            "name": "js/unitTests/goalStepTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.goalStepTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "js/unitTests/importDeclarationTests.js": {
             "name": "js/unitTests/importDeclarationTests.js",
             "modules": {},
             "classes": {
                 "UnitTests.importDeclarationTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/initialTreeTests.js": {
+            "name": "js/unitTests/initialTreeTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.behaviourDefinitionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/javaMethodTests.js": {
+            "name": "js/unitTests/javaMethodTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.javaMethod": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/mixedCallTests.js": {
+            "name": "js/unitTests/mixedCallTests.js",
+            "modules": {
+                "UnitTests": 1
+            },
+            "classes": {
+                "UnitTests.conditionalExpressionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/namedPropertyTests.js": {
+            "name": "js/unitTests/namedPropertyTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.namedPropertyTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/numberNeededForSuccessTests.js": {
+            "name": "js/unitTests/numberNeededForSuccessTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.numberNeededforSuccessTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/operatorTests.js": {
+            "name": "js/unitTests/operatorTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.operatorTests": 1
             },
             "fors": {},
             "namespaces": {}
@@ -154,6 +313,13 @@
             "fors": {},
             "namespaces": {}
         },
+        "js/unitTests/paramTest.js": {
+            "name": "js/unitTests/paramTest.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
         "js/unitTests/paramsTest.js": {
             "name": "js/unitTests/paramsTest.js",
             "modules": {},
@@ -163,11 +329,92 @@
             "fors": {},
             "namespaces": {}
         },
+        "js/unitTests/persistenceTests.js": {
+            "name": "js/unitTests/persistenceTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.persistenceTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "js/unitTests/preconditionTests.js": {
             "name": "js/unitTests/preconditionTests.js",
             "modules": {},
             "classes": {
                 "UnitTests.preconditionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/primitiveActTests.js": {
+            "name": "js/unitTests/primitiveActTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.primitiveActTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/priorityModifierTests.js": {
+            "name": "js/unitTests/priorityModifierTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.priorityModifierTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/progTests.js": {
+            "name": "js/unitTests/progTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.behavingEntityTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/specificityTests.js": {
+            "name": "js/unitTests/specificityTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.specificityTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/stepModifierTests.js": {
+            "name": "js/unitTests/stepModifierTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.stepModifierTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/successConditionTests.js": {
+            "name": "js/unitTests/successConditionTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.successConditionTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/successTestTests.js": {
+            "name": "js/unitTests/successTestTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.successTestTests": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "js/unitTests/teamMemberSpecifierTests.js": {
+            "name": "js/unitTests/teamMemberSpecifierTests.js",
+            "modules": {},
+            "classes": {
+                "UnitTests.teamMemberSpecifierTests": 1
             },
             "fors": {},
             "namespaces": {}
@@ -238,13 +485,31 @@
                 "UnitTests.teamNeededForSuccessTests": 1,
                 "UnitTests.wmeDeclarationTests": 1,
                 "UnitTests.wmeFieldTestTests": 1,
+                "UnitTests.behavingEntityTests": 1,
                 "UnitTests.actionRegistrationTests": 1,
+                "UnitTests.basicStepTests": 1,
+                "UnitTests.behaviourDefinitionTests": 1,
+                "UnitTests.behaviourModifierTests": 1,
+                "UnitTests.goalStepTests": 1,
                 "UnitTests.conflictDeclarationTests": 1,
                 "UnitTests.constantDeclarationTests": 1,
+                "UnitTests.contextConditionTests": 1,
+                "UnitTests.entryConditionTests": 1,
                 "UnitTests.importDeclarationTests": 1,
+                "UnitTests.namedPropertyTests": 1,
+                "UnitTests.numberNeededforSuccessTests": 1,
+                "UnitTests.operatorTests": 1,
                 "UnitTests.packageImportTests": 1,
                 "UnitTests.paramsTests": 1,
+                "UnitTests.persistenceTests": 1,
                 "UnitTests.preconditionTests": 1,
+                "UnitTests.primitiveActTests": 1,
+                "UnitTests.priorityModifierTests": 1,
+                "UnitTests.specificityTests": 1,
+                "UnitTests.stepModifierTests": 1,
+                "UnitTests.successConditionTests": 1,
+                "UnitTests.successTestTests": 1,
+                "UnitTests.teamMemberSpecifierTests": 1,
                 "UnitTests.throwErrorTests": 1,
                 "UnitTests.wmeTestSequenceTests": 1,
                 "Parser": 1,
@@ -272,13 +537,35 @@
                 "UnitTests.WMERegistrationTests": 1,
                 "UnitTests.wmeTestTest": 1,
                 "UnitTests.wmeFieldTestTests": 1,
+                "UnitTests.behavingEntityTests": 1,
                 "UnitTests.actionRegistrationTests": 1,
+                "UnitTests.basicStepTests": 1,
+                "UnitTests.behaviourDefinitionTests": 1,
+                "UnitTests.behaviourModifierTests": 1,
+                "UnitTests.goalStepTests": 1,
+                "UnitTests.binaryOpTests": 1,
+                "UnitTests.clauseTests": 1,
+                "UnitTests.conditionalExpressionTests": 1,
                 "UnitTests.conflictDeclarationTests": 1,
                 "UnitTests.constantDeclarationTests": 1,
+                "UnitTests.contextConditionTests": 1,
+                "UnitTests.entryConditionTests": 1,
                 "UnitTests.importDeclarationTests": 1,
+                "UnitTests.javaMethod": 1,
+                "UnitTests.namedPropertyTests": 1,
+                "UnitTests.numberNeededforSuccessTests": 1,
+                "UnitTests.operatorTests": 1,
                 "UnitTests.packageImportTests": 1,
                 "UnitTests.paramsTests": 1,
+                "UnitTests.persistenceTests": 1,
                 "UnitTests.preconditionTests": 1,
+                "UnitTests.primitiveActTests": 1,
+                "UnitTests.priorityModifierTests": 1,
+                "UnitTests.specificityTests": 1,
+                "UnitTests.stepModifierTests": 1,
+                "UnitTests.successConditionTests": 1,
+                "UnitTests.successTestTests": 1,
+                "UnitTests.teamMemberSpecifierTests": 1,
                 "UnitTests.throwErrorTests": 1,
                 "UnitTests.wmeTestSequenceTests": 1
             },
@@ -462,7 +749,7 @@
             "module": "UnitTests",
             "namespace": "",
             "file": "js/unitTests/WMETestTest.js",
-            "line": 7,
+            "line": 13,
             "description": "Checks WMETests"
         },
         "UnitTests.wmeFieldTestTests": {
@@ -480,6 +767,21 @@
             "line": 7,
             "description": "Tests the grammar construct of wmeFieldTest"
         },
+        "UnitTests.behavingEntityTests": {
+            "name": "UnitTests.behavingEntityTests",
+            "shortname": "UnitTests.behavingEntityTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/progTests.js",
+            "line": 8,
+            "description": "behaving entity parsing tests"
+        },
         "UnitTests.actionRegistrationTests": {
             "name": "UnitTests.actionRegistrationTests",
             "shortname": "UnitTests.actionRegistrationTests",
@@ -494,6 +796,107 @@
             "file": "js/unitTests/actionRegistrationTests.js",
             "line": 7,
             "description": "Tests actionRegistrations"
+        },
+        "UnitTests.basicStepTests": {
+            "name": "UnitTests.basicStepTests",
+            "shortname": "UnitTests.basicStepTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/basicStepTests.js",
+            "line": 8,
+            "description": "Test Basic Steps like succeeding, failing, and waiting"
+        },
+        "UnitTests.behaviourDefinitionTests": {
+            "name": "UnitTests.behaviourDefinitionTests",
+            "shortname": "UnitTests.behaviourDefinitionTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/initialTreeTests.js",
+            "line": 8,
+            "description": "Test Behaviour Definition parsing. The Big one."
+        },
+        "UnitTests.behaviourModifierTests": {
+            "name": "UnitTests.behaviourModifierTests",
+            "shortname": "UnitTests.behaviourModifierTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/behaviourModifierTests.js",
+            "line": 8,
+            "description": "behaviourModifierTests"
+        },
+        "UnitTests.goalStepTests": {
+            "name": "UnitTests.goalStepTests",
+            "shortname": "UnitTests.goalStepTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/goalStepTests.js",
+            "line": 8,
+            "description": "//Test goalStep parsing"
+        },
+        "UnitTests.binaryOpTests": {
+            "name": "UnitTests.binaryOpTests",
+            "shortname": "UnitTests.binaryOpTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/binaryOpTests.js",
+            "line": 7
+        },
+        "UnitTests.clauseTests": {
+            "name": "UnitTests.clauseTests",
+            "shortname": "UnitTests.clauseTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/clauseTests.js",
+            "line": 13,
+            "description": "Checks clause parsing for part of conditional expressions\na simplifying construct to aggregate bools, names,\njavamethods and binaryOps"
+        },
+        "UnitTests.conditionalExpressionTests": {
+            "name": "UnitTests.conditionalExpressionTests",
+            "shortname": "UnitTests.conditionalExpressionTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/mixedCallTests.js",
+            "line": 8,
+            "description": "utility to combine multiple clauses together"
         },
         "UnitTests.conflictDeclarationTests": {
             "name": "UnitTests.conflictDeclarationTests",
@@ -525,6 +928,36 @@
             "line": 9,
             "description": "Tests for constant declarations"
         },
+        "UnitTests.contextConditionTests": {
+            "name": "UnitTests.contextConditionTests",
+            "shortname": "UnitTests.contextConditionTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/contextConditionTests.js",
+            "line": 7,
+            "description": "Test the contextCondition Construct"
+        },
+        "UnitTests.entryConditionTests": {
+            "name": "UnitTests.entryConditionTests",
+            "shortname": "UnitTests.entryConditionTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/entryConditionTests.js",
+            "line": 7,
+            "description": "Test the entryCondition Construct"
+        },
         "UnitTests.importDeclarationTests": {
             "name": "UnitTests.importDeclarationTests",
             "shortname": "UnitTests.importDeclarationTests",
@@ -537,8 +970,67 @@
             "submodule": "UnitTests",
             "namespace": "",
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 9,
+            "line": 8,
             "description": "Checks that import statements work"
+        },
+        "UnitTests.javaMethod": {
+            "name": "UnitTests.javaMethod",
+            "shortname": "UnitTests.javaMethod",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/javaMethodTests.js",
+            "line": 6,
+            "description": "tests parsing of java method like calls"
+        },
+        "UnitTests.namedPropertyTests": {
+            "name": "UnitTests.namedPropertyTests",
+            "shortname": "UnitTests.namedPropertyTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/namedPropertyTests.js",
+            "line": 8,
+            "description": "test property declaration"
+        },
+        "UnitTests.numberNeededforSuccessTests": {
+            "name": "UnitTests.numberNeededforSuccessTests",
+            "shortname": "UnitTests.numberNeededforSuccessTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/numberNeededForSuccessTests.js",
+            "line": 7,
+            "description": "Test the numberNeededForSuccess construct"
+        },
+        "UnitTests.operatorTests": {
+            "name": "UnitTests.operatorTests",
+            "shortname": "UnitTests.operatorTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/operatorTests.js",
+            "line": 8,
+            "description": "tests operator parsing"
         },
         "UnitTests.packageImportTests": {
             "name": "UnitTests.packageImportTests",
@@ -570,6 +1062,21 @@
             "line": 7,
             "description": "Tests parameter declarations"
         },
+        "UnitTests.persistenceTests": {
+            "name": "UnitTests.persistenceTests",
+            "shortname": "UnitTests.persistenceTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/persistenceTests.js",
+            "line": 8,
+            "description": "test persistence declaration"
+        },
         "UnitTests.preconditionTests": {
             "name": "UnitTests.preconditionTests",
             "shortname": "UnitTests.preconditionTests",
@@ -584,6 +1091,111 @@
             "file": "js/unitTests/preconditionTests.js",
             "line": 7,
             "description": "Test the Precondition Construct"
+        },
+        "UnitTests.primitiveActTests": {
+            "name": "UnitTests.primitiveActTests",
+            "shortname": "UnitTests.primitiveActTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/primitiveActTests.js",
+            "line": 8,
+            "description": "Test primitive acts like:\n\"act blah(x,y);\""
+        },
+        "UnitTests.priorityModifierTests": {
+            "name": "UnitTests.priorityModifierTests",
+            "shortname": "UnitTests.priorityModifierTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/priorityModifierTests.js",
+            "line": 8,
+            "description": "test priority modification"
+        },
+        "UnitTests.specificityTests": {
+            "name": "UnitTests.specificityTests",
+            "shortname": "UnitTests.specificityTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/specificityTests.js",
+            "line": 8,
+            "description": "tests for parsing specificity"
+        },
+        "UnitTests.stepModifierTests": {
+            "name": "UnitTests.stepModifierTests",
+            "shortname": "UnitTests.stepModifierTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/stepModifierTests.js",
+            "line": 8,
+            "description": "Aggregate of all the step modifiers"
+        },
+        "UnitTests.successConditionTests": {
+            "name": "UnitTests.successConditionTests",
+            "shortname": "UnitTests.successConditionTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/successConditionTests.js",
+            "line": 7,
+            "description": "Test the successCondition Construct"
+        },
+        "UnitTests.successTestTests": {
+            "name": "UnitTests.successTestTests",
+            "shortname": "UnitTests.successTestTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/successTestTests.js",
+            "line": 7,
+            "description": "Test the successTest Construct"
+        },
+        "UnitTests.teamMemberSpecifierTests": {
+            "name": "UnitTests.teamMemberSpecifierTests",
+            "shortname": "UnitTests.teamMemberSpecifierTests",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "ABLParser",
+            "submodule": "UnitTests",
+            "namespace": "",
+            "file": "js/unitTests/teamMemberSpecifierTests.js",
+            "line": 8,
+            "description": "Test declaration of team members"
         },
         "UnitTests.throwErrorTests": {
             "name": "UnitTests.throwErrorTests",
@@ -641,7 +1253,7 @@
             "module": "ABLParser",
             "namespace": "",
             "file": "js/JGListener.js",
-            "line": 6,
+            "line": 8,
             "description": "The JGListener constructor",
             "is_constructor": 1
         },
@@ -723,6 +1335,56 @@
             "submodule": "UnitTests"
         },
         {
+            "file": "js/unitTests/AblLiteralTests.js",
+            "line": 30,
+            "description": "Test Floats",
+            "itemtype": "method",
+            "name": "simpleFloat",
+            "class": "UnitTests.ablLiteralTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/AblLiteralTests.js",
+            "line": 47,
+            "description": "simpleString",
+            "itemtype": "method",
+            "name": "simpleString",
+            "class": "UnitTests.ablLiteralTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/AblLiteralTests.js",
+            "line": 63,
+            "description": "simpleBool",
+            "itemtype": "method",
+            "name": "simpleBool",
+            "class": "UnitTests.ablLiteralTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/AblLiteralTests.js",
+            "line": 80,
+            "description": "simpleBoolFalse",
+            "itemtype": "method",
+            "name": "simpleBoolFalse",
+            "class": "UnitTests.ablLiteralTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/AblLiteralTests.js",
+            "line": 97,
+            "description": "simpleNull",
+            "itemtype": "method",
+            "name": "simpleLiteral",
+            "class": "UnitTests.ablLiteralTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
             "file": "js/unitTests/PropertyDeclarationTests.js",
             "line": 14,
             "description": "Initial Smoke Test",
@@ -786,7 +1448,7 @@
         },
         {
             "file": "js/unitTests/WMEDeclarationTests.js",
-            "line": 49,
+            "line": 48,
             "description": "Checks that WMEs can have fields",
             "itemtype": "method",
             "name": "variablesTest",
@@ -832,7 +1494,7 @@
         },
         {
             "file": "js/unitTests/WMETestTest.js",
-            "line": 13,
+            "line": 19,
             "description": "initial smoke test",
             "itemtype": "method",
             "name": "simple",
@@ -850,6 +1512,16 @@
             "submodule": "UnitTests"
         },
         {
+            "file": "js/unitTests/ablDeclarationTests.js",
+            "line": 14,
+            "description": "The simplest smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behavingEntityTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
             "file": "js/unitTests/actionRegistrationTests.js",
             "line": 13,
             "description": "Initial Smoke Test",
@@ -861,13 +1533,109 @@
         },
         {
             "file": "js/unitTests/actionRegistrationTests.js",
-            "line": 30,
+            "line": 31,
             "description": "Check that actions can be registered with parameters",
             "itemtype": "method",
             "name": "withParamsTest",
             "class": "UnitTests.actionRegistrationTests",
             "module": "ABLParser",
             "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/basicStepTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simpleFailStep",
+            "class": "UnitTests.basicStepTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/basicStepTests.js",
+            "line": 30,
+            "description": "simplest succeedStep",
+            "itemtype": "method",
+            "name": "simpleSucceedStep",
+            "class": "UnitTests.basicStepTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/basicStepTests.js",
+            "line": 46,
+            "description": "simple wait step",
+            "itemtype": "method",
+            "name": "simpleWaitStep",
+            "class": "UnitTests.basicStepTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/behavingEntityTests.js",
+            "line": 14,
+            "description": "The simplest smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behavingEntityTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/behaviourDefinitionTests.js",
+            "line": 14,
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behaviourDefinitionTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/behaviourModifierTests.js",
+            "line": 14,
+            "description": "The simplest smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behaviourModifierTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/behaviourStepTests.js",
+            "line": 14,
+            "description": "simplest possibly act",
+            "itemtype": "method",
+            "name": "simpleGoalStep",
+            "class": "UnitTests.goalStepTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/binaryOpTests.js",
+            "line": 12,
+            "description": "initial smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.binaryOpTests",
+            "module": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/clauseTests.js",
+            "line": 27,
+            "description": "initial smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.clauseTests",
+            "module": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/conditionalExpressionTests.js",
+            "line": 14,
+            "description": "initial smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.conditionalExpressionTests",
+            "module": "UnitTests"
         },
         {
             "file": "js/unitTests/conflictDeclarationTests.js",
@@ -930,8 +1698,27 @@
             "submodule": "UnitTests"
         },
         {
+            "file": "js/unitTests/decisionCycleTests.js",
+            "line": 14,
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behaviourDefinitionTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/goalStepTests.js",
+            "line": 14,
+            "description": "simplest possibly act",
+            "itemtype": "method",
+            "name": "simpleGoalStep",
+            "class": "UnitTests.goalStepTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 15,
+            "line": 14,
             "description": "Initial Smoke Test",
             "itemtype": "method",
             "name": "simpleImport",
@@ -941,7 +1728,7 @@
         },
         {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 30,
+            "line": 29,
             "description": "Check that imports can be subpackages",
             "itemtype": "method",
             "name": "simpleDotImport",
@@ -951,7 +1738,7 @@
         },
         {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 46,
+            "line": 45,
             "description": "check that imports can be arbitrary length subpackages",
             "itemtype": "method",
             "name": "repeatedDotImport",
@@ -961,7 +1748,7 @@
         },
         {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 62,
+            "line": 61,
             "description": "Check that imports can cover everything in a package\nusing *",
             "itemtype": "method",
             "name": "starredImport",
@@ -971,17 +1758,7 @@
         },
         {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 78,
-            "description": "Check that multiple packages can be imported in a row",
-            "itemtype": "method",
-            "name": "multipleImports",
-            "class": "UnitTests.importDeclarationTests",
-            "module": "ABLParser",
-            "submodule": "UnitTests"
-        },
-        {
-            "file": "js/unitTests/importDeclarationTests.js",
-            "line": 97,
+            "line": 77,
             "description": "Check that if no value is specified to import,\nnothing is imported",
             "itemtype": "method",
             "name": "failOnNoImport",
@@ -991,11 +1768,118 @@
         },
         {
             "file": "js/unitTests/importDeclarationTests.js",
-            "line": 111,
+            "line": 91,
             "description": "Verify what happens when a keyword is misspelled",
             "itemtype": "method",
             "name": "failOnMispelling",
             "class": "UnitTests.importDeclarationTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/initialTreeTests.js",
+            "line": 14,
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behaviourDefinitionTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/javaMethodTests.js",
+            "line": 12,
+            "description": "initial smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.javaMethod",
+            "module": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/mixedCallTests.js",
+            "line": 14,
+            "description": "initial smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.conditionalExpressionTests",
+            "module": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/namedPropertyTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.namedPropertyTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 14,
+            "description": "bind test",
+            "itemtype": "method",
+            "name": "bindTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 30,
+            "description": "greaterThan test",
+            "itemtype": "method",
+            "name": "greaterThanTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 46,
+            "description": "greaterEqual test",
+            "itemtype": "method",
+            "name": "greaterEqualTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 62,
+            "description": "lessThan test",
+            "itemtype": "method",
+            "name": "lessThanTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 78,
+            "description": "lessEqual test",
+            "itemtype": "method",
+            "name": "lessEqualTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 94,
+            "description": "equal test",
+            "itemtype": "method",
+            "name": "equalTest",
+            "class": "UnitTests.operatorTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/operatorTests.js",
+            "line": 110,
+            "description": "notEqual test",
+            "itemtype": "method",
+            "name": "notEqualTest",
+            "class": "UnitTests.operatorTests",
             "module": "ABLParser",
             "submodule": "UnitTests"
         },
@@ -1040,12 +1924,32 @@
             "submodule": "UnitTests"
         },
         {
-            "file": "js/unitTests/packageTest.js",
-            "line": 70,
-            "description": "Verify behaviour from the 'prog' root rule",
+            "file": "js/unitTests/paramTest.js",
+            "line": 13,
+            "description": "Initial Smoke Test",
             "itemtype": "method",
-            "name": "progTest",
-            "class": "UnitTests.packageImportTests",
+            "name": "simpleParameters",
+            "class": "UnitTests.paramsTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/paramTest.js",
+            "line": 31,
+            "description": "a parameter with a type test",
+            "itemtype": "method",
+            "name": "paramAndTypeTest",
+            "class": "UnitTests.paramsTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/paramTest.js",
+            "line": 49,
+            "description": "test a literal",
+            "itemtype": "method",
+            "name": "paramLiteralTest",
+            "class": "UnitTests.paramsTests",
             "module": "ABLParser",
             "submodule": "UnitTests"
         },
@@ -1061,7 +1965,7 @@
         },
         {
             "file": "js/unitTests/paramsTest.js",
-            "line": 30,
+            "line": 32,
             "description": "Check that multiple parameters can be declared at once",
             "itemtype": "method",
             "name": "multipleParams",
@@ -1071,11 +1975,101 @@
         },
         {
             "file": "js/unitTests/paramsTest.js",
-            "line": 48,
+            "line": 56,
             "description": "Verify what happens with an empty param list",
             "itemtype": "method",
             "name": "emptyParams",
             "class": "UnitTests.paramsTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/paramsTest.js",
+            "line": 71,
+            "description": "check that both types and names are a recognised",
+            "itemtype": "method",
+            "name": "paramsOfTYPEandName",
+            "class": "UnitTests.paramsTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/paramsTest.js",
+            "line": 93,
+            "description": "check that multiples of types and names are recognised",
+            "itemtype": "method",
+            "name": "paramsOfTYPEandNameMULTIPLE",
+            "class": "UnitTests.paramsTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/persistenceTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.persistenceTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/primitiveActTests.js",
+            "line": 15,
+            "description": "simplest possibly act",
+            "itemtype": "method",
+            "name": "simplePrimitiveActTest",
+            "class": "UnitTests.primitiveActTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/priorityModifierTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.priorityModifierTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/progTests.js",
+            "line": 14,
+            "description": "The simplest smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.behavingEntityTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/specificityTests.js",
+            "line": 14,
+            "description": "The simplest smoke test",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.specificityTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/stepModifierTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.stepModifierTests",
+            "module": "ABLParser",
+            "submodule": "UnitTests"
+        },
+        {
+            "file": "js/unitTests/teamMemberSpecifierTests.js",
+            "line": 14,
+            "description": "The simplest possible expression",
+            "itemtype": "method",
+            "name": "simple",
+            "class": "UnitTests.teamMemberSpecifierTests",
             "module": "ABLParser",
             "submodule": "UnitTests"
         },
@@ -1131,7 +2125,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 26,
+            "line": 28,
             "description": "Enter the root rule of the ABL Grammar\nSets up the parsedStack datastructure",
             "itemtype": "method",
             "name": "enterProg",
@@ -1140,7 +2134,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 35,
+            "line": 37,
             "description": "Parses a package declaration",
             "itemtype": "method",
             "name": "enterG_package",
@@ -1149,7 +2143,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 52,
+            "line": 54,
             "description": "Parses an import statement",
             "itemtype": "method",
             "name": "enterG_import",
@@ -1158,7 +2152,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 79,
+            "line": 80,
             "description": "Parses constant declarations",
             "itemtype": "method",
             "name": "enterConstants",
@@ -1167,7 +2161,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 95,
+            "line": 96,
             "description": "Parse team needed statements",
             "itemtype": "method",
             "name": "enterTeamNeeded",
@@ -1176,7 +2170,7 @@
         },
         {
             "file": "js/JGListener.js",
-            "line": 116,
+            "line": 117,
             "description": "Parse Conflict Declarations",
             "itemtype": "method",
             "name": "enterConflictDecl",
@@ -1189,6 +2183,51 @@
             "description": "parse wmeRegistration",
             "itemtype": "method",
             "name": "enterWmeRegistration",
+            "class": "JGListener",
+            "module": "ABLParser"
+        },
+        {
+            "file": "js/JGListener.js",
+            "line": 155,
+            "description": "parse individual parameter",
+            "itemtype": "method",
+            "name": "exitParam",
+            "class": "JGListener",
+            "module": "ABLParser"
+        },
+        {
+            "file": "js/JGListener.js",
+            "line": 182,
+            "description": "Parse parameters",
+            "itemtype": "method",
+            "name": "exitParams",
+            "class": "JGListener",
+            "module": "ABLParser"
+        },
+        {
+            "file": "js/JGListener.js",
+            "line": 203,
+            "description": "Parse an action registration\nEXIT method to be able to scoop up params",
+            "itemtype": "method",
+            "name": "exitActionRegistration",
+            "class": "JGListener",
+            "module": "ABLParser"
+        },
+        {
+            "file": "js/JGListener.js",
+            "line": 225,
+            "description": "Parse a variable declaration",
+            "itemtype": "method",
+            "name": "enterAblVariableDeclaration",
+            "class": "JGListener",
+            "module": "ABLParser"
+        },
+        {
+            "file": "js/JGListener.js",
+            "line": 241,
+            "description": "Parse, from the exit, a wme Declaration",
+            "itemtype": "method",
+            "name": "exitWMEDeclaration",
             "class": "JGListener",
             "module": "ABLParser"
         }

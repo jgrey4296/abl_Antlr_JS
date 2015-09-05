@@ -67,21 +67,4 @@ exports.packageImportTests = {
         test.done();
     },
 
-    /**
-       Verify behaviour from the 'prog' root rule
-       @method progTest
-     */
-    progTest : function(test){
-        var parseString = "package Blah;";
-        var startRule = "prog";
-
-        var result = ABLModule.parse(parseString,startRule);
-
-        test.ok(result.length === 1);
-        test.ok(result[0].name === "Blah");
-        test.ok(result[0].type === "package");
-        
-        test.done();
-    },
-    
 };

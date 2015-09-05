@@ -75,26 +75,6 @@ exports.importDeclarationTests = {
     },
 
     /**
-       Check that multiple packages can be imported in a row
-       @method multipleImports
-     */
-    multipleImports : function(test){
-        var parseString = "import Blah; import Bloo; import Something.else;";
-        var startRule = "prog";
-        var result = ABLModule.parse(parseString,startRule);
-
-        test.ok(result.length === 3);
-        test.ok(result[0].type === "importDeclaration");
-        test.ok(result[1].type === "importDeclaration");
-        test.ok(result[2].type === "importDeclaration");
-
-        test.ok(result[0].name === "Blah");
-        test.ok(result[1].name === "Bloo");
-        test.ok(result[2].name === "Something.else");
-        test.done();
-    },
-
-    /**
        Check that if no value is specified to import,
        nothing is imported
        @method failOnNoImport

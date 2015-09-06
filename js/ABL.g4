@@ -53,7 +53,7 @@ wmeFieldTest : name operator ablExpression;
 //bang and name switched for sense reasons
 //why isn't this the same binding operator!
 //TODO: on v2 change '=' to '::'
-wmeTest : (name '=')? BANG? '(' TYPE wmeFieldTest* ')';
+wmeTest : (name ('=' | '::'))? BANG? '(' TYPE wmeFieldTest* ')';
 
 binaryOp : BANG? ablExpression (operator ablExpression)?;
 javaMethod : BANG? name params;

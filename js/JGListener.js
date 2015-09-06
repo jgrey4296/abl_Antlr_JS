@@ -34,6 +34,19 @@ JGListener.prototype.enterProg = function(ctx){
     this.parsedStack = [];
 };
 
+JGListener.prototype.itemsOnStack = function(ctx){
+    if(this.parsedStack.length > 0) return true;
+    return false;
+}
+
+JGListener.prototype.lastOnStack = function(ctx){
+    if(this.parsedStack.length > 0){
+        return this.parsedStack[this.parsedStack.length-1];
+    }else{
+        return null;
+    }
+};
+
 /**
    Parses a package declaration
    @method enterG_package
@@ -43,12 +56,10 @@ JGListener.prototype.enterG_package = function(ctx){
         throw new Error("Package missing TYPE");
     }
 
-    this.parsedStack.push(//["package",ctx.name().getText()]);
-        {
+    this.parsedStack.push({
             type : "package",
             name : ctx.TYPE().getText(),
-        }
-    );
+        });
 };
 
 /**
@@ -159,7 +170,9 @@ JGListener.prototype.enterWmeRegistration = function(ctx){
 JGListener.prototype.exitParam = function(ctx){
     var outObj = {
         type : "param",
+        //explicit TYPE name
         varType : undefined,
+        //either a name or a literal
         value : undefined
     };
     
@@ -167,9 +180,15 @@ JGListener.prototype.exitParam = function(ctx){
         outObj.varType = ctx.TYPE().getText();
     }
 
-    if(ctx.ablExpression()
-       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"){
+    //Use an expression
+    //TODO: fold in?
+    if(ctx.ablExpression() && this.lastOnStack().type === "ablExpression"){
         outObj.value = this.parsedStack.pop();
+
+        //if a name:
+
+        //if a literal:
+        
     }
 
     
@@ -190,12 +209,9 @@ JGListener.prototype.exitParams = function(ctx){
     };
 
     //transfer all individual param into the params array
-    while(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "param"){
+    while(this.itemsOnStack() && this.lastOnStack().type === "param"){
         outObj.params.unshift(this.parsedStack.pop());
     };
-
-
-    
     this.parsedStack.push(outObj);
 };
 
@@ -213,7 +229,8 @@ JGListener.prototype.exitActionRegistration = function(ctx){
         params : undefined
     };
 
-    if(ctx.TYPE(0) && ctx.TYPE(1)){
+    if(ctx.TYPE(0) && ctx.TYPE(1) && this.itemsOnStack()
+       && this.lastOnStack().type === "params"){
         outObj.name = ctx.TYPE(0).getText();
         outObj.target = ctx.TYPE(1).getText();
         outObj.params = this.parsedStack.pop().params;
@@ -224,6 +241,7 @@ JGListener.prototype.exitActionRegistration = function(ctx){
 
 /**
    Parse a variable declaration
+   can declare multiple variables of the same type
    @method enterAblVariableDeclaration
  */
 JGListener.prototype.enterAblVariableDeclaration = function(ctx){
@@ -245,8 +263,7 @@ JGListener.prototype.enterAblVariableDeclaration = function(ctx){
 JGListener.prototype.exitWmeDeclaration = function(ctx){
     var extendedFromName,collectedVariables;
     collectedVariables = [];
-    while(this.parsedStack[this.parsedStack.length-1]
-          && this.parsedStack[this.parsedStack.length-1].type === "ablVariableDeclaration"){
+    while(this.itemsOnStack() && this.lastOnStack().type === "ablVariableDeclaration"){
         collectedVariables.push(this.parsedStack.pop());
     }
     if(ctx.TYPE(1)){
@@ -315,12 +332,13 @@ JGListener.prototype.exitAblExpression = function(ctx){
         value : undefined        
     };
 
+    //TODO: fold ablLiteral into the expression
+    
     if(ctx.name()){
         outObj.value = ctx.name().getText();
         outObj.varType = "name";
         this.parsedStack.push(outObj);
-    }else if(ctx.ablLiteral()
-             && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+    }else if(ctx.ablLiteral() && this.itemsOnStack() && this.lastOnStack().type === "ablLiteral"){
         outObj.value = this.parsedStack.pop();
         outObj.varType = "ablLiteral";
         this.parsedStack.push(outObj);
@@ -330,7 +348,9 @@ JGListener.prototype.exitAblExpression = function(ctx){
 JGListener.prototype.enterOperator = function(ctx){
     var outObj = {
         type : "operator",
-        opType : undefined
+        opType : undefined,
+        possibleOps : ["_bind","greaterThan","greaterEqual",
+                       "lessThan","lessEqual","equal","notEqual"]
     };
 
     if(ctx.BIND()){
@@ -366,13 +386,13 @@ JGListener.prototype.exitWmeFieldTest = function(ctx){
         outObj.name = ctx.name().getText();
     }
 
-    if(ctx.ablExpression() &&
-       this.parsedStack[this.parsedStack.length-1].type === "ablExpression"){
+    if(ctx.ablExpression() && this.itemsOnStack() &&
+       this.lastOnStack().type === "ablExpression"){
         outObj.expression = this.parsedStack.pop();
     }
 
-    if(ctx.operator() &&
-       this.parsedStack[this.parsedStack.length-1].type === "operator"){
+    if(ctx.operator() && this.itemsOnStack() && 
+       this.lastOnStack().type === "operator"){
         outObj.operator = this.parsedStack.pop();
     }
 
@@ -404,8 +424,8 @@ JGListener.prototype.exitWmeTest = function(ctx){
     }
 
     if(ctx.wmeFieldTest()){
-        while(this.parsedStack[this.parsedStack.length-1]
-              && this.parsedStack[this.parsedStack.length-1].type == "wmeFieldTest"){
+        while(this.lastOnStack()
+              && this.lastOnStack().type == "wmeFieldTest"){
             outObj.fieldTests.push(this.parsedStack.pop());
         }
     }
@@ -420,7 +440,7 @@ JGListener.prototype.exitBinaryOp = function(ctx){
     var outObj = {
         type : "binaryOp",
         bang : false,
-        expressions : [],
+        expression : [],
         operator : undefined
     };
 
@@ -428,15 +448,18 @@ JGListener.prototype.exitBinaryOp = function(ctx){
         outObj.bang = true;
     }
 
-    if(ctx.operator() && ctx.ablExpression().length === 2
-       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"
-       && this.parsedStack[this.parsedStack.length-2].type === "operator"){
+    if(ctx.ablExpression().length === 2 && this.itemsOnStack()
+       && this.lastOnStack().type === "ablExpression"){
         outObj.expressions[1] = this.parsedStack.pop();
+    }
+
+    if(ctx.operator() && this.itemsOnStack()
+       && this.lastOnStack.type === "operator"){
         outObj.operator = this.parsedStack.pop();
     }
 
-    if(ctx.ablExpression(0)
-       && this.parsedStack[this.parsedStack.length-1]){
+    if(ctx.ablExpression(0) && this.itemsOnStack()
+       && this.lastOnStack()){
         outObj.expressions[0] = this.parsedStack.pop();
         this.parsedStack.push(outObj);
     }
@@ -458,7 +481,7 @@ JGListener.prototype.exitJavaMethod = function(ctx){
         outObj.name = ctx.name().getText();
     }
 
-    if(ctx.params() && this.parsedStack[this.parsedStack.length-1].type === "params"){
+    if(ctx.params() && this.lastOnStack().type === "params"){
         outObj.params = this.parsedStack.pop().params;
     }
 
@@ -483,10 +506,10 @@ JGListener.prototype.exitClause = function(ctx){
     }else if(ctx.name()){
         outObj.child = ctx.name().getText();
     }else if(ctx.javaMethod()
-             && this.parsedStack[this.parsedStack.length-1].type === "javaMethod"){
+             && this.lastOnStack().type === "javaMethod"){
         outObj.child = this.parsedStack.pop();
     }else if(ctx.binaryOp()
-             && this.parsedStack[this.parsedStack.length-1].type === "binaryOp"){
+             && this.lastOnStack().type === "binaryOp"){
         outObj.child = this.parsedStack.pop();
     }    
 
@@ -517,21 +540,21 @@ JGListener.prototype.exitMixedCall = function(ctx){
         clauses : [],
     };
 
-    while(this.parsedStack.length > 1 && this.parsedStack[this.parsedStack.length-1].type === "clause" && this.parsedStack[this.parsedStack.length-2].type === "booleanHelper"){
+    while(this.parsedStack.length > 1 && this.lastOnStack().type === "clause" && this.parsedStack[this.parsedStack.length-2].type === "booleanHelper"){
         var clause = this.parsedStack.pop();
         var op = this.parsedStack.pop();
         outObj.clauses.unshift([clause,op.value]);
     }
 
-    if(this.parsedStack.length >= 1 && this.parsedStack[this.parsedStack.length-1].type === "clause"){
+    if(this.parsedStack.length >= 1 && this.lastOnStack().type === "clause"){
         outObj.clauses.unshift([this.parsedStack.pop(),"default"]);
         this.parsedStack.push(outObj);
     }
 };
 
 JGListener.prototype.exitConditionalExpression = function(ctx){
-    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "mixedCall"){
-        this.parsedStack[this.parsedStack.length-1].type = "conditionalExpression";
+    if(this.itemsOnStack() && this.lastOnStack().type === "mixedCall"){
+        this.lastOnStack().type = "conditionalExpression";
     }
 };
 
@@ -541,8 +564,8 @@ JGListener.prototype.exitWmeTestSequence = function(ctx){
         clauses : []
     };
 
-    while(this.parsedStack.length > 0
-          && (this.parsedStack[this.parsedStack.length-1].type === "wmeTest" || this.parsedStack[this.parsedStack.length-1].type === "conditionalExpression")){
+    while(this.itemsOnStack()
+          && (this.lastOnStack().type === "wmeTest" || this.lastOnStack().type === "conditionalExpression")){
         outObj.clauses.unshift(this.parsedStack.pop());
     }
     
@@ -552,16 +575,16 @@ JGListener.prototype.exitWmeTestSequence = function(ctx){
 };
 
 JGListener.prototype.exitTestExpression = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "wmeTestSequence"){
-        this.parsedStack[this.parsedStack.length-1].type = "testExpression";
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "wmeTestSequence"){
+        this.lastOnStack().type = "testExpression";
     }
 
 };
 
 JGListener.prototype.exitPrecondition = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "precondition",
             testExpression : this.parsedStack.pop()
@@ -571,8 +594,8 @@ JGListener.prototype.exitPrecondition = function(ctx){
 
 
 JGListener.prototype.exitContextCondition = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "contextCondition",
             testExpression : this.parsedStack.pop()
@@ -582,8 +605,8 @@ JGListener.prototype.exitContextCondition = function(ctx){
 
 
 JGListener.prototype.exitEntryCondition = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "entryCondition",
             testExpression : this.parsedStack.pop()
@@ -593,8 +616,8 @@ JGListener.prototype.exitEntryCondition = function(ctx){
 
 
 JGListener.prototype.exitSuccessCondition = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "successCondition",
             testExpression : this.parsedStack.pop()
@@ -604,8 +627,8 @@ JGListener.prototype.exitSuccessCondition = function(ctx){
 
 
 JGListener.prototype.exitStateCondition = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "stateCondition",
             testExpression : this.parsedStack.pop()
@@ -615,8 +638,8 @@ JGListener.prototype.exitStateCondition = function(ctx){
 
 
 JGListener.prototype.exitSuccessTest = function(ctx){
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "testExpression"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "testExpression"){
         this.parsedStack.push({
             type : "successTest",
             testExpression : this.parsedStack.pop()
@@ -626,7 +649,7 @@ JGListener.prototype.exitSuccessTest = function(ctx){
 
 JGListener.prototype.exitNumberNeededForSuccess = function(ctx){
     if(ctx.ablLiteral()
-       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+       && this.lastOnStack().type === "ablLiteral"){
         this.parsedStack.push({
             type : "numberNeededForSuccess",
             value : this.parsedStack.pop()
@@ -656,7 +679,7 @@ JGListener.prototype.exitPriorityModifier = function(ctx){
     };
 
     if(ctx.ablLiteral()
-       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+       && this.lastOnStack().type === "ablLiteral"){
         outObj.value = this.parsedStack.pop();
         this.parsedStack.push(outObj);
     }
@@ -691,7 +714,7 @@ JGListener.prototype.exitNamedProperty = function(ctx){
     }
 
     if(ctx.ablExpression()
-       && this.parsedStack[this.parsedStack.length-1].type === "ablExpression"){
+       && this.lastOnStack().type === "ablExpression"){
         outObj.value = this.parsedStack.pop();
     }
 
@@ -710,8 +733,8 @@ JGListener.prototype.exitStepModifier = function(ctx){
     };
 
     var prevValue;
-    if(this.parsedStack.length > 0){
-        prevValue = this.parsedStack[this.parsedStack.length-1];
+    if(this.itemsOnStack()){
+        prevValue = this.lastOnStack();
     }
 
     if(ctx.IGNORE_FAILURE()){
@@ -799,7 +822,7 @@ JGListener.prototype.exitPrimitiveAct = function(ctx){
     }
 
     if(ctx.params()
-       && this.parsedStack[this.parsedStack.length-1].type === "params"){
+       && this.lastOnStack().type === "params"){
         outObj.params = this.parsedStack.pop().params;
     }
 
@@ -838,7 +861,7 @@ JGListener.prototype.exitGoalStep = function(ctx){
         outObj.at = ctx.name(1).getText();
     }
 
-    if(this.parsedStack[this.parsedStack.length-1].type === "params"){
+    if(this.lastOnStack().type === "params"){
         outObj.params = this.parsedStack.pop().params;
     }
 
@@ -856,16 +879,16 @@ JGListener.prototype.exitBehaviourStep = function(ctx){
         step : undefined
     };
 
-    var prev = this.parsedStack[this.parsedStack.length-1];
+    var prev = this.lastOnStack();
     
-    if(this.parsedStack.length > 0 && prev && (prev.type === "basicStep"
+    if(this.itemsOnStack() && prev && (prev.type === "basicStep"
                                        || prev.type === "goalStep"
                                       || prev.type === "primitiveAct")){
         outObj.step = this.parsedStack.pop();
     }
 
-    while(this.parsedStack.length > 0
-          && this.parsedStack[this.parsedStack.length-1].type == "stepModifier"){
+    while(this.itemsOnStack()
+          && this.lastOnStack().type == "stepModifier"){
         outObj.modifiers.unshift(this.parsedStack.pop());
     }
 
@@ -880,7 +903,7 @@ JGListener.prototype.exitSpecificity = function(ctx){
     };
 
     if(ctx.ablLiteral()
-       && this.parsedStack[this.parsedStack.length-1].type === "ablLiteral"){
+       && this.lastOnStack().type === "ablLiteral"){
         outObj.value = this.parsedStack.pop();
         this.parsedStack.push(outObj);
     }
@@ -890,7 +913,7 @@ JGListener.prototype.exitSpecificity = function(ctx){
 
 
 JGListener.prototype.exitBehaviourModifier = function(ctx){
-    var prev = this.parsedStack[this.parsedStack.length-1];
+    var prev = this.lastOnStack();
 
     if(["precondition","specificity","contextCondition","entryCondition","numberNeededForSuccess","teamMemberSpecifier","successCondition"].indexOf(prev.type) > -1){
         this.parsedStack.push({
@@ -914,7 +937,7 @@ JGListener.prototype.exitBehaviourDefinition = function(ctx){
         variables : [],
     };
 
-    while(this.parsedStack.length > 0 && (this.parsedStack[this.parsedStack.length-1].type === "behaviourModifier" || this.parsedStack[this.parsedStack.length-1].type === "ablVariableDeclaration" || this.parsedStack[this.parsedStack.length-1].type === "behaviourStep" )){
+    while(this.itemsOnStack() && (this.lastOnStack().type === "behaviourModifier" || this.lastOnStack().type === "ablVariableDeclaration" || this.lastOnStack().type === "behaviourStep" )){
         var prev = this.parsedStack.pop();
         if(prev.type === "behaviourModifier"){
             outObj.modifiers.unshift(prev);
@@ -923,7 +946,7 @@ JGListener.prototype.exitBehaviourDefinition = function(ctx){
         }
     }
 
-    if(this.parsedStack.length > 0 && this.parsedStack[this.parsedStack.length-1].type === "params"){
+    if(this.itemsOnStack() && this.lastOnStack().type === "params"){
         outObj.params = this.parsedStack.pop().params;
     }
 
@@ -962,8 +985,8 @@ JGListener.prototype.exitInitialTree = function(ctx){
         steps : []
     };
 
-    while(this.parsedStack.length > 0
-          && this.parsedStack[this.parsedStack.length-1].type === "behaviourStep"){
+    while(this.itemsOnStack()
+          && this.lastOnStack().type === "behaviourStep"){
         outObj.steps.push(this.parsedStack.pop());
     }
 
@@ -989,7 +1012,7 @@ JGListener.prototype.exitAblDeclaration = function(ctx){
 
     if(this.parsedStack.length === 0) return;
     
-    var prev = this.parsedStack[this.parsedStack.length-1];
+    var prev = this.lastOnStack();
 
     if(prev.type === "wmeRegistration"
        || prev.type === "actionRegistration"
@@ -1012,12 +1035,12 @@ JGListener.prototype.exitBehavingEntity = function(ctx){
         intitialTree : undefined
     };
 
-    if(this.parsedStack.length > 0
-       && this.parsedStack[this.parsedStack.length-1].type === "initialTree"){
+    if(this.itemsOnStack()
+       && this.lastOnStack().type === "initialTree"){
         outObj.initialTree = this.parsedStack.pop();
     }
 
-    while(this.parsedStack.length > 0){
+    while(this.itemsOnStack()){
         var current = this.parsedStack.pop();
         if(current.type === "initialTree"){
             outObj.initialTree = current;

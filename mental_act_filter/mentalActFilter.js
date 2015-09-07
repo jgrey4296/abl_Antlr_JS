@@ -1,5 +1,5 @@
 /**
-   Pre-processess ABL files to filter out the mental acts
+   Pre-process (ABL) strings to filter out mental acts
    @module mentalActFilter
 */
 if(typeof define !== 'function'){
@@ -17,7 +17,8 @@ define([],function(){
         
         //Find the mental Act
         var match = mentalActRegex.exec(string);
-        while(match){
+        if(match){
+            while(match){
                 outString = "";
                 //Append all thats before the mental act to the outString
                 outString += string.slice(0,match.index);
@@ -41,11 +42,15 @@ define([],function(){
                 if(current < string.length-1){
                     outString += string.slice(current+1);
                 }
-            string = outString;
-            match = mentalActRegex.exec(string);
+                string = outString;
+                match = mentalActRegex.exec(string);
+            }
+        }else{
+            outString = string;
         }
         return outString;
     };
 
+    
     return filter;
 });

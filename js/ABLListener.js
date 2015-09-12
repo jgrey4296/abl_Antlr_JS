@@ -137,6 +137,42 @@ ABLListener.prototype.exitAblVariableDeclaration = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#ablVariableDeclarations.
+ABLListener.prototype.enterAblVariableDeclarations = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablVariableDeclarations.
+ABLListener.prototype.exitAblVariableDeclarations = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#ablVariableLiteralAssignment.
+ABLListener.prototype.enterAblVariableLiteralAssignment = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablVariableLiteralAssignment.
+ABLListener.prototype.exitAblVariableLiteralAssignment = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#ablVariableAssignment.
+ABLListener.prototype.enterAblVariableAssignment = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablVariableAssignment.
+ABLListener.prototype.exitAblVariableAssignment = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#classConstruction.
+ABLListener.prototype.enterClassConstruction = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#classConstruction.
+ABLListener.prototype.exitClassConstruction = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#wmeDeclaration.
 ABLListener.prototype.enterWmeDeclaration = function(ctx) {
 };

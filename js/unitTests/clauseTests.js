@@ -88,15 +88,15 @@ exports.clauseTests = {
         test.ok(result[0].type === "clause");
         test.ok(result[0].child.type === "binaryOp");
         test.ok(result[0].child.bang === true);
-        test.ok(result[0].child.expressions.length === 2);
+        test.ok(result[0].child.expression.length === 2);
         test.ok(result[0].child.operator.type === "operator");
         test.ok(result[0].child.operator.opType === "lessEqual");
-        test.ok(result[0].child.expressions[0].type === "ablExpression");
-        test.ok(result[0].child.expressions[0].value === "something");
-        test.ok(result[0].child.expressions[1].type === "ablExpression");
-        test.ok(result[0].child.expressions[1].value.type === "ablLiteral");
-        test.ok(result[0].child.expressions[1].value.varType === "float");
-        test.ok(result[0].child.expressions[1].value.value === "5.6");
+        test.ok(result[0].child.expression[0].type === "ablExpression");
+        test.ok(result[0].child.expression[0].value === "something");
+        test.ok(result[0].child.expression[1].type === "ablExpression");
+        test.ok(result[0].child.expression[1].value.type === "ablLiteral");
+        test.ok(result[0].child.expression[1].value.varType === "float");
+        test.ok(result[0].child.expression[1].value.value === "5.6");
         test.done();
     },
 

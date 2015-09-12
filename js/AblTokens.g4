@@ -45,7 +45,7 @@ ADAPTIVE : 'adaptive';
 STAR : '*';
 BOOL : 'True' | 'False';
 NULL : 'Null';
-TYPE : [A-Z][a-zA-Z_\.]*;
+TYPE : [A-Z][a-zA-Z_\.\[\]]*;
 CHARS : [a-z][a-zA-Z_\.]*;
 FLOAT : [0-9]+'.'[0-9]+;
 INT : [0-9]+;    
@@ -56,6 +56,7 @@ INT : [0-9]+;
 //whitespaceHiddenChannel -> everythingelse
 //see http://antlr.1301665.n2.nabble.com/Easy-method-of-preserving-white-space-in-string-literals-td7579040.html
 STRING : '"' (CHARS | TYPE | ' ')+ '"';
-
 WS : [ \t\r\n\f]+ -> channel(HIDDEN);
-
+COMMENT : '/*' .*? '*/' -> channel(HIDDEN);
+LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN);
+ANYTHING : .+?;

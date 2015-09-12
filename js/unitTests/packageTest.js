@@ -16,15 +16,24 @@ exports.packageImportTests = {
        @method simpleTest 
      */
     simpleTest : function(test){
-        var parseString = "package Blah;";
+        var parseString = "package blah;";
         var result = [];
         result = ABLModule.parse(parseString,startRule);
         test.ok(result.length === 1);
         test.ok(result[0].type === "package");
-        test.ok(result[0].name === "Blah");        
+        test.ok(result[0].name === "blah");        
         test.done();
     },
 
+    fromAblExampleTest : function(test){
+        var parseString = "package eis.ablsl.agents;";
+        var result = ABLModule.parse(parseString,startRule);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "package");
+        test.ok(result[0].name === "eis.ablsl.agents");
+        test.done();
+    },
+    
     /**
        Verify behaviour of no value specified
        @method noPackageFail
@@ -42,11 +51,11 @@ exports.packageImportTests = {
        @method multiplePackageFail
      */
     multiplePackageFail : function(test){
-        var parseString = "package Blah; package Other;";
+        var parseString = "package blah; package other;";
         var result = ABLModule.parse(parseString, startRule);
 
         test.ok(result.length === 1);
-        test.ok(result[0].name === "Blah");
+        test.ok(result[0].name === "blah");
         test.ok(result[0].type === "package");
         
         test.done();
@@ -56,15 +65,15 @@ exports.packageImportTests = {
        Verify behaviour of keyword being misspelled
        @method misspelledPackageCorrect
      */
-    misspelledPackageCorrect : function(test){
-        var parseString = "pacage Blah;";
-        var result = ABLModule.parse(parseString,startRule);
+    // misspelledPackageCorrect : function(test){
+    //     var parseString = "pacage blah;";
+    //     var result = ABLModule.parse(parseString,startRule);
 
-        test.ok(result.length === 1);
-        test.ok(result[0].name === "Blah");
-        test.ok(result[0].type === "package");
+    //     test.ok(result.length === 1);
+    //     test.ok(result[0].name === "blah");
+    //     test.ok(result[0].type === "package");
         
-        test.done();
-    },
+    //     test.done();
+    // },
 
 };

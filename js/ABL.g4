@@ -7,15 +7,15 @@ import AblTokens;
 prog : g_package? g_import* constants behavingEntity EOF;
 
 //g_ = grammar. As antlr will complain of conflicting keywords with target language
-g_package : 'package' TYPE ';';
-g_import : 'import' TYPE STAR?';'; //todo .*?
+g_package : 'package' CHARS ';';
+g_import : 'import' CHARS STAR?';'; //todo .*?
 constants : ('constants' TYPE ';')*;
 
 teamNeeded
     : JOINTNEG (TEAMNEEDED | ONENEEDED)';';
 
 
-conflictDecl : 'conflict' name (name)+ ';';
+conflictDecl : 'conflict' (name) (name)+ ';';
 
 //WME Registration:
 wmeRegistration : 'register' 'wme' TYPE 'with' TYPE ';';
@@ -33,10 +33,18 @@ param : TYPE ablExpression?
     | TYPE? ablExpression;
 
 //Action Registration:
-actionRegistration : 'register' 'action' TYPE params 'with' TYPE';';
+actionRegistration : 'register' 'action' name params 'with' TYPE';';
 
 //Variable Declaration:
-ablVariableDeclaration : TYPE name (',' name)* ';';
+ablVariableDeclaration : ablVariableDeclarations
+    | ablVariableAssignment
+    | ablVariableLiteralAssignment;
+
+ablVariableDeclarations : name name (',' name)* ';';
+ablVariableLiteralAssignment  : name name '=' ablLiteral';';
+ablVariableAssignment : name name '=' 'new' classConstruction';';
+
+classConstruction : name '(' name ('('')')?')';
 
 //WME Declaration:
 wmeDeclaration : 'wme' TYPE ('extends' TYPE)? '{' ablVariableDeclaration* '}';
@@ -151,12 +159,13 @@ ablDeclaration : wmeRegistration
     | ablVariableDeclaration;
 
 //Behaving Entity
-behavingEntity : 'behaving_entity' name '{' teamNeeded? decisionCycleSMCallDeclaration? conflictDecl* ablDeclaration* behaviourDefinition*  initialTree '}';
+behavingEntity : 'behaving_entity' TYPE '{' teamNeeded? decisionCycleSMCallDeclaration? conflictDecl* ablDeclaration* behaviourDefinition*  initialTree '}';
 
 
 //NAME
-name : CHARS;
+name : CHARS | TYPE;
 nameList : name (',' name)*;
+
 
 //STRING HACK:
 string : STRING;

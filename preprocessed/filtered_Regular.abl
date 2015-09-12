@@ -1,0 +1,2495 @@
+package eis.ablsl.agents;
+import eis.ablsl.*;
+import eis.ablsl.structs.*;
+import eis.ablsl.actions.*;
+import eis.ablsl.sensors.*;
+import eis.ablsl.wmes.*;
+import java.lang.*; // so the ABL compiler can resolve String (in act invocations)
+import java.util.Random;
+import java.util.ArrayList;
+
+
+behaving_entity Regular 
+{    //CONFLICTS 
+    conflict walkTo walkTo;
+    conflict turnTowards turnTowards;
+    conflict playGesture playGesture;
+	conflict sitOn sitOn;
+	conflict stand stand;
+	conflict nudgeMove nudgeMove;
+	conflict walkTo turnTowards playGesture;
+	conflict walkToObject turnTowards playGesture;
+	conflict walkToObjectById turnTowards playGesture;
+	conflict nudgeRotate nudgeRotate;
+	conflict wearItem wearItem;
+	conflict removeItem removeItem;
+	conflict giveItem giveItem;
+	conflict walkToObject walkTo;
+	conflict walkToObjectById walkTo;
+	conflict walkToObject walkToObjectById;
+	conflict touchObject touchObject;
+	conflict touchObject touchObjectById;
+	conflict touchObjectById touchObjectById;
+	conflict lookAtObject lookAtObject;
+	conflict lookAtObjectById lookAtObject;
+	conflict lookAtObjectById lookAtObjectById;
+	conflict PlayGesture PlayGesture;
+	
+	//conflict DoWalkAndWait MaintainMinSocialDistance;
+	
+	//Goal conflicts? uses priorities on subgoal action
+	
+    //ACTIONS 
+	//NOTE: action method signatures cannot combine Objects with primitives, like: doSomething(double, String);
+    register action walkTo(double, double, double) with WalkTo; //walkTo(someLocX, someLocY)
+	register action walkTo(String) with WalkTo; //walkTo("someAvatarName")
+    register action turnTowards(String) with TurnTowards; //turnTowards("someAvatarName")
+	register action turnTowards(double, double) with TurnTowards; //turnTowards(someLocx, someLocy) -- seems to always put the agent facing a bit to far their right.
+    register action turnTowards(double, double, double) with TurnTowards; //turnTowards(x, y, overshootDegrees)
+	register action turnTowards(String, Double) with TurnTowards; //turnTowards("name", overshootDegrees)
+	register action playGesture(String) with PlayGesture; //playGesture("gesturename")
+	register action debugPrint(String) with DebugPrint; //sends string output to log window in C#
+	register action sitOn(String) with SitOn; //sitOn("someObjectName")
+	register action sitOnById(String) with SitOnById; //sitOn("objectID")
+	register action stand() with Stand;
+	register action stopMovement() with Stop;
+
+	//Nudge direction options: Nudge.LEFT, Nudge.RIGHT, Nudge.FORWARD, Nudge.BACKWARD
+	register action nudgeMove(String) with NudgeMove;  //default nudge move - looks the best, but no distance control
+	//nudge(string direction, double distance, SelfWME self) - uses current rotation of self as reference for directions
+	register action nudgeMove(String, Double, SelfWME) with NudgeMove;  
+	//Same as above, but this uses the direction from self to other as reference instead of self rotation
+	//This version only works with Nudge.FORWARD and Nudge.BACKWARD currently
+	register action nudgeMove(String, Double, SelfWME, AvatarWME) with NudgeMove;  
+	
+	register action nudgeRotate(double) with NudgeRotate; //rotate body positive or negative around the z-axis (vertical) - positive is left, negative is right
+	
+	//rotate chosen body partpositive or negative around the z-axis (vertical) - positive is left, negative is right
+	//Body part options: NudgeRotate.TARGET_HEAD and NudgeRotate.TARGET_BODY -- currently head rotation doesn't seem to work
+	register action nudgeRotate(Double, String) with NudgeRotate; 
+														
+	register action walkToObject(String) with WalkToObject; //walkToObject("someObjectName")
+	register action walkToObjectById(String) with WalkToObjectById; //walkToObjectById("someObjectId")
+	register action wearItem(String) with WearItem; //wearItem("someItemName") - wear item (replacing any existing ones) - used for attaching drinks, etc
+    register action removeItem(String) with RemoveItem; //removeItem("someItemName") - detach item from avatar
+	register action giveItem(String, String) with GiveItem; //giveItem("itemName","avatarName") - give an item to an avatar
+	register action touchObject(String) with TouchObject; //touchObject("objectName") - do touch animation 
+	register action touchObject(String, Boolean) with TouchObject; //touchObject("objectId", stopTouch) - do touch animation and whether to stop it or not
+    register action touchObject() with TouchObject; //Stops touching action
+	register action touchObjectById(String) with TouchObjectById; //touchObject("objectId") - do touch animation 
+	register action touchObjectById(String, Boolean) with TouchObjectById; //touchObject("objectId", stopTouch) - do touch animation and whether to stop it or not
+    register action touchObjectById() with TouchObjectById; //Stops touching action
+	register action lookAtObject(String) with LookAtObject; //lookAtObject("objectName")
+	register action lookAtObjectById(String) with LookAtObjectById; //lookAtObject("objectId")
+	//assuming the head rotation works, this will reset the head rotation to the body rotation
+	register action resetHead() with ResetHead;
+	
+	register wme AnimationWME with AnimationSensor; //x, y, z, animationName, avatarName 
+    register wme AvatarWME with AvatarSensor; //x, y, z, rotx, roty, rotz, name
+    register wme SelfWME with SelfSensor; //x, y, z, rotx, roty, rotz, name
+	register wme ObjectWME with ObjectSensor; //contains x, y, z location variables, objectname (string)
+	register wme ItemReceivedWME with ItemReceivedSensor; //contains itemName, and avatarName of offerer (these are items in "Objects" folder - typically drinks)
+
+	/* Objects with automatic timeouts after a certain timespan has passed:
+	 * AnimationWME - 5 seconds
+	 * ItemReceivedWME - 8 seconds
+	 * NOTE: This timeout/stale removal window can be changed in the respective WME files for each type
+	 */
+	
+	double PERSONAL_BUFFER = 1.5;
+
+	Random randomNumGen = new Random(System.currentTimeMillis());
+	
+	Boolean TrueObject = new Boolean(true);
+	Boolean FalseObject = new Boolean(false);
+
+	String[] DRINK_ITEMS = new String[] {"Straw-Banana Daiquiri", "Margarita", "MANHATTAN", "Bloody Mary", 
+											"Pina Colada", "Cabernet", "Key Lime Colada", "Draft Beer", 
+											"Long Island Ice Tea", "Frosty Mug", "Tropical Paradise", "Blue Raspberry Colada"};
+		
+	
+	/**
+	 * Some locations of useful bar regions.
+	 */
+	double barFrontX = 161.42;
+	double barFrontY = 221.60;
+	double barFrontZ = 23.82;
+	double barBehindX = 157.67;
+	double barBehindY = 222.76;
+	double barBehindZ = 24.2;
+	double stageX = 166.103;
+	double stageY = 233.183;
+	double stageZ = 24.312;
+	double faceBarFromStageX = 165.976;
+	double faceBarFromStageY = 231.348;
+	double faceBarFromStageZ = 24.29;
+	
+
+	
+	/**
+	*
+	*  Used to keep track of anger when somebody bumps into us
+	**/
+	wme AngryWME {
+		String name;
+		double strength;
+		long lastIncident;
+	}
+	
+	
+	/**
+	 * Keeps the type of previous behavior subtree around when transitioning to a new 
+	 * subtree. This is used for subtrees like GetDrink that may execute then go back to
+	 * the previous subtree.
+	 */
+	wme LastStateWME {
+		String stateName;
+	}
+	
+	/**
+	 * A WME used by behavior trees to trigger animations to play. Used when the
+	 * conversation monitoring and response logic is in a different behavior than the
+	 * performance logic.
+	 */
+	wme PerformGestureWME {
+		String gestureName;
+		String targetName;
+		boolean isResponse;
+	}
+	
+	/**
+	 * A WME to control the GetDrink behavior subtree.
+	 */
+	wme GetDrinkWME {
+		String name;
+	}
+	
+	/**
+	 * A WME to control the StageDance behavior subtree.
+	 */
+	wme StageDanceWME {
+		long startTime;
+	}
+	
+	/**
+	 * A WME to control the SoloDance behavior subtree.
+	 */
+	wme SoloDanceWME {
+		long startTime;
+		long lastDanceTime;
+		boolean performer;
+		String target;
+	}
+	
+	/**
+	 * A WME to flag that we are autopiloting currently
+	 */
+
+	wme AutoPilotWME {
+		double x;
+		double y;
+		double z;
+	}
+	
+	/**
+	 * A WME to flag that we are currently have a drink in hand
+	 */
+	wme HaveDrinkWME {
+		String name;
+		long startTime;
+	}
+	
+
+
+
+	/**
+	 * A WME to control the Greet behavior subtree.
+	 */
+	wme GreetWME {
+		long startTime;
+		String targetName;
+	}
+	
+	
+	/**
+	 * Used for counting other agents the holodeck avatar is facing and are nearby.
+	 */
+	wme FaceGroupWME {
+		String name;
+	}
+	
+		/**************************************************************************
+	* General and utility behaviors.
+	**************************************************************************/
+	/**
+	 * Do random, noisy human-like movement
+	 */
+	 sequential behavior HumanLocationAdjustment() {
+		long startTime;
+		double randomRotateDeg;
+		int translationCase;
+		mental_act{}
+		
+		with (success_test {
+			(SelfWME sitting==false)
+			!(AutoPilotWME)
+			((System.currentTimeMillis() - startTime) > 3500)
+		}) wait;
+		
+		mental_act{}
+		
+		subgoal RandomNudgeMove(translationCase);
+		act nudgeRotate(randomRotateDeg);
+
+	 }
+	 
+	sequential behavior RandomNudgeMove(int translationCase) {
+		precondition {
+			(translationCase > -1)
+		}
+		String direction;
+		mental_act{}
+		
+		act nudgeMove(direction);
+	}
+	
+	sequential behavior RandomNudgeMove(int translationCase) {
+		precondition { (translationCase == -1) }
+		
+		succeed_step;
+	}
+	/**
+	 *
+	 * Put a known item in hand and remove it in order to clear hands of any drinks
+	 */
+	sequential behavior ClearDrinksInHand() {
+		subgoal Wait(3000);
+		act wearItem("MANHATTAN");
+		subgoal Wait(750);
+		act removeItem("MANHATTAN");
+	}
+	
+	
+	/* Remove drink from hand over time
+	 *
+	 */
+	sequential behavior TimeoutDrink() {
+		String drinkName;
+		long drinkStartTime;
+		HaveDrinkWME drinkWME;
+		with( success_test {
+				drinkWME = (HaveDrinkWME name::drinkName startTime::drinkStartTime)
+				((System.currentTimeMillis() - drinkStartTime) > 140000)	
+		}) wait;
+		
+		mental_act{}
+		act removeItem(drinkName);
+	}
+	
+	/* 
+	 * Always take drink from somebody and drink from it
+	 */
+	 sequential behavior AlwaysTakeDrink() {
+		String drinkName;
+		String avName;
+		long drinkStartTime;
+		ItemReceivedWME itemWME;
+		with( success_test {
+				itemWME = (ItemReceivedWME itemName::drinkName avatarName::avName)
+				(ItemReceivedWME.isInList(drinkName, DRINK_ITEMS))
+		}) wait;
+		
+		mental_act{}
+		subgoal Wait(2000);
+		subgoal TurnAndWait(avName);
+		subgoal Wait(1000);
+		subgoal PlayGesture(";)");
+		subgoal Wait(3500);
+		act wearItem(drinkName);
+		subgoal Wait(10000);
+	}
+	
+	
+	 /*
+	 *	Play Dance Gesture, with no head movement (assumed to be using hotkeys)
+	 *
+	 */
+	 sequential behavior PlayGesture(String gestureName)
+	 {
+		specificity 2;
+		precondition {
+			(AnimationWME.isDance(gestureName)) //dance gesture
+			(SelfWME name::selfName)
+			(ObjectWME name=="footobject" ownerName==selfName objectId::objId)
+			(randomNumGen.nextDouble() < 0.65)
+		}
+		
+		
+		
+		subgoal Wait(350);
+		act playGesture(gestureName);
+		subgoal Wait(1500);
+		
+	 
+	 
+	 }
+	 
+	 /*
+	 *	Play Gesture, with a head movement to ground
+	 *
+	 */
+	 sequential behavior PlayGesture(String gestureName)
+	 {
+		specificity 1;
+		precondition {
+			(SelfWME name::selfName)
+			(ObjectWME name=="footobject" ownerName==selfName objectId::objId)
+			(randomNumGen.nextDouble() < 0.5)
+		}
+		
+		
+		act lookAtObjectById(objId);
+		subgoal Wait(2500);
+		act resetHead();
+		subgoal Wait(50);
+		act resetHead();
+		act playGesture(gestureName);
+		subgoal Wait(500);
+		
+	 
+	 
+	 }
+	 
+	 sequential behavior PlayGesture(String gestureName)
+	 {
+
+		subgoal Wait(350);
+		act playGesture(gestureName);
+		subgoal Wait(1500);
+	 
+	 
+	 }
+	 
+	 
+	 sequential behavior StandIfSitting() {
+	 
+		precondition {
+			(SelfWME sitting == true)
+		}
+		
+		act stand();
+	}
+	
+	sequential behavior StandIfSitting() {
+	
+		precondition {
+			(SelfWME sitting==false)
+		}
+		
+		succeed_step;
+	}
+	
+	
+	sequential behavior Wait(int millis) {
+		long startTime;
+		mental_act{}
+		with( success_test {
+				((System.currentTimeMillis() - startTime) > (long)millis)
+		}) wait;
+		
+	}
+				
+	sequential behavior TurnAndWait(String avatarName) {
+		
+		act turnTowards(avatarName);
+		subgoal Wait(700);
+
+	}
+	
+	sequential behavior TurnAndWait(double x, double y) {
+	
+	
+		act turnTowards(x, y);
+		subgoal Wait(700);
+	}
+	
+	//better name for this, but it moves to a location and returns when
+	//the location is reached
+	
+	sequential behavior WalkAndWait(double x, double y, double z) {
+		double buffer;
+		mental_act{}
+		
+		with (priority 10) subgoal DoWalkAndWait(x, y, z, buffer);
+	}
+	
+	sequential behavior WalkAndWait(double x, double y, double z, double buffer) {
+		
+		with (priority 10) subgoal DoWalkAndWait(x, y, z, buffer);
+	}
+	
+	
+	sequential behavior DoWalkAndWait(double x, double y, double z, double buffer) {
+		specificity 1;
+		precondition {
+			(SelfWME x::myX y::myY z::myZ)
+		}
+		SelfWME self;
+		long startTime;
+		double currentDistance, normX, normY, newX, newY;
+		mental_act{}
+		act walkTo(newX,newY,z);
+		mental_act{}	
+		
+		with( success_test { 
+				self = (SelfWME)
+				(
+					( 
+						(Math.abs(self.getX() - newX) <= 1.5) && 
+						(Math.abs(self.getY() - newY) <= 1.5)
+					) 
+					||
+					((System.currentTimeMillis() - startTime) > 4000)
+				) 
+				} ) wait;
+				
+				
+		mental_act{}	
+		
+		succeed_step;
+	}
+	
+
+	sequential behavior WalkAndWait(String targetName, double buffer) {
+		precondition {
+			(AvatarWME name == targetName x::targetX y::targetY z::targetZ)
+		}
+		
+		subgoal WalkAndWait(targetX, targetY, targetZ, buffer);
+		
+	}
+	
+	
+	sequential behavior WalkAndWait(String targetName) {
+		
+		with (priority 10) subgoal DoWalkAndWait(targetName);
+	}
+	
+	
+	sequential behavior DoWalkAndWait(String targetName) {
+		precondition {
+			self = (SelfWME)
+			(AvatarWME name == targetName x::targetX y::targetY z::targetZ)
+			/*( 
+				!((Math.abs(self.getX() - targetX) <= 1.0) && 
+				(Math.abs(self.getY() - targetY) <= 1.0))
+			) */
+		}
+		long startTime;
+		
+		act walkTo(targetName);
+		mental_act{}
+		with( success_test { 
+				self = (SelfWME)
+				//(AvatarWME name == targetName x::targetX y::targetY)
+				(
+					/*( 
+						(Math.abs(self.getX() - targetX) <= 1.0) && 
+						(Math.abs(self.getY() - targetY) <= 1.0)
+					) */
+					
+					( 
+						(Math.abs(self.getX() - targetX) <= 1.0) && 
+						(Math.abs(self.getY() - targetY) <= 1.0)
+					) 
+					||
+					((System.currentTimeMillis() - startTime) > 4000)
+				) 
+				} ) wait;
+		
+		mental_act{}	
+		
+		succeed_step;
+	}	
+	
+	/**
+	 * If any character is within a minimum distance of the agent, back up.
+	 */
+	parallel behavior MaintainMinSocialDistance() {
+		
+		with (persistent) subgoal TimeoutAnger();
+		with (persistent) subgoal WaitForBump();
+	}
+	
+	
+	/*
+	 *	
+	 *
+	 */
+	sequential behavior TimeoutAnger() {
+		long lastTime;
+		AngryWME angerWME;
+		with( success_test {
+				angerWME = (AngryWME lastIncident::lastTime)
+				((System.currentTimeMillis() - lastTime) > 25000)	
+		}) wait;
+		
+		mental_act{}
+
+	}
+	
+	sequential behavior WaitForBump() {
+		AvatarWME a;
+		SelfWME self;
+		String nudgeDir;
+		String avatarName;
+		
+		
+		
+		with( success_test  {
+			a = (AvatarWME x::otherX y::otherY name::avatarName)
+			self = (SelfWME x::selfX y::selfY)
+			//distance from avatar to self
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.INTIMATE, a, self))
+			!(AutoPilotWME)
+			//(minDist >= Math.sqrt( (selfX - otherX)*(selfX - otherX) + (selfY - otherY)*(selfY - otherY)))
+		}) wait;
+
+		mental_act{}
+		
+		subgoal KeepDistancePerformance(avatarName, nudgeDir);
+	}
+		
+	
+	
+	
+	
+	
+	
+	/* Group member response - always neutral, no emotional gesture
+	 */
+	sequential behavior KeepDistancePerformance(String avatarName, String nudgeDirection) {
+	
+		precondition {
+			(GroupMemberWME name == avatarName)
+
+		}
+		
+		subgoal Wait(300);
+		subgoal TurnAndWait(avatarName);
+		
+		act nudgeMove(nudgeDirection);
+	
+		subgoal Wait(500);
+
+	}
+	
+	/* Normal non-group member non-angry bump response
+	 */
+	sequential behavior KeepDistancePerformance(String avatarName, String nudgeDirection) {
+	
+		precondition {
+			!(GroupMemberWME name == avatarName)
+			!(AngryWME name == avatarName)
+		
+		}
+		
+		subgoal Wait(300);
+		subgoal TurnAndWait(avatarName);
+		subgoal Wait(2000);
+		act nudgeMove(nudgeDirection);
+		
+		mental_act{}
+		
+		subgoal Wait(500);
+		
+		
+	
+	}
+
+	
+	/* Anger-building bump response, for non group members
+     *
+	 */
+	sequential behavior KeepDistancePerformance(String avatarName, String nudgeDirection) {
+	
+		precondition {
+			anger = (AngryWME name == avatarName strength < 1.0 strength::oldStrength lastIncident::lastTime)
+			((System.currentTimeMillis() - lastTime) < 15000)
+		
+		}
+		
+	
+		subgoal TurnAndWait(avatarName);
+		subgoal Wait(300);
+		mental_act{}
+		act nudgeMove(nudgeDirection);
+		subgoal Wait(700);
+		subgoal PlayGesture("/no");
+		subgoal Wait(500);
+	
+	
+	}
+	
+	/* Very angry bump response, for non group members
+	 *
+	 */
+	sequential behavior KeepDistancePerformance(String avatarName, String nudgeDirection) {
+	
+		precondition {
+			anger = (AngryWME name == avatarName strength > 1.0 strength::oldStrength lastIncident::lastTime)
+			((System.currentTimeMillis() - lastTime) < 15000)
+		
+		}
+		
+	
+		subgoal TurnAndWait(avatarName);
+		mental_act{}
+		act nudgeMove(nudgeDirection);
+		subgoal Wait(100);
+		subgoal PlayGesture("/scold");
+		subgoal Wait(500);
+	
+	
+	}
+	
+	sequential behavior ShuffleWME(String wmeType) {
+        //Total Hack: Manually shuffle story state so author goals can match randomly to WME's
+        mental_act{}
+    }
+	
+	sequential behavior EliminateDuplicateAnimationEvents() {
+		AnimationWME anim1, anim2;
+		String selfName, animName, avName;
+		long animTime1, animTime2;
+		
+		
+		with( success_test  {
+			self = (SelfWME name::selfName)
+			anim1 = (AnimationWME avatarName::avName animationName::animName timeMS::animTime1)
+			anim2 = (AnimationWME avatarName==avName animationName==animName timeMS::animTime2)
+			(anim1 != anim2)
+			(Math.abs(animTime1 - animTime2) < 100)	
+		}) wait;
+
+		mental_act{}
+	}
+		
+	/**************************************************************************
+	 * Transition Behaviors - behaviors that clean up WMEs to move to a new behavior subtree.
+	 *************************************************************************/
+	
+	/**
+	 * Removes all WMEs associated with behavior subtrees.
+	 */
+	sequential behavior CleanForTransition() {
+		specificity 1;
+		precondition {
+			ccWME = (ChatCircleWME)
+		}
+			
+		mental_act{}
+	}
+	
+	sequential behavior CleanForTransition() {
+		specificity 1;
+		precondition {
+			gdWME = (GetDrinkWME)
+		}
+			
+		mental_act{}
+	}
+	
+	sequential behavior CleanForTransition() {
+		specificity 1;
+		precondition {
+			gWME = (GreetWME)
+		}
+			
+		mental_act{}
+	}
+	
+	sequential behavior CleanForTransition() {
+		specificity 1;
+		precondition {
+			soloWME = (SoloDanceWME)
+		}
+			
+		mental_act{}
+	}	
+	
+	sequential behavior CleanForTransition() {
+		
+		
+		mental_act{}
+		
+	}
+	
+	/**
+	 * Returns avatar behavior to that of the previous subtree. If there was no previous subtree,
+	 * default to ChatCircle.
+	 */
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="ChatCircle")
+		}
+		mental_act{}
+		subgoal TransitionToChatCircle();
+	}
+	
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="DanceCircle")
+		}
+		mental_act{}
+		subgoal TransitionToDanceCircle();
+	}
+	
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="GetDrink")
+		}
+		mental_act{}
+		
+		subgoal TransitionToGetDrink();
+	}
+	
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="StageDance")
+		}
+		mental_act{}
+		
+		subgoal TransitionToStageDance();
+	}
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="Greet")
+		}
+		mental_act{}
+		
+		subgoal TransitionToStageDance();
+	}
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 1;
+		precondition {
+			(LastStateWME stateName=="SoloDance")
+		}
+		mental_act{}
+		
+		subgoal TransitionToStageDance();
+	}
+	sequential behavior TransitionToPreviousSubtree() {
+		specificity 0;
+		
+		mental_act{}
+		
+		subgoal TransitionToChatCircle();
+	}
+	
+	/**
+	 * Transitions to the StageDance behavior tree.
+	 */
+	sequential behavior TransitionToStageDance() {
+		mental_act{}
+	}
+	
+	/**
+	 * Transitions to the GetADrink behavior tree.
+	 */
+	sequential behavior TransitionToGetDrink() {
+		
+		//subgoal CleanForTransition();
+		
+		mental_act{}
+		subgoal Wait(1000);
+		//with (priority 0) subgoal MakeAGetDrinkWME();
+	}
+	
+	sequential behavior MakeAGetDrinkWME() {
+		mental_act{}
+	}
+  
+	/**
+	 * Transitions to the ChatCircle behavior tree.
+	 */
+	sequential behavior TransitionToChatCircle() {
+		mental_act{}
+	}
+	
+	/**
+	 * Transitions to the DanceCircle behavior tree.
+	 */
+	sequential behavior TransitionToDanceCircle() {
+		mental_act{}
+	}
+	
+	/**
+	 * Transitions to the Greet behavior tree.
+	 */
+	sequential behavior TransitionToGreet(String targetName) {
+		mental_act{}
+	}
+	/**
+	 * Transitions to the SoloDance behavior tree.
+	 */
+	sequential behavior TransitionToSoloDance(boolean performer, String target) {
+		mental_act{}
+	}
+	/**************************************************************************
+	 * StageDance
+	 *
+	 * Agent goes to the stage and dances for a while.
+	 *************************************************************************/
+	sequential behavior EnterStageDance() {
+		StageDanceWME sd;
+		with (success_test {
+			sd=(StageDanceWME)
+		} ) wait;
+		mental_act{}
+		//go to the stage
+		subgoal WalkAndWait(stageX, stageY, stageZ);
+		//face the bar
+		subgoal TurnAndWait(faceBarFromStageX, faceBarFromStageY);
+		//dance for a a while.
+		with (priority 1) subgoal SD_Master();
+	}
+	
+	parallel behavior SD_Master() {
+		context_condition {
+			(StageDanceWME)
+		}
+		//int danceStartTime;
+		
+		with (persistent) subgoal HumanLocationAdjustment();
+		with (persistent) subgoal MaintainMinSocialDistance(); 
+		with (persistent) subgoal SD_TransitionOut();
+		with (persistent) subgoal SD_PerformStageDance();
+		with (persistent) subgoal SD_ContinueDancing();
+		
+		/* with (success_test {
+			
+			//(BehavingEntity.truePrintln( ""+(System.currentTimeMillis() - danceStartTime) + " " + ((System.currentTimeMillis() - danceStartTime) > 60000.0)))
+			((System.currentTimeMillis() - danceStartTime) > 60000.0)
+			//(BehavingEntity.truePrintln( ""+danceStartTime ))
+			//(BehavingEntity.truePrintln( ""+(int)(System.currentTimeMillis())))
+		}) subgoal PerformStageDance(); */
+		//go back to previous state.
+		//subgoal TransitionToPreviousSubtree();
+		
+	}
+	
+	
+	sequential behavior SD_PerformStageDance() {
+		String danceGestureName;
+		mental_act{}
+		subgoal PlayGesture(danceGestureName);
+		subgoal Wait(3000);
+	}
+	
+	sequential behavior SD_ContinueDancing() {
+		precondition {
+			stageDanceWME = (StageDanceWME)
+		}
+		AnimationWME danceAnim;
+		AvatarWME targetAvatar;
+		SelfWME self;
+		String avName;
+		
+		
+		with (success_test {
+			danceAnim = (AnimationWME avatarName::avName isDance==true)
+			targetAvatar = (AvatarWME name == avName)
+			self = (SelfWME)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+		} ) wait;
+		
+		subgoal SD_RespondToStageDanceDanceGesture(avName, danceAnim);
+		subgoal Wait(500);
+	}
+	
+	/*
+	 * Group Member dancing - increase dance time, and turn toward avatar
+	 */
+	sequential behavior SD_RespondToStageDanceDanceGesture(String avatarName, AnimationWME danceAnim) {
+		precondition {
+			stageDanceWME = (StageDanceWME)
+			(GroupMemberWME name == avatarName)
+		
+		}	
+		
+		mental_act{}
+		
+		//Always turn towards last dancer
+		act turnTowards(avatarName);
+	
+		
+	
+	}
+	
+	/*
+	 * Non Group Member dancing -  turn toward avatar
+	 */
+	sequential behavior SD_RespondToStageDanceDanceGesture(String avatarName, AnimationWME danceAnim) {
+		precondition {
+			!(GroupMemberWME name == avatarName)
+		
+		}
+		
+		mental_act{}
+		//Always turn towards last dancer
+		act turnTowards(avatarName);
+
+	}
+	
+	
+	
+	
+	sequential behavior SD_TransitionOut() {
+	
+
+		with (success_test {
+			(StageDanceWME startTime::sdStartTime)
+			(System.currentTimeMillis() - sdStartTime > 35000)
+		} ) wait;
+		
+		
+		subgoal TransitionToChatCircle();
+	}
+	
+	/**************************************************************************
+	 *  Get Waiter Drink - get a drink if I don't have one, and waiter is near 
+	 *  and is looking at me
+	 * 
+	 *************************************************************************/
+	 
+	 sequential behavior EnterGetWaiterDrink() {
+		AvatarWME waiterAvatar;
+		SelfWME self; 
+		
+		with (success_test {
+			(ChatCircleWME)
+			self = (SelfWME)
+			!(HaveDrinkWME)
+			waiterAvatar = (AvatarWME isWaiter == true)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, waiterAvatar, self))
+			(AvatarWME.gazeAngleBetween(waiterAvatar, self) < 35.0)
+		} ) wait;
+		
+		
+		subgoal TransitionToGetDrink();
+	}
+
+	
+	
+	/**************************************************************************
+	 * GetDrink
+	 *
+	 * Agent goes to the bar (or potentially a waiter) to get a drink.
+	 *************************************************************************/
+	sequential behavior EnterGetDrink() {
+		with (success_test {
+			(GetDrinkWME)
+		} ) wait;
+		with (priority 1) subgoal GD_Master();
+	}
+	
+	parallel behavior GD_Master() {
+		context_condition {
+			(GetDrinkWME)
+		}
+		
+		with (priority 50) subgoal ShuffleWME("AvatarWME");
+		
+		subgoal GD_Performance();
+		with (persistent) subgoal HumanLocationAdjustment();
+		with (persistent) subgoal MaintainMinSocialDistance();
+	
+	}
+	
+	/**
+	 * Get Drink at bar if no close waiter
+	 */
+	  
+	sequential behavior GD_Performance() {
+		precondition {
+			!(AvatarWME isWaiter == true distanceFromSelf < 3.0)
+			(ObjectWME name=="BARTENDER hsr03" objectId::objId)
+		
+		}
+		
+		String boredGesture;
+		String pointYouGesture;
+		String winkBangGesture;
+		String drinkName;
+		
+
+		mental_act{}
+		
+		//go to the bar
+		subgoal WalkAndWait(barFrontX, barFrontY, barFrontZ);
+		//face the baar
+		act turnTowards(barBehindX, barBehindY);
+		//wait a bit, tap foot or something to show that we're deciding on a drink
+		//subgoal Wait(3000);
+		//subgoal PlayGesture(boredGesture);
+		subgoal Wait(1500);
+		act touchObjectById(objId);
+		subgoal Wait(2500);
+		act touchObjectById(); //stop touching
+		subgoal Wait(350);
+		act touchObjectById();
+		subgoal Wait(250);
+		act touchObjectById();
+		
+		mental_act{}
+		
+		subgoal Wait(3500);
+		act wearItem(drinkName);
+		subgoal Wait(1000);
+		subgoal PlayGesture(winkBangGesture);
+		//go back to previous behavior subtree
+		subgoal TransitionToPreviousSubtree();
+		
+	}
+	
+	/**
+	 * Get Drink at waiter/waitress - go to close waiter/waitress first
+	 */
+	 sequential behavior GD_Performance() {
+		specificity 2;
+		precondition {
+			(AvatarWME name::targetName isWaiter == true distanceFromSelf < 3.0)
+			(ObjectWME ownerName==targetName name=="BARTENDER hsr02" objectId::objId)
+		
+		}
+		
+		subgoal GD_PerformanceWithWaiter(targetName, objId);
+		
+		
+	}
+	
+	
+	 /**
+	 * Get Drink at waiter/waitress - go to any waiter/waitress within a reasonable far distance
+	 */
+	sequential behavior GD_Performance() {
+		precondition {
+			(AvatarWME name::targetName isWaiter == true distanceFromSelf < 6.0)
+			(ObjectWME ownerName==targetName name=="BARTENDER hsr02" objectId::objId)
+		
+		}
+		
+		subgoal GD_PerformanceWithWaiter(targetName, objId);
+		
+		
+	}
+	
+	
+	
+	/**
+	 * Do performance where we go to selected waiter/waitress and get a drink
+	 */
+	sequential behavior GD_PerformanceWithWaiter(String waiterName, String bartenderObjectId) {
+		
+		String boredGesture;
+		String pointYouGesture;
+		String winkBangGesture;
+		String drinkName;
+		String waveGesture;
+		
+
+		mental_act{}
+		
+		//go to the waiter
+		subgoal TurnAndWait(waiterName);
+		subgoal PlayGesture(waveGesture);
+		subgoal Wait(500);
+		subgoal WalkAndWait(waiterName, PERSONAL_BUFFER);
+		//face the waiter
+		subgoal TurnAndWait(waiterName);
+		//wait a bit, tap foot or something to show that we're deciding on a drink
+		subgoal Wait(500);
+		act touchObjectById(bartenderObjectId);
+		subgoal Wait(2500);
+		act touchObjectById(); //stop touching
+		subgoal Wait(350);
+		act touchObjectById();
+		subgoal Wait(250);
+		act touchObjectById();
+		
+		//wear a drink
+		
+		mental_act{}
+		
+		act wearItem(drinkName);
+		subgoal Wait(200);
+		subgoal PlayGesture(winkBangGesture);
+		subgoal Wait(500);
+		//go back to previous behavior subtree
+		subgoal TransitionToPreviousSubtree();
+		
+	}
+	
+	
+	/**************************************************************************
+	 *  dance circle
+	 *
+	 * 
+	 *************************************************************************/
+	 
+	sequential behavior EnterDanceCircle() {
+		with (success_test {
+			(DanceCircleWME)
+		} ) wait;
+		with (priority 1) subgoal DC_Master();
+	}
+  
+	/**
+	 * A global way to start the DanceCircle subtree from ChatCircle. This looks for two people that are within your social distance
+	 *  who are dancing. If this is the case, you transition to the DanceCircle subtree.
+	 */
+	sequential behavior EnterDanceCircleFromOthersDancing() {
+		SelfWME self;
+		AvatarWME a1;
+		AvatarWME a2;
+		AnimationWME anim1;
+		AnimationWME anim2;
+		with (success_test {
+			/* 2 different avatars that are dancing, near each other and at least on of the is near the holodeck avatar. */
+			(ChatCircleWME)
+			self=(SelfWME)
+			a1=(AvatarWME name::a1Name)
+			a2=(AvatarWME name != a1Name name::a2Name)
+			(GroupMemberWME name == a1Name)
+			(GroupMemberWME name == a2Name)
+			(!a1Name.equals(a2Name))
+			anim1=(AnimationWME avatarName==a1Name isDance==true)
+			anim2=(AnimationWME avatarName==a2Name isDance==true)
+			(AnimationWME.isSimultaneous(anim1, anim2)) //within 1.5 seconds of each other
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, a2))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, self) || AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a2, self))
+		} ) wait;
+		
+		mental_act{}
+		
+		subgoal TransitionToDanceCircle();
+		subgoal Wait(15000);
+	}
+  
+	parallel behavior DC_Master() {
+		context_condition {
+			(DanceCircleWME)
+		}
+		
+		with (persistent) subgoal HumanLocationAdjustment();
+		//with (persistent) subgoal MaintainMinSocialDistance();
+		with (persistent) subgoal Regular_BeNearAGroupMember();
+		with (persistent) subgoal DC_Facing();
+		//monitor dances and other appropriate gestures
+		with (persistent) subgoal DC_MonitorDanceCircle();
+		with (priority 5, persistent) subgoal DC_JoinGroupDance(); //Always prioritize group dance detection to find animations first
+		with (persistent) subgoal DC_KeepDancing();
+		with (persistent) subgoal DC_TransitionOut();
+		
+		
+		//perform dance circle behaviors
+		with (persistent) subgoal DC_Perform();
+
+		
+		
+		
+		
+		//manage transitions and preformance initiation
+	}
+	
+	sequential behavior DC_Facing() {
+	
+		subgoal Regular_FaceGroup();
+		subgoal Wait(3400);
+	}
+	
+	/**
+	 * Monitors the behavior of other agents while in the dance circle subtree. It will queue 
+	 * simple call/response and mimic gestures and/or dances that are appropriate to the tree.
+	 */
+	sequential behavior DC_MonitorDanceCircle() {
+		//When an agent is nearby and they gesture, continue
+		String aName;
+		String animation;
+		String gestureNameToPlay;
+		String incomingGesture;
+		DanceCircleWME danceCircleWME;
+		AnimationWME animWME;
+		boolean response;
+		double gazeAngle;
+		
+		with (success_test {
+			a = (AvatarWME name::aName)
+			self = (SelfWME)
+			(GroupMemberWME name == aName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a, self))
+			animWME = (AnimationWME avatarName==aName animationName::animation otherGazeAngle::gazeAngle)
+			((animWME.getIsDance()) || (animWME.getIsGesture()))
+			danceCircleWME = (DanceCircleWME)
+		}) wait;
+		
+		
+		
+		//categorize the animation and update the conversation
+		mental_act{}
+		
+		//Throttle monitoring
+		subgoal Wait(1000);
+		
+	}
+	
+	/**
+	 * If 3 seconds has passed and we have not performed a dance, we
+	 * will perform a dance gesture
+	 */
+	sequential behavior DC_KeepDancing() {
+		DanceCircleWME dcWME;
+		long myLastDanceTime;
+		String danceGestureName;
+		with(success_test {
+			dcWME = (DanceCircleWME myLastDanceTime::myLastDanceTime)
+			(System.currentTimeMillis() - myLastDanceTime > 2000)
+		}) wait;
+		
+	
+		mental_act{}
+		
+		subgoal Wait(3000);
+		
+		
+	}	
+			
+			
+		
+	
+	sequential behavior DC_JoinGroupDance() {
+		SelfWME self;
+		AvatarWME a1;
+		AvatarWME a2;
+		AnimationWME anim1;
+		AnimationWME anim2;
+		PerformGestureWME perfGestureWME;
+		with (success_test {
+			/* 2 different avatars that are dancing, near each other and at least on of the is near the holodeck avatar. Both are performing the same dance.*/
+			self=(SelfWME)
+			a1=(AvatarWME name::a1Name)
+			a2=(AvatarWME name != a1Name name::a2Name)
+			(!a1Name.equals(a2Name))
+			anim1=(AnimationWME avatarName==a1Name animationName::anim1Name isDance==true)
+			anim2=(AnimationWME avatarName==a2Name animationName == anim1Name isDance==true)
+			//the same dance
+			(AnimationWME.isSimultaneous(anim1, anim2))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, a2))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, self) || AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a2, self))
+		} ) wait;
+		
+		
+		mental_act{}
+		
+		subgoal Wait(3000);
+	}
+	
+	/**
+	 * Performs the gestures while in DanceCircle.
+	 */
+	sequential behavior DC_Perform() {
+	    specificity 1;
+		String gesture;
+		String gestureTargetName;
+		PerformGestureWME perfGestureWME;
+		DanceCircleWME dcWME;
+		int timeToNextPerformance;
+		boolean response;
+		with (success_test {
+			perfGestureWME=(PerformGestureWME gestureName::gesture targetName::gestureTargetName isResponse::response)
+			//(AnimationWME.isDance(gesture))
+			dcWME = (DanceCircleWME)
+		}) wait;
+		
+		mental_act{}
+		
+		
+		subgoal Wait(100);
+		with (ignore_failure) subgoal Regular_TurnToIfNamed(gestureTargetName);
+	
+		subgoal PlayGesture(gesture);
+		subgoal Wait(timeToNextPerformance);
+		mental_act{}
+	}
+  
+  
+  	sequential behavior DC_TransitionOut() {
+	
+
+		with (success_test {
+			(DanceCircleWME lastDanceTime::lastDanceT)
+			(System.currentTimeMillis() - lastDanceT > 15000)
+		} ) wait;
+		
+		mental_act{}
+		
+		subgoal TransitionToPreviousSubtree();
+	}
+  
+
+	/**************************************************************************
+	 *  Solo Dance
+	 *
+	 * 
+	 *************************************************************************/
+	 
+	 sequential behavior EnterSoloDance() {
+		with (success_test {
+			(SoloDanceWME)
+		} ) wait;
+		with (priority 1) subgoal SO_Master();
+	}
+  
+	/**
+	 * A global way to start the SoloDance subtree. This triggers when two group members clap at us in a dance circle.
+	 */
+	sequential behavior EnterSoloDanceAsPerformer() {
+		SelfWME self;
+		AvatarWME a1;
+		AvatarWME a2;
+		AnimationWME clap1;
+		AnimationWME clap2;
+		AnimationWME selfAnim;
+		with (success_test {
+			/* 2 different avatars that are dancing, near each other and at least on of the is near the holodeck avatar. */
+			!(SoloDanceWME)
+			self=(SelfWME name::selfName)
+			a1=(AvatarWME name::a1Name)
+			a2=(AvatarWME name != a1Name name::a2Name)
+			(GroupMemberWME name == a1Name)
+			(GroupMemberWME name == a2Name)
+			(!a1Name.equals(a2Name))
+			selfAnim=(AnimationWME avatarName==selfName isDance == true)
+			clap1=(AnimationWME avatarName==a1Name animationName::anim1Name otherGazeAngle < 15.0)
+			clap2=(AnimationWME avatarName==a2Name animationName == anim1Name otherGazeAngle < 15.0)
+			(clap1.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(clap2.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, a2))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, self) || AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a2, self))
+		} ) wait;
+		
+		
+		mental_act{}
+		subgoal TransitionToSoloDance(true, "");
+		subgoal Wait(5000);
+		
+	}
+	
+	/**
+	 * A global way to start the SoloDance subtree. This triggers when me and another avatar claps at some other avatar dancing
+	 */
+	sequential behavior EnterSoloDanceAsAudienceMeAndOther() {
+		SelfWME self;
+		AvatarWME otherAvatar;
+		AvatarWME dancerAvatar;
+		AnimationWME clap1;
+		AnimationWME clap2;
+		AnimationWME danceAnim;
+		String dancerName;
+		with (success_test {
+			/* 2 different avatars that are dancing near each other and at least one of them is near the holodeck avatar. */
+			!(SoloDanceWME)
+			self=(SelfWME name::myName)
+			otherAvatar=(AvatarWME name::otherName)
+			dancerAvatar=(AvatarWME name != otherName name::dancerName)
+			
+			(GroupMemberWME name == otherName)
+			(GroupMemberWME name == dancerName)
+			clap1=(AnimationWME avatarName==otherName)
+			(clap1.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(AvatarWME.gazeAngleBetween(otherAvatar, dancerAvatar) < 15.0)
+			clap2=(AnimationWME avatarName==myName)
+			(clap2.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(AvatarWME.gazeAngleBetween(self, dancerAvatar) < 15.0)
+			danceAnim=(AnimationWME avatarName==dancerName isDance == true)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, otherAvatar, dancerAvatar))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, otherAvatar, self) || AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, dancerAvatar, self))
+		} ) wait;
+		
+		mental_act{}
+		subgoal TransitionToSoloDance(false, dancerName);
+	}
+	/**
+	 * A global way to start the SoloDance subtree from ChatCircle as the audience. This triggers when two group members clap at another group member
+	 * while in ChatCircle
+	 */
+	sequential behavior EnterSoloDanceAsAudience() {
+		SelfWME self;
+		AvatarWME a1;
+		AvatarWME a2;
+		AvatarWME targetAvatar;
+		AnimationWME clap1;
+		AnimationWME clap2;
+		AnimationWME danceAnim;
+		String targetName;
+		with (success_test {
+			/* 2 different avatars that are dancing near each other and at least one of them is near the holodeck avatar. */
+			!(SoloDanceWME)
+			self=(SelfWME)
+			a1=(AvatarWME name::a1Name)
+			a2=(AvatarWME name != a1Name name::a2Name)
+			targetAvatar=(AvatarWME name !=a1Name name != a2Name name::targetName)
+			(GroupMemberWME name == a1Name)
+			(GroupMemberWME name == a2Name)
+			(GroupMemberWME name == targetName)
+			clap1=(AnimationWME avatarName==a1Name animationName::anim1Name)
+			(clap1.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(AvatarWME.gazeAngleBetween(a1, targetAvatar) < 15.0)
+			clap2=(AnimationWME avatarName==a2Name animationName==anim1Name)
+			(clap2.gestureName().equals(AnimationWME.Gestures.CLAP))
+			(AvatarWME.gazeAngleBetween(a2, targetAvatar) < 15.0)
+			danceAnim=(AnimationWME avatarName==targetName isDance == true)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, targetAvatar))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a2, targetAvatar))
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a1, self) || AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a2, self))
+		} ) wait;
+		
+		mental_act{}
+		subgoal TransitionToSoloDance(false, targetName);
+	}
+	
+	parallel behavior SO_Master() {
+		context_condition {
+			(SoloDanceWME)
+		}
+		//int danceStartTime;
+		
+		with (persistent) subgoal HumanLocationAdjustment();
+		with (persistent) subgoal MaintainMinSocialDistance(); 
+		with (persistent) subgoal SO_TransitionOut();
+		with (persistent) subgoal Regular_BeNearAGroupMember();
+		with (persistent) subgoal SO_Perform();
+		with (persistent) subgoal SO_ContinueSoloDancing();
+		
+
+		
+	}
+	
+	/**
+	 * Solo Dance actions as performer
+	 */
+	sequential behavior SO_Perform() {
+		precondition {
+			(SoloDanceWME performer == true)
+		}
+		String danceGestureName;
+		mental_act{}
+		subgoal PlayGesture(danceGestureName);
+		subgoal Wait(3000);
+	}
+	
+	/**
+	 * Solo Dance actions as audience
+	 */
+	sequential behavior SO_Perform() {
+		precondition {
+			(SoloDanceWME performer == false)
+		}
+		String clapGestureName;
+		mental_act{}
+		subgoal PlayGesture(clapGestureName);
+		subgoal Wait(3000);
+	}
+	
+	
+	//Continue dancing as performer if people keep clapping
+	sequential behavior SO_ContinueSoloDancing() {
+		precondition {
+			sdWME = (SoloDanceWME performer == true)
+		}
+		AnimationWME someAnim;
+		AvatarWME targetAvatar;
+		SelfWME self;
+		String avName;
+		
+		
+		with (success_test {
+			someAnim = (AnimationWME avatarName::avName)
+			(someAnim.gestureName().equals(AnimationWME.Gestures.CLAP))
+			targetAvatar = (AvatarWME name == avName)
+			(GroupMemberWME name == avName)
+			
+			self = (SelfWME)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+		} ) wait;
+		
+		
+		mental_act{}
+		
+		//Always turn towards last dancer
+		act turnTowards(avName);
+		subgoal Wait(1000);
+	
+	}
+	
+	//Continue dancing as performer if people keep clapping
+	sequential behavior SO_ContinueSoloDancing() {
+		precondition {
+			sdWME = (SoloDanceWME performer == false target::performerAvatar)
+		}
+		AnimationWME someAnim;
+		AvatarWME targetAvatar;
+		SelfWME self;
+		
+		
+		with (success_test {
+			someAnim = (AnimationWME avatarName == performerAvatar isDance == true)
+			targetAvatar = (AvatarWME name == performerAvatar)
+			(GroupMemberWME name == performerAvatar)
+			
+			self = (SelfWME)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, targetAvatar, self))
+		} ) wait;
+		
+		
+		mental_act{}
+		
+		//Always turn towards performer
+		act turnTowards(performerAvatar);
+		subgoal Wait(1000);
+	}
+	
+	
+	sequential behavior SO_TransitionOut() {
+	
+
+		with (success_test {
+			(SoloDanceWME startTime::sdStartTime)
+			(System.currentTimeMillis() - sdStartTime > 20000)
+		} ) wait;
+		
+		
+		subgoal TransitionToPreviousSubtree();
+	}
+	
+	
+	/**************************************************************************
+	 *  Greeting
+	 *
+	 * 
+	 *************************************************************************/
+	 
+	 sequential behavior EnterGreeting() {
+		with (success_test {
+			(GreetWME)
+		} ) wait;
+		with (priority 1) subgoal GR_Master();
+	}
+	
+	//Detect YES_BANG gesture from group member to unknown avatar
+	
+	sequential behavior EnterDetectGreetingByGroupMember() {
+		AnimationWME acceptanceAnim;
+		String newAvatarName;
+		String groupMemberName;
+		with (success_test {
+			(ChatCircleWME)
+			self=(SelfWME)
+			newAvatar=(AvatarWME name::newAvatarName isWaiter == false)
+			!(GroupMemberWME name == newAvatarName)
+			groupAvatar = (AvatarWME name::groupMemberName)
+			(GroupMemberWME name == groupMemberName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, newAvatar, groupAvatar))
+			acceptanceAnim=(AnimationWME avatarName==groupMemberName)
+			(acceptanceAnim.gestureName().equals(AnimationWME.Gestures.YES_BANG))
+			(AvatarWME.gazeAngleBetween(groupAvatar, newAvatar) < 15.0)
+
+		} ) wait;
+		
+		
+		mental_act{}
+	
+	
+	}
+	
+	
+	/**
+	 * Enter greeting sequence from Chat Circle, if new non-waiter avatar waves at us and is close to us
+	 */
+	sequential behavior EnterGreetingFromChatCircle() {
+		SelfWME self;
+		AvatarWME newAvatar;
+		AnimationWME greetingAnim;
+		String newAvatarName;
+		with (success_test {
+			(ChatCircleWME)
+			self=(SelfWME)
+			newAvatar=(AvatarWME name::newAvatarName isWaiter == false)
+			!(GroupMemberWME name == newAvatarName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, newAvatar, self))
+			greetingAnim=(AnimationWME avatarName==newAvatarName otherGazeAngle < 35.0)
+			(greetingAnim.gestureName().equals(AnimationWME.Gestures.WAVE))
+
+		} ) wait;
+		
+		
+	
+		mental_act{}
+		subgoal TransitionToGreet(newAvatarName);
+	
+	}
+	
+	sequential behavior EnterGreetingFromChatCircleWithParticipant() {
+		SelfWME self;
+		AvatarWME newAvatar;
+		AnimationWME greetingAnim;
+		String newAvatarName;
+		with (success_test {
+			(ChatCircleWME)
+			self=(SelfWME)
+			newAvatar=(AvatarWME name::newAvatarName isWaiter == false isParticipant==true)
+			!(GroupMemberWME name == newAvatarName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, newAvatar, self))
+			(AvatarWME.gazeAngleBetween(newAvatar, self) < 25.0)
+			greetingAnim=(AnimationWME avatarName==newAvatarName otherGazeAngle < 45.0 isGesture==true)
+			(randomNumGen.nextDouble() < 0.35)
+		} ) wait;
+		
+		
+	
+		mental_act{}
+		subgoal TransitionToGreet(newAvatarName);
+		subgoal Wait(15000);
+	
+	}
+	
+	parallel behavior GR_Master() {
+		context_condition {
+			(GreetWME targetName::avatarName)
+		}
+		
+		with (persistent) subgoal HumanLocationAdjustment();
+		with (persistent) subgoal MaintainMinSocialDistance();
+		with (persistent) subgoal GR_TransitionOut();
+		subgoal GR_Perform(avatarName);
+	}
+	
+	
+	/**
+	 * Solo Dance actions as audience
+	 */
+	sequential behavior GR_Perform(String avatarName) {
+		
+		String gestureName;
+		mental_act{}
+		subgoal TurnAndWait(avatarName);
+		subgoal Wait(1000);
+		subgoal PlayGesture(gestureName);
+		mental_act{}
+		subgoal Wait(3000);
+		
+		subgoal TransitionToPreviousSubtree();
+		
+	}
+	
+	
+	/**
+	 *
+	 * Time out after a while
+	 */
+	sequential behavior GR_TransitionOut() {
+	
+
+		with (success_test {
+			(GreetWME startTime::greetStartTime)
+			(System.currentTimeMillis() - greetStartTime > 25000)
+		} ) wait;
+		
+		
+		subgoal TransitionToPreviousSubtree();
+	}
+	
+
+
+	
+	/**************************************************************************
+	 * chat circle - close proximity, frequent gestures, and drinking. All facing a common middle point
+	 *
+	 * The middle point is the average location of the regulars.
+	 *
+	 * This state can be entered if the current agent state is idle (aka not in another behavior subtree) for a period of time.
+	 *
+	 *************************************************************************/
+	
+	/**
+	 * The root of the subtree for the ChatCircle behaviors. This should be invoked by an intent
+	 * formation behavior. It manages mental an phyiscal aspects of being in a chat circle and
+	 * determines when the chat circle should end.
+	 *
+	 *If there is no ChatCircleWME, the chat circle ends.
+	 */
+	 
+	sequential behavior EnterChatCircle() {
+		with (success_test {
+			(ChatCircleWME)
+		} ) wait;
+		with (priority 1) subgoal CC_Master();
+	}
+	
+	parallel behavior CC_Master() {
+		context_condition {
+			(ChatCircleWME)
+		}
+		
+		with (persistent) subgoal HumanLocationAdjustment();
+		with (persistent) subgoal MaintainMinSocialDistance();
+		with (persistent) subgoal Regular_BeNearAGroupMember();
+		with (persistent) subgoal CC_Facing(5000);
+		with (persistent) subgoal CC_MonitorConversation();
+		with (persistent) subgoal CC_UpdateConversationMemory();
+		with (priority 10, persistent) subgoal CC_Perform();
+		with (persistent) subgoal CC_ManagePerformanceInitiation();
+		with (persistent) subgoal CC_SitMonitor();
+		with (persistent) subgoal CC_StandMonitor();
+	}
+	
+	/**
+	 * Detects cases in which the regular would want to initiate performances (gesture patterns)
+	 * while in a chat circle.
+	 *
+	 * If group is idle, start a gesture pattern, walk somewhere else and transition behavior, 
+	 * initiate a dance circle, get a drink from the bar and come back, go to the stage and
+	 * dance.
+	 */
+	sequential behavior CC_ManagePerformanceInitiation() {
+		precondition {
+			ccWME = (ChatCircleWME)
+		}
+		mental_act{}
+		subgoal Wait(5100);
+		with (ignore_failure) subgoal CC_InitiateFromIdle();
+		
+	}
+	
+	/**
+	 * If chat circle is idle for a while, start a preformance.
+	 *
+	 * 20 seconds idle -- \bored or dance
+	 */
+	sequential behavior CC_InitiateFromIdle() {
+		specificity 0;
+		precondition {
+			cc = (ChatCircleWME timeSinceLastGesture::t)
+			(t > 20000 && t < 35000)
+			(randomNumGen.nextDouble() < 0.6)
+			!(AngryWME)
+		}
+		String gestureToPlay;
+		
+		mental_act{}
+		
+		subgoal Wait(1000);
+	}
+	
+	/**
+	 * If chat circle is idle for a while, start a preformance.
+	 *
+	 * 35 seconds idle -- 
+	 */
+	sequential behavior CC_InitiateFromIdle() {
+		specificity 1;
+		precondition {
+			cc = (ChatCircleWME timeSinceLastGesture::t)
+			(t > 45000 && t < 65000)
+			!(AngryWME)
+		}
+		
+		mental_act{}
+		
+		subgoal PlayGesture("/pointyou");
+		subgoal Wait(4000);
+		subgoal PlayGesture("/nya");
+	}
+	
+	/**
+	 * If there was not previous state, transition to GetDrink.
+	 */
+	sequential behavior CC_InitiateFromIdle() {
+		specificity 2;
+		precondition {
+			cc = (ChatCircleWME)
+			(randomNumGen.nextDouble() < 0.6)
+			(cc.getTimeSinceLastGesture() > 85000)
+			!(AngryWME)
+		}
+		
+		mental_act{}
+		subgoal StandIfSitting();
+		subgoal Wait(2000);
+		subgoal TransitionToGetDrink();
+	}
+	
+	/**
+	 * If chat circle is idle for a while, start a preformance.
+	 * 25 seconds idle -- go get a drink
+	 */
+	sequential behavior CC_InitiateFromIdle() {
+		specificity 3;
+		precondition {
+			(LastStateWME stateName=="StageDance")
+			(randomNumGen.nextDouble() < 0.6)
+			cc = (ChatCircleWME)
+			(cc.getTimeSinceLastGesture() > 85000)
+			!(AngryWME)
+			
+		}
+		
+		mental_act{}
+		
+		subgoal StandIfSitting();
+		subgoal Wait(2000);
+		subgoal TransitionToGetDrink();
+	}
+	
+	/**
+	 * If chat circle is idle for a while, start a preformance.
+	 * 25 seconds idle -- go dance
+	 */
+	sequential behavior CC_InitiateFromIdle() {
+		specificity 3;
+		precondition {
+			(LastStateWME stateName=="GetDrink")
+			(randomNumGen.nextDouble() < 0.6)
+			cc = (ChatCircleWME)
+			// (cc.getTimeSinceLastGesture() > 60000)
+			(cc.getTimeSinceLastGesture() > 85000)
+			!(AngryWME)
+		}
+		mental_act{}
+		subgoal StandIfSitting();
+		subgoal Wait(2000);
+		subgoal TransitionToStageDance();
+	}
+	
+	/**
+	 * Mimic behavior of other agents in the chat circle once every 5 seconds.
+	 */
+	sequential behavior CC_Perform() {
+		specificity 1;
+		String gesture;
+		String gestureTargetName;
+		PerformGestureWME pgWME;
+		int timeToNextPerformance;
+		boolean response;
+		with (success_test {
+			pgWME=(PerformGestureWME gestureName::gesture targetName::gestureTargetName isResponse::response)
+		}) wait;
+		
+		mental_act{}
+		
+		subgoal Wait(1500);
+		with (ignore_failure) subgoal Regular_TurnToIfNamed(gestureTargetName);
+		subgoal PlayGesture(gesture);
+		subgoal Wait(timeToNextPerformance);
+		mental_act{}
+	}
+	
+	
+	
+	
+	sequential behavior CC_UpdateConversationMemory() {
+		precondition {
+			chatCircleWME = (ChatCircleWME)
+		}
+		
+		int decayDelay;
+	
+		mental_act{}
+		
+		subgoal Wait(decayDelay);
+	
+	}
+	 
+	
+
+	sequential behavior CC_SitMonitor() {
+		String objId;
+		double targetX;
+		double targetY;
+		double targetZ;
+		ChatCircleWME ccWME;
+		
+		with (success_test {
+			self = (SelfWME sitting==false)
+			a = (AvatarWME name::aName sitting==true)
+			(GroupMemberWME name == aName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a, self))
+			ccWME = (ChatCircleWME)
+			objWME = (ObjectWME distanceFromSelf < 2.0 objectId::objId isSeat==true x::targetX y::targetY z::targetZ)
+			(ObjectWME.distanceBetween(objWME, a) > 2.0)
+			!(AngryWME)
+		}) wait;
+		
+		
+		mental_act{}
+		
+		subgoal TurnAndWait(targetX, targetY);
+		//subgoal WalkAndWait(targetX, targetY, targetZ);
+		act touchObjectById(objId);
+		subgoal Wait(3000);
+		act touchObjectById(); //stop touching
+		subgoal Wait(500);
+		act touchObjectById(); //stop touching
+		subgoal Wait(300);
+		act sitOnById(objId);
+		subgoal Wait(1000);
+		act sitOnById(objId);
+		
+		
+		
+		
+		
+	}
+	
+	sequential behavior CC_StandMonitor() {
+		ChatCircleWME ccWME;
+		with (success_test {
+			!(AvatarWME name::aName sitting==true isGroupMember==true)
+			self = (SelfWME sitting==true)
+			ccWME = (ChatCircleWME)
+		}) wait;
+		
+		
+		mental_act{}
+		subgoal Wait(3000);
+		act stand();
+		subgoal Wait(500);
+		act stand();
+		subgoal Wait(1000);
+		act stand();
+		
+		
+		
+		
+	}
+	
+	sequential behavior CC_MonitorConversation() {
+		//When an agent is nearby and they gesture, continue
+		String aName;
+		String animation;
+		String gestureNameToPlay;
+		String incomingGesture;
+		ChatCircleWME chatCircleWME;
+		AnimationWME animWME;
+		boolean response;
+		String targetName;
+		
+		subgoal ShuffleWME("AnimationWME");
+		with (success_test {
+			a = (AvatarWME name::aName)
+			self = (SelfWME)
+			(GroupMemberWME name == aName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a, self))
+			animWME = (AnimationWME avatarName==aName animationName::animation isGesture==true)
+			chatCircleWME = (ChatCircleWME)
+		}) wait;
+		
+		
+		
+		//categorize the animation and update the conversation
+		mental_act{}
+		
+		with (ignore_failure) subgoal CC_RespondToConversation(animWME, incomingGesture, aName);
+		//Throttle monitoring			
+		subgoal Wait(2000);
+	
+	}
+	
+
+		
+	/* response pairs (if first, perform second):
+	 * embarrassed laugh
+	 * bow clap 
+	 * clap bow (solo performance)
+	 * no! shrug
+	 * cry embarrassed
+	 */
+		
+	
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			ccWME = (ChatCircleWME)
+			(randomNumGen.nextDouble() < 0.6)
+			(AnimationWME.Gestures.EMBARRASSED.equals(gestureName))
+		}
+	
+		
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+		
+		
+	
+	}
+	
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			ccWME = (ChatCircleWME)
+			(randomNumGen.nextDouble() < 0.6)
+			(AnimationWME.Gestures.BOW.equals(gestureName))
+		}
+		
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+	
+	}
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			ccWME = (ChatCircleWME)
+			(randomNumGen.nextDouble() < 0.6)
+			(AnimationWME.Gestures.NO_BANG.equals(gestureName))
+		}
+		
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+	
+	}
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			(randomNumGen.nextDouble() < 0.6)
+			ccWME = (ChatCircleWME)
+			(AnimationWME.Gestures.CRY.equals(gestureName))
+		}
+		
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+	
+	}
+	
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			ccWME = (ChatCircleWME)
+			(AnimationWME.Gestures.POINTYOU.equals(gestureName))
+		}
+	
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+	
+	}
+	
+	
+	//Clap at dance
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			(SelfWME sitting == false)
+			ccWME = (ChatCircleWME)
+			(anim.getIsDance() == true)
+			(randomNumGen.nextDouble() < 0.4)
+		}
+		subgoal Wait(1000);
+		subgoal TurnAndWait(avatarName);
+		
+		mental_act{}
+	
+	}
+	
+	
+	//Mimic dance
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		specificity 1;
+		precondition {
+			(SelfWME sitting == false)
+			ccWME = (ChatCircleWME)
+			(anim.getIsDance() == true)
+			(randomNumGen.nextDouble() < 0.4)
+		}
+		
+		subgoal Wait(1000);
+		subgoal TurnAndWait(avatarName);
+		
+		
+		mental_act{}
+	
+	}
+	
+	//Nothing, just consume event
+	sequential behavior CC_RespondToConversation(AnimationWME anim, String gestureName, String avatarName) {
+		
+		subgoal Wait(2000);
+		mental_act{}
+	
+	}
+	
+	sequential behavior CC_Facing(int updateInterval) {
+		precondition {
+			(SelfWME sitting==false)
+		}
+		GroupCenterWME groupCenterWME;
+		//int waitTime;
+		double turnX;
+		double turnY;
+
+		subgoal Wait(updateInterval);
+		subgoal Regular_FaceGroup();
+	
+	}
+	
+	
+	/*
+	 *
+	 *	General behaviors specific to the Regular
+	 *
+	 *
+	 */
+	
+	sequential behavior Regular_TurnToIfNamed(String name) {
+		precondition{
+			(!name.equals(""))
+		}
+		act turnTowards(name);
+	}
+	
+	
+	
+	sequential behavior Regular_FaceGroup() {
+		specificity 3;
+		precondition {
+			self = (SelfWME)
+			a = (AvatarWME name::avatarName)
+			(GroupMemberWME name == avatarName)
+			(AvatarWME.gazeAngleBetween(self, a) < 90.0)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, a, self))
+		}
+		
+		double totalX;
+		double totalY;
+		double totalZ;
+		double count;
+		double destX;
+		double destY;
+		AvatarWME a;
+		AvatarWME avTarget;
+		mental_act{}
+		
+		subgoal TurnAndWait(destX, destY);
+		
+		//Possibely move away from group center if too close
+		with (ignore_failure) subgoal Regular_FaceGroupKeepDistance(destX, destY);
+			
+		
+	}
+	
+	sequential behavior Regular_FaceGroupKeepDistance(double targetX, double targetY) {
+		precondition {
+			(SelfWME x::selfX y::selfY)
+			(SensorUtilities.DistanceBetween(selfX, selfY, targetX, targetY) < AvatarWME.SocialDistanceThresholdValues.INTIMATE)
+		}
+		String direction;
+		mental_act{}
+		
+		act nudgeMove(direction);
+	
+	}
+	
+	
+	
+	/*
+	 * Wait for non-waiter non-group member to be near a regular, then trigger a timer that automatically adds
+	 * the non group member as a member if they are around a regular for a length of time
+	 */
+	sequential behavior Regular_TimeinGroupMembership() {
+	
+		AvatarWME potentialGroupMember;
+		
+		with( success_test {
+		
+			
+			potentialGroupMember = (AvatarWME name::avName isWaiter==false)
+			!(GroupMemberWME name == avName)
+			regular = (AvatarWME name::gmName isRegular == true)
+			(GroupMemberWME name==gmName)
+		    (AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, regular, potentialGroupMember))
+		
+		}) wait;
+		
+		subgoal Regular_AddPotentialGroupMember(potentialGroupMember);
+	
+	}
+	
+	/*
+	 * This behavior is a timer with a context condition that ensures our potential group member is always
+	 * close to a regular, and only adds this potential new person to the group if they stick around
+	 * until our Wait() goal is finished.
+	 */
+	sequential behavior Regular_AddPotentialGroupMember(AvatarWME potentialGroupMember) {
+		context_condition {
+			regular = (AvatarWME name::gmName isRegular == true)
+			(GroupMemberWME name==gmName)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, regular, potentialGroupMember))
+	
+		}
+		
+		String newGroupMemberName;
+		String winkBangGesture;
+
+		
+		mental_act{}
+		//35 second timer
+		subgoal Wait(35000);
+		
+		mental_act{}
+		
+		subgoal TurnAndWait(newGroupMemberName);
+		subgoal PlayGesture(winkBangGesture);
+	
+	}
+	
+	
+	//NOTE: these won't work to update ALL group members, only the first matching one
+	//Case for being near self
+	/*sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 1;
+		precondition {
+		
+			self = (SelfWME)
+			groupMemberWME = (GroupMemberWME name::groupMemberName)
+			nonRegularGroupMember = (AvatarWME name==groupMemberName isRegular == false)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, nonRegularGroupMember, self))
+		}
+		
+		mental_act{}
+		
+		subgoal Wait(1000);
+	
+	}*/
+	
+	//Case for being near some regular
+	/*sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 1;
+		precondition {
+		
+			regular = (AvatarWME name::otherGroupMemName isRegular == true)
+			groupMemberWME = (GroupMemberWME name::groupMemberName)
+			nonRegularGroupMember = (AvatarWME name==groupMemberName isRegular == false)
+			(AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, nonRegularGroupMember, regular))
+		}
+		
+		mental_act{}
+		
+		subgoal Wait(1000);
+	
+	}*/
+	
+	
+	
+	
+	
+	
+	//Membership timeout Case for not being near self
+	sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 3;
+		precondition {
+			self = (SelfWME)
+			groupMemberWME = (GroupMemberWME name::groupMemberName lastContactMS::lastContact)
+			nonRegularGroupMember = (AvatarWME name==groupMemberName isRegular == false)
+			(!AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.PERSONAL, nonRegularGroupMember, self))
+			(System.currentTimeMillis() - lastContact > 60000)
+			
+		}
+		
+		mental_act{}
+		
+		subgoal Wait(500);
+	
+	}
+	
+	//Membership timout Case for not being near some regular
+	sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 3;
+		precondition {
+			regular = (AvatarWME name::regName isRegular==true)
+			(GroupMemberWME name==regName)
+			groupMemberWME = (GroupMemberWME name::groupMemberName lastContactMS::lastContact)
+			nonRegularGroupMember = (AvatarWME name==groupMemberName isRegular == false)
+			(!AvatarWME.withinSocialDistance(AvatarWME.SocialDistance.SOCIAL, nonRegularGroupMember, regular))
+			(System.currentTimeMillis() - lastContact > 60000)
+			
+		}
+		
+		mental_act{}
+		
+		subgoal Wait(500);
+	
+	}
+	
+	
+	//Update all last contact times, if nobody times out of group membership
+	sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 2;
+		
+		
+		mental_act{}
+		
+		subgoal Wait(500);
+	
+	}
+	
+	/*
+	 * Do nothing and wait for next check time
+	 */
+	sequential behavior Regular_TimeoutGroupMembership() {
+		specificity 1;
+		subgoal Wait(500);
+	}
+	
+	
+	
+	
+	
+	
+	//add a static function to self: SelfWME.location()
+	//inside public method getDistanceFromSelf() in AvatarWME use SelfWME.location() to find proximic info
+	
+	/**
+	* If we are not near a regular, move to regular.
+	*/
+	sequential behavior Regular_BeNearAGroupMember() {
+		double xloc, yloc, zloc;
+		String followAvatarName;
+		String groupMemberName;
+		long startTime;
+		
+		mental_act{}
+		
+		subgoal ShuffleWME("GroupMemberWME");
+		subgoal ShuffleWME("AvatarWME");
+		
+		
+		
+		
+		with( success_test {
+			((System.currentTimeMillis() - startTime) > 2500)
+			(SelfWME x::myX y::myY z::myZ sitting==false)
+			!(AvatarWME isGroupMember==true distanceFromSelf<2.7)
+			(AvatarWME name::followAvatarName isRegular==true x::xloc y::yloc z::zloc)
+			(GroupMemberWME name==followAvatarName)
+		}) wait;
+		
+		
+		mental_act{}
+	
+		subgoal StandIfSitting();
+		subgoal Wait(1200);
+		subgoal TurnAndWait(followAvatarName);
+		subgoal WalkAndWait(xloc, yloc, zloc, PERSONAL_BUFFER);
+		subgoal TurnAndWait(followAvatarName);
+	}
+  	
+	/**
+	 *
+	 *	Put regulars in the initial group
+	 */
+	sequential behavior Regular_SetupInitialGroupMembers() {
+	
+		mental_act{}
+	}
+	
+	sequential behavior Regular_PrintOutDistanceToSomebody(String avatarName) {
+	
+		precondition {
+			self = (SelfWME)
+			avWME = (AvatarWME name==avatarName)
+		}
+		
+		mental_act{}
+		subgoal Wait(750);
+	}
+	
+	
+	sequential behavior Regular_PrintOutDistanceToSomebody(String avatarName) {
+	
+		precondition {
+			!(AvatarWME name==avatarName)
+		}
+		
+		
+		subgoal Wait(3000);
+	}
+	
+    initial_tree 
+    {
+		//Setup before behaviors begin
+		with (priority 50) subgoal Regular_SetupInitialGroupMembers();
+		with (priority 50) subgoal ClearDrinksInHand();
+		
+		
+		//Start out in Chat Circle
+ 		with(priority 1) subgoal  TransitionToChatCircle();
+		
+		
+		//with(priority 1) subgoal TransitionToDanceCircle();
+		//with(priority 1) subgoal TransitionToGetDrink();
+		//with(priority 1) act removeItem("Margarita");
+		
+		
+		//behavior subtree entry points
+		with(priority 10, persistent) subgoal EnterChatCircle();
+		
+		//DanceCircle triggers
+		with(priority 10, persistent) subgoal EnterDanceCircle();
+		with(priority 10, persistent) subgoal EnterDanceCircleFromOthersDancing();
+		
+		//SoloDance triggers
+		with(priority 10, persistent) subgoal EnterSoloDance();
+		with(priority 10, persistent) subgoal EnterSoloDanceAsPerformer();
+		with(priority 10, persistent) subgoal EnterSoloDanceAsAudience();
+		with(priority 10, persistent) subgoal EnterSoloDanceAsAudienceMeAndOther();
+		
+		//Greeting triggers
+		with(priority 10, persistent) subgoal EnterGreeting();
+		with(priority 10, persistent) subgoal EnterGreetingFromChatCircle();
+		with(priority 10, persistent) subgoal EnterGreetingFromChatCircleWithParticipant();
+		with(priority 10, persistent) subgoal EnterDetectGreetingByGroupMember();
+		
+		//GetDrink triggers
+		with(priority 10, persistent) subgoal EnterGetWaiterDrink();
+	
+		with(priority 10, persistent) subgoal EnterGetDrink();
+		
+		with(priority 10, persistent) subgoal EnterStageDance();
+	
+		//Group Membership time-out for non regulars
+		with(priority 10, persistent) subgoal Regular_TimeoutGroupMembership();
+		
+		//Group member ship automatic add for people hanging around us
+		with(priority 10, persistent) subgoal Regular_TimeinGroupMembership();
+	
+	
+		//Drink Triggers
+		with(priority 10, persistent) subgoal TimeoutDrink();
+		with(priority 10, persistent) subgoal AlwaysTakeDrink();
+		
+		
+		//DEBUG print
+		//with(priority 10, persistent, ignore_failure) subgoal Regular_PrintOutDistanceToSomebody("Terry Rushwald");
+		//general behaviors to be active at all times
+		//with(persistent) subgoal MaintainMinSocialDistance(); 
+
+    }
+}

@@ -16,12 +16,12 @@ exports.behavingEntityTests = {
        @method simple
     */
     simple : function(test){
-        var parseString = "behaving_entity blah { initial_tree { fail; } };"
+        var parseString = "behaving_entity Blah { initial_tree { fail; } };"
         var startRule = "behavingEntity";
         var result = ABLModule.parse(parseString,startRule);
 
-        
         test.ok(result.length === 1);
+        test.ok(result[0].name === "Blah");
         
         test.done();
     },

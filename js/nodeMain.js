@@ -10,13 +10,11 @@
 var fs = require('fs');
 var ABLModule = require('./ABLModule');
 
-var testInput = "package blah; import amodule; "
-              + " behaving_entity Something{"
-              + " initial_tree {"
-              + " fail; } }";
 
-console.log("Antlr Test");
+fs.readFile(process.argv[2],'utf8',function(err,data){
+    console.log("File Loaded");
+    console.log("Selection: ",data.slice(0,300));
+    var result = ABLModule.parse(data);
+    console.log("Result:",result);
 
-var result = ABLModule.parse(testInput);
-
-console.log("Result:",result);
+});

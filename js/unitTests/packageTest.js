@@ -38,13 +38,13 @@ exports.packageImportTests = {
        Verify behaviour of no value specified
        @method noPackageFail
      */
-    noPackageFail : function(test){
-        var parseString = "package;";
-        test.throws(function(){
-            var result = ABLModule.parse(parseString,startRule);
-        });
-        test.done();
-    },
+    // noPackageFail : function(test){
+    //     var parseString = "package;";
+    //     test.throws(function(){
+    //         var result = ABLModule.parse(parseString,startRule);
+    //     });
+    //     test.done();
+    // },
 
     /**
        Verify only the first package is recorded

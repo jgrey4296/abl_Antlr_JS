@@ -7,8 +7,8 @@ import AblTokens;
 prog : g_package? g_import* constants behavingEntity EOF;
 
 //g_ = grammar. As antlr will complain of conflicting keywords with target language
-g_package : 'package' CHARS ';';
-g_import : 'import' CHARS STAR?';'; //todo .*?
+g_package : 'package' name ';';
+g_import : 'import' name STAR?';'; //todo .*?
 constants : ('constants' TYPE ';')*;
 
 teamNeeded
@@ -24,13 +24,15 @@ wmeRegistration_plural : (wmeRegistration)+;
 //Literal:
 ablLiteral : INT | FLOAT | string | BOOL | NULL;
 
-ablExpression : name | ablLiteral;
-
 
 //Generic parameters rule
 params : '(' param? (',' param)* ')';
 param : TYPE ablExpression?
     | TYPE? ablExpression;
+
+javaMethod : BANG? name params;
+ablExpression : name | ablLiteral | javaMethod | conditionalExpression;
+
 
 //Action Registration:
 actionRegistration : 'register' 'action' name params 'with' TYPE';';
@@ -44,8 +46,10 @@ ablVariableDeclarations : name name (',' name)* ';';
 ablVariableLiteralAssignment  : name name '=' ablLiteral';';
 ablVariableAssignment : name name '=' 'new' classConstruction';';
 
-classConstruction : name ('(' name ('('')')?')'
-                          | '{' string? (',' string)* '}');
+classConstruction : name (internalConstruction | arrayConstruction);
+internalConstruction : '(' name ('('')')?')';
+arrayConstruction : '{' string (',' string)* '}';
+
 
 //WME Declaration:
 wmeDeclaration : 'wme' TYPE ('extends' TYPE)? '{' ablVariableDeclaration* '}';
@@ -55,7 +59,7 @@ propertyDeclaration : 'property' TYPE name ';';
 
 
 //WME Field Test:
-operator : BIND | GT | GE | LT | LE | EQ | NE;
+operator : BIND | GT | GE | LT | LE | EQ | NE | PLUS | MINUS | DIV | MOD | POW;
 wmeFieldTest : name operator ablExpression;
 
 //WME TEST:
@@ -64,11 +68,9 @@ wmeFieldTest : name operator ablExpression;
 //TODO: on v2 change '=' to '::'
 wmeTest : (name ('=' | '::'))? BANG? '(' TYPE wmeFieldTest* ')';
 
-binaryOp : BANG? ablExpression (operator ablExpression)?;
-javaMethod : BANG? name params;
-clause : BOOL | name | javaMethod | binaryOp;
-booleanHelper : AND | OR;
-mixedCall : clause ((booleanHelper) clause)*;
+binaryOp :  ablExpression (operator ablExpression)?;
+clause : binaryOp;
+mixedCall : clause (( AND | OR) clause)*;
 
 conditionalExpression : '(' mixedCall ')';
 
@@ -137,9 +139,10 @@ goalStep : JOINT? (SUBGOAL | SPAWNGOAL) name params? ('at' name)?';';
 //Modify step skipped as no examples
 
 //Mental Act would go here:
+mentalAct : 'mental_act' '{' '}';
 
 //Behaviour Step:
-behaviourStep : ('with' '(' stepModifier (',' stepModifier)* ')')? (goalStep | primitiveAct | basicStep);
+behaviourStep : ('with' '(' stepModifier (',' stepModifier)* ')')? (goalStep | primitiveAct | basicStep | mentalAct);
 
 //TODO:Anonymous block
 

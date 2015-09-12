@@ -92,15 +92,6 @@ ABLListener.prototype.exitAblLiteral = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ABLParser#ablExpression.
-ABLListener.prototype.enterAblExpression = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#ablExpression.
-ABLListener.prototype.exitAblExpression = function(ctx) {
-};
-
-
 // Enter a parse tree produced by ABLParser#params.
 ABLListener.prototype.enterParams = function(ctx) {
 };
@@ -116,6 +107,24 @@ ABLListener.prototype.enterParam = function(ctx) {
 
 // Exit a parse tree produced by ABLParser#param.
 ABLListener.prototype.exitParam = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#javaMethod.
+ABLListener.prototype.enterJavaMethod = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#javaMethod.
+ABLListener.prototype.exitJavaMethod = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#ablExpression.
+ABLListener.prototype.enterAblExpression = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#ablExpression.
+ABLListener.prototype.exitAblExpression = function(ctx) {
 };
 
 
@@ -173,6 +182,24 @@ ABLListener.prototype.exitClassConstruction = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#internalConstruction.
+ABLListener.prototype.enterInternalConstruction = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#internalConstruction.
+ABLListener.prototype.exitInternalConstruction = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#arrayConstruction.
+ABLListener.prototype.enterArrayConstruction = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#arrayConstruction.
+ABLListener.prototype.exitArrayConstruction = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#wmeDeclaration.
 ABLListener.prototype.enterWmeDeclaration = function(ctx) {
 };
@@ -227,30 +254,12 @@ ABLListener.prototype.exitBinaryOp = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ABLParser#javaMethod.
-ABLListener.prototype.enterJavaMethod = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#javaMethod.
-ABLListener.prototype.exitJavaMethod = function(ctx) {
-};
-
-
 // Enter a parse tree produced by ABLParser#clause.
 ABLListener.prototype.enterClause = function(ctx) {
 };
 
 // Exit a parse tree produced by ABLParser#clause.
 ABLListener.prototype.exitClause = function(ctx) {
-};
-
-
-// Enter a parse tree produced by ABLParser#booleanHelper.
-ABLListener.prototype.enterBooleanHelper = function(ctx) {
-};
-
-// Exit a parse tree produced by ABLParser#booleanHelper.
-ABLListener.prototype.exitBooleanHelper = function(ctx) {
 };
 
 
@@ -431,6 +440,15 @@ ABLListener.prototype.enterGoalStep = function(ctx) {
 
 // Exit a parse tree produced by ABLParser#goalStep.
 ABLListener.prototype.exitGoalStep = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ABLParser#mentalAct.
+ABLListener.prototype.enterMentalAct = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#mentalAct.
+ABLListener.prototype.exitMentalAct = function(ctx) {
 };
 
 

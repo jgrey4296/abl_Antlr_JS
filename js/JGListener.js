@@ -52,13 +52,13 @@ JGListener.prototype.lastOnStack = function(ctx){
    @method enterG_package
  */
 JGListener.prototype.enterG_package = function(ctx){
-    if(ctx.CHARS().getText() === "<missing undefined>"){
+    if(ctx.name().getText() === "<missing undefined>"){
         throw new Error("Package missing TYPE");
     }
 
     this.parsedStack.push({
             type : "package",
-            name : ctx.CHARS().getText(),
+            name : ctx.name().getText(),
         });
 };
 
@@ -73,8 +73,8 @@ JGListener.prototype.enterG_import = function(ctx){
         name : undefined
     };
 
-    if(ctx.CHARS() && ctx.CHARS().getText() !== "<missing undefined>"){
-        outObj.name = ctx.CHARS().getText();
+    if(ctx.name() && ctx.name().getText() !== "<missing undefined>"){
+        outObj.name = ctx.name().getText();
     }
     
     if(ctx.STAR()){
@@ -396,6 +396,12 @@ JGListener.prototype.exitAblExpression = function(ctx){
         outObj.value = this.parsedStack.pop();
         outObj.varType = "ablLiteral";
         this.parsedStack.push(outObj);
+    }else if(ctx.javaMethod() && this.itemsOnStack() && this.lastOnStack().type === "javaMethod"){
+        outObj.value = this.parsedStack.pop();
+        outObj.varType = "javaMethod";
+    }else if(ctx.conditionalExpression() && this.itemsOnStack() && this.lastOnStack().type === "conditionalExpression"){
+        outObj.value = this.parsedStack.pop();
+        outObj.varType = "conditionalExpression";
     }
 };
 
@@ -493,14 +499,10 @@ JGListener.prototype.exitWmeTest = function(ctx){
 JGListener.prototype.exitBinaryOp = function(ctx){
     var outObj = {
         type : "binaryOp",
-        bang : false,
         expression : [],
         operator : undefined
     };
 
-    if(ctx.BANG()){
-        outObj.bang = true;
-    }
 
     if(ctx.ablExpression().length === 2 && this.itemsOnStack()
        && this.lastOnStack().type === "ablExpression"){
@@ -548,22 +550,11 @@ JGListener.prototype.exitJavaMethod = function(ctx){
 JGListener.prototype.exitClause = function(ctx){
     var outObj = {
         type : 'clause',
-        child : undefined
+        child : undefined,
     };
 
-    if(ctx.BOOL()){
-        if(ctx.BOOL().getText() === "True"){
-            outObj.child = true;
-        }else{
-            outObj.child = false;
-        }
-    }else if(ctx.name()){
-        outObj.child = ctx.name().getText();
-    }else if(ctx.javaMethod()
-             && this.lastOnStack().type === "javaMethod"){
-        outObj.child = this.parsedStack.pop();
-    }else if(ctx.binaryOp()
-             && this.lastOnStack().type === "binaryOp"){
+    
+    if(ctx.binaryOp() && this.lastOnStack().type === "binaryOp"){
         outObj.child = this.parsedStack.pop();
     }    
 
@@ -926,6 +917,12 @@ JGListener.prototype.exitGoalStep = function(ctx){
     
 };
 
+JGListener.prototype.enterMentalAct = function(ctx){
+    this.parsedStack.push({
+        type : "mentalAct",
+    });
+};
+
 JGListener.prototype.exitBehaviourStep = function(ctx){
     var outObj = {
         type : "behaviourStep",
@@ -937,7 +934,8 @@ JGListener.prototype.exitBehaviourStep = function(ctx){
     
     if(this.itemsOnStack() && prev && (prev.type === "basicStep"
                                        || prev.type === "goalStep"
-                                      || prev.type === "primitiveAct")){
+                                       || prev.type === "primitiveAct"
+                                      || prev.type === "mentalAct")){
         outObj.step = this.parsedStack.pop();
     }
 

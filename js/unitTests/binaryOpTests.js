@@ -14,12 +14,11 @@ exports.binaryOpTests = {
        @method simple
     */
     simple : function(test){
-        var parseString = "! something == 5";
+        var parseString = "something == 5";
         var startRule = "binaryOp";
         var result = ABLModule.parse(parseString,startRule);
         test.ok(result.length === 1);
         test.ok(result[0].type === "binaryOp");
-        test.ok(result[0].bang === true);
         test.ok(result[0].expression.length == 2);
         test.ok(result[0].expression[0].type === "ablExpression");
         test.ok(result[0].expression[0].value === "something");

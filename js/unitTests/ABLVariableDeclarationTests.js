@@ -77,5 +77,19 @@ exports.ABLVariableDeclarationTests = {
         test.ok(result[0].value === "Random(System.currentTimeMillis())");
 
         test.done();
-    }
+    },
+
+    fromAblExampleStringArray : function(test){
+        var parseString = 'String[] DRINK_ITEMS = new String[]{"Straw-Banana Daiquiri","Margarita","MANHATTAN","Bloody Mary"};';
+        var startRule = "ablVariableDeclaration";
+        var result = ABLModule.parse(parseString,startRule);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "ablVariableDeclaration");
+        test.ok(result[0].varType === "String[]");
+        test.ok(result[0].name === "DRINK_ITEMS");
+        test.ok(result[0].value === 'String[]{"Straw-Banana Daiquiri","Margarita","MANHATTAN","Bloody Mary"}',result[0].value);
+        
+        test.done();
+    },
+    
 };

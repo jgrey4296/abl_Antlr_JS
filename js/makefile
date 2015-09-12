@@ -14,9 +14,12 @@ $(GEN_FILES) : compileGrammar
 
 test : FORCE 
 	nodeunit ./unitTests/unitTests.js
+	nodeunit ./unitTests/allTests.js
 
 FORCE : 
 
 clean :
 	rm ${GEN_FILES}
 
+real :
+	node nodeMain.js ../preprocessed/filtered_Regular.abl

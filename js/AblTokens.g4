@@ -13,6 +13,14 @@ EQ : '==';
 NE : '!=';
 BANG : '!';
 
+PLUS : '+';
+MINUS : '-';
+DIV : '/';
+MOD : '%';
+POW : '^';
+
+
+
 WHEN_FAILS : 'when_fails';
 WHEN_SUCCEEDS : 'when_succeeds';
 IGNORE_FAILURE : 'ignore_failure';
@@ -55,7 +63,7 @@ INT : [0-9]+;
 //comments -> strings ->
 //whitespaceHiddenChannel -> everythingelse
 //see http://antlr.1301665.n2.nabble.com/Easy-method-of-preserving-white-space-in-string-literals-td7579040.html
-STRING : '"' (CHARS | TYPE | ' ')+ '"';
+STRING : '"' (CHARS | TYPE | ' ' | '-')+ '"';
 WS : [ \t\r\n\f]+ -> channel(HIDDEN);
 COMMENT : '/*' .*? '*/' -> channel(HIDDEN);
 LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN);

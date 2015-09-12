@@ -79,14 +79,14 @@ exports.importDeclarationTests = {
        nothing is imported
        @method failOnNoImport
      */
-    failOnNoImport : function(test){
-        var parseString = "import;";
-        var result = ABLModule.parse(parseString,startRule);
+    // failOnNoImport : function(test){
+    //     var parseString = "import;";
+    //     var result = ABLModule.parse(parseString,startRule);
 
-        test.ok(result.length === 0);
+    //     test.ok(result.length === 0);
         
-        test.done();
-    },
+    //     test.done();
+    // },
 
     /**
        Verify what happens when a keyword is misspelled

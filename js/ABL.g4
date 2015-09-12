@@ -44,7 +44,8 @@ ablVariableDeclarations : name name (',' name)* ';';
 ablVariableLiteralAssignment  : name name '=' ablLiteral';';
 ablVariableAssignment : name name '=' 'new' classConstruction';';
 
-classConstruction : name '(' name ('('')')?')';
+classConstruction : name ('(' name ('('')')?')'
+                          | '{' string? (',' string)* '}');
 
 //WME Declaration:
 wmeDeclaration : 'wme' TYPE ('extends' TYPE)? '{' ablVariableDeclaration* '}';

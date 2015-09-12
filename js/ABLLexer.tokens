@@ -93,9 +93,9 @@ ANYTHING=81
 'action'=12
 '='=13
 'new'=14
-'extends'=15
-'{'=16
-'}'=17
+'{'=15
+'}'=16
+'extends'=17
 'property'=18
 'precondition'=19
 'context_condition'=20

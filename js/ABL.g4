@@ -28,12 +28,17 @@ ablLiteral : INT | FLOAT | string | BOOL | NULL;
 //Generic parameters rule
 params : '(' param? (',' param)* ')';
 param : name ablExpression?
-    | name ? ablExpression;
+    | name ? ablExpression
+    | binaryOp;
 
 
 javaMethod : BANG? name params;
 cast : '(' name ')';
-ablExpression : cast? name | ablLiteral | javaMethod | conditionalExpression;
+ablExpression : cast?
+    name
+    | ablLiteral
+    | javaMethod
+    | conditionalExpression;
 
 
 //Action Registration:

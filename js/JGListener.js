@@ -185,6 +185,11 @@ JGListener.prototype.exitParam = function(ctx){
         outObj.value = this.parsedStack.pop();
     }
 
+    if(ctx.binaryOp() && this.lastOnStack().type === "binaryOp"){
+        outObj.value = this.parsedStack.pop();
+        outObj.varType = "binaryOp";
+    }
+    
     if(outObj.varType !== undefined || outObj.value !== undefined){
         this.parsedStack.push(outObj);
     }

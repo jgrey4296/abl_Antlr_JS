@@ -63,7 +63,7 @@ INT : '-'?[0-9]+;
 //comments -> strings ->
 //whitespaceHiddenChannel -> everythingelse
 //see http://antlr.1301665.n2.nabble.com/Easy-method-of-preserving-white-space-in-string-literals-td7579040.html
-STRING : '"' (CHARS | TYPE | ' ' | '-' | ';' | '(' | ')')+ '"';
+STRING : '"' (CHARS | TYPE | ' ' | '-' | ';' | '(' | ')' | '/')+ '"';
 WS : [ \t\r\n\f]+ -> channel(HIDDEN);
 COMMENT : '/*' .*? '*/' -> channel(HIDDEN);
 LINE_COMMENT : '//' ~[\r\n]* -> channel(HIDDEN);

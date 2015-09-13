@@ -69,8 +69,8 @@ wmeFieldTest : name operator ablExpression;
 wmeTest : (name ('=' | '::'))? BANG? '(' TYPE wmeFieldTest* ')';
 
 binaryOp :  ablExpression (operator ablExpression)?;
-clause : binaryOp;
-mixedCall : clause (( AND | OR) clause)*;
+booleanHelper : AND | OR;
+mixedCall : binaryOp (booleanHelper binaryOp)*;
 
 conditionalExpression : '(' mixedCall ')';
 

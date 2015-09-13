@@ -399,9 +399,11 @@ JGListener.prototype.exitAblExpression = function(ctx){
     }else if(ctx.javaMethod() && this.itemsOnStack() && this.lastOnStack().type === "javaMethod"){
         outObj.value = this.parsedStack.pop();
         outObj.varType = "javaMethod";
+        this.parsedStack.push(outObj);
     }else if(ctx.conditionalExpression() && this.itemsOnStack() && this.lastOnStack().type === "conditionalExpression"){
         outObj.value = this.parsedStack.pop();
         outObj.varType = "conditionalExpression";
+        this.parsedStack.push(outObj);
     }
 };
 
@@ -506,7 +508,7 @@ JGListener.prototype.exitBinaryOp = function(ctx){
 
     if(ctx.ablExpression().length === 2 && this.itemsOnStack()
        && this.lastOnStack().type === "ablExpression"){
-        outObj.expression[1] = this.parsedStack.pop();
+        outObj.expression.unshift(this.parsedStack.pop());
     }
 
     if(ctx.operator() && this.itemsOnStack()
@@ -516,7 +518,7 @@ JGListener.prototype.exitBinaryOp = function(ctx){
 
     if(ctx.ablExpression(0) && this.itemsOnStack()
        && this.lastOnStack()){
-        outObj.expression[0] = this.parsedStack.pop();
+        outObj.expression.unshift(this.parsedStack.pop());
         this.parsedStack.push(outObj);
     }
 };
@@ -554,7 +556,7 @@ JGListener.prototype.exitClause = function(ctx){
     };
 
     
-    if(ctx.binaryOp() && this.lastOnStack().type === "binaryOp"){
+    if(ctx.binaryOp() && this.lastOnStack() && this.lastOnStack().type === "binaryOp"){
         outObj.child = this.parsedStack.pop();
     }    
 
@@ -581,17 +583,17 @@ JGListener.prototype.enterBooleanHelper = function(ctx){
 
 JGListener.prototype.exitMixedCall = function(ctx){
     var outObj = {
-        type : "mixedCall",
+        type : "mixedCall", //will become a conditionalExpression
         clauses : [],
     };
 
-    while(this.parsedStack.length > 1 && this.lastOnStack().type === "clause" && this.parsedStack[this.parsedStack.length-2].type === "booleanHelper"){
+    while(this.parsedStack.length > 2 && this.lastOnStack().type === "binaryOp" && this.parsedStack[this.parsedStack.length-2].type === "booleanHelper"){
         var clause = this.parsedStack.pop();
         var op = this.parsedStack.pop();
         outObj.clauses.unshift([clause,op.value]);
     }
 
-    if(this.parsedStack.length >= 1 && this.lastOnStack().type === "clause"){
+    if(this.parsedStack.length >= 1 && this.lastOnStack().type === "binaryOp"){
         outObj.clauses.unshift([this.parsedStack.pop(),"default"]);
         this.parsedStack.push(outObj);
     }

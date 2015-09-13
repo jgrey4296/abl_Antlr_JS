@@ -254,12 +254,12 @@ ABLListener.prototype.exitBinaryOp = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ABLParser#clause.
-ABLListener.prototype.enterClause = function(ctx) {
+// Enter a parse tree produced by ABLParser#booleanHelper.
+ABLListener.prototype.enterBooleanHelper = function(ctx) {
 };
 
-// Exit a parse tree produced by ABLParser#clause.
-ABLListener.prototype.exitClause = function(ctx) {
+// Exit a parse tree produced by ABLParser#booleanHelper.
+ABLListener.prototype.exitBooleanHelper = function(ctx) {
 };
 
 

@@ -147,7 +147,7 @@ behaviourStep : ('with' '(' stepModifier (',' stepModifier)* ')')? (goalStep | p
 //TODO:Anonymous block
 
 //Behaviour Definition:
-behaviourDefinition : (JOINT | ATOMIC | ADAPTIVE)* (SEQ | PAR | COLL) BEH name params '{' (behaviourModifier | ablVariableDeclaration | behaviourStep)*; 
+behaviourDefinition : (JOINT | ATOMIC | ADAPTIVE)* (SEQ | PAR | COLL) BEH name params '{' (behaviourModifier | ablVariableDeclaration | behaviourStep)* '}'; 
 
 
 //Initial Tree!!

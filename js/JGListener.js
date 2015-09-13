@@ -1093,6 +1093,8 @@ JGListener.prototype.exitAblDeclaration = function(ctx){
 };
 
 JGListener.prototype.exitBehavingEntity = function(ctx){
+    var notRecognised = {};
+
     var outObj = {
         type : "behavingEntity",
         name : undefined,
@@ -1128,12 +1130,29 @@ JGListener.prototype.exitBehavingEntity = function(ctx){
         }else if(current.type === "teamNeeded"){
             outObj.teamNeeded = current;
         }else{
-            console.warn("Did not recognise:",current);
+            //console.warn("Did not recognise:",current);
+            if(!notRecognised[current.type]){
+                notRecognised[current.type] = [];
+            }
+            notRecognised[current.type].push(current);
+            
         }
     };
+
+    if(getKeys(notRecognised).length !== 0){
+        console.warn("Tokens were not recognised",getKeys(notRecognised));
+    }
     
     this.parsedStack.push(outObj);
     
+};
+
+var getKeys = function(obj){
+    var keys = [];
+    for(var x in obj){
+        keys.push(x);
+    }
+    return keys;
 };
 
 

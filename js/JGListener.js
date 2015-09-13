@@ -537,8 +537,14 @@ JGListener.prototype.exitJavaMethod = function(ctx){
         bang : false,
         name : undefined,
         params : undefined,
+        chain : undefined,
     };
 
+    if(this.itemsOnStack() && this.lastOnStack().type === "javaMethod" && ctx.javaMethod()){
+        outObj.chain = this.parsedStack.pop();
+    }
+    
+    
     if(ctx.BANG()){
         outObj.bang = true;
     }

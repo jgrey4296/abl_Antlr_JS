@@ -32,13 +32,12 @@ param : name ablExpression?
     | binaryOp;
 
 
-javaMethod : BANG? name params;
+javaMethod : BANG? name params ('.' javaMethod)?;
 cast : '(' name ')';
-ablExpression : cast?
-    name
-    | ablLiteral
-    | javaMethod
-    | conditionalExpression;
+ablExpression : cast? (name
+                       | ablLiteral
+                       | javaMethod
+                       | conditionalExpression);
 
 
 //Action Registration:

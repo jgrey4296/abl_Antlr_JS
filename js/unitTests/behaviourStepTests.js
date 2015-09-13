@@ -9,7 +9,7 @@ var ABLModule = require('../ABLModule');
    //Test goalStep parsing
    @class UnitTests.goalStepTests 
 */
-exports.goalStepTests = {
+exports.behaviourStepTests = {
 
     /**
        simplest possibly act
@@ -112,14 +112,12 @@ exports.goalStepTests = {
         test.ok(result[0].step.params.length === 2);
         
         test.ok(result[0].step.params[0].type === "param");
-        test.ok(result[0].step.params[0].varType === undefined);
-        test.ok(result[0].step.params[0].value.type === "ablExpression");
-        test.ok(result[0].step.params[0].value.value === "x");
+        test.ok(result[0].step.params[0].varType === "x");
+        test.ok(result[0].step.params[0].value === undefined);
 
         test.ok(result[0].step.params[1].type === "param");
-        test.ok(result[0].step.params[0].varType === undefined);
-        test.ok(result[0].step.params[0].value.type === "ablExpression");
-        test.ok(result[0].step.params[0].value.value === "x");
+        test.ok(result[0].step.params[1].varType === "y");
+        test.ok(result[0].step.params[1].value === undefined);
         
         test.done();
     },
@@ -146,12 +144,9 @@ exports.goalStepTests = {
         test.ok(result[0].step.params[0].varType === undefined);
         test.ok(result[0].step.params[0].value.type === "ablExpression");
         test.ok(result[0].step.params[0].value.value.type === "ablLiteral");
-        test.ok(result[0].step.params[0].value.value.varType === "int");
-        test.ok(result[0].step.params[0].value.value.value === "5");
-        test.ok(result[0].step.params[1].value.type === "ablExpression");
-        test.ok(result[0].step.params[1].value.varType === "name");
-        test.ok(result[0].step.params[1].value.value === "bloo");
-        test.ok(result[0].step.params[1].varType === undefined);
+
+        test.ok(result[0].step.params[1].varType === "bloo");
+        test.ok(result[0].step.params[1].value === undefined);
 
         
         test.done();

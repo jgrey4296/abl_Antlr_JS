@@ -85,9 +85,9 @@ var serializedATN = ["\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
     "\u00b9\3\2\2\2\u00b9\u00be\3\2\2\2\u00ba\u00bb\7\f\2\2\u00bb\u00bd\5",
     "\26\f\2\u00bc\u00ba\3\2\2\2\u00bd\u00c0\3\2\2\2\u00be\u00bc\3\2\2\2",
     "\u00be\u00bf\3\2\2\2\u00bf\u00c1\3\2\2\2\u00c0\u00be\3\2\2\2\u00c1\u00c2",
-    "\7\r\2\2\u00c2\25\3\2\2\2\u00c3\u00c5\7Q\2\2\u00c4\u00c6\5\32\16\2\u00c5",
-    "\u00c4\3\2\2\2\u00c5\u00c6\3\2\2\2\u00c6\u00cc\3\2\2\2\u00c7\u00c9\7",
-    "Q\2\2\u00c8\u00c7\3\2\2\2\u00c8\u00c9\3\2\2\2\u00c9\u00ca\3\2\2\2\u00ca",
+    "\7\r\2\2\u00c2\25\3\2\2\2\u00c3\u00c5\5p9\2\u00c4\u00c6\5\32\16\2\u00c5",
+    "\u00c4\3\2\2\2\u00c5\u00c6\3\2\2\2\u00c6\u00cc\3\2\2\2\u00c7\u00c9\5",
+    "p9\2\u00c8\u00c7\3\2\2\2\u00c8\u00c9\3\2\2\2\u00c9\u00ca\3\2\2\2\u00ca",
     "\u00cc\5\32\16\2\u00cb\u00c3\3\2\2\2\u00cb\u00c8\3\2\2\2\u00cc\27\3",
     "\2\2\2\u00cd\u00cf\7/\2\2\u00ce\u00cd\3\2\2\2\u00ce\u00cf\3\2\2\2\u00cf",
     "\u00d0\3\2\2\2\u00d0\u00d1\5p9\2\u00d1\u00d2\5\24\13\2\u00d2\31\3\2",
@@ -1275,8 +1275,8 @@ function ParamContext(parser, parent, invokingState) {
 ParamContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 ParamContext.prototype.constructor = ParamContext;
 
-ParamContext.prototype.TYPE = function() {
-    return this.getToken(ABLParser.TYPE, 0);
+ParamContext.prototype.name = function() {
+    return this.getTypedRuleContext(NameContext,0);
 };
 
 ParamContext.prototype.ablExpression = function() {
@@ -1312,7 +1312,7 @@ ABLParser.prototype.param = function() {
         case 1:
             this.enterOuterAlt(localctx, 1);
             this.state = 193;
-            this.match(ABLParser.TYPE);
+            this.name();
             this.state = 195;
             _la = this._input.LA(1);
             if(_la===ABLParser.T__8 || _la===ABLParser.BANG || ((((_la - 77)) & ~0x1f) == 0 && ((1 << (_la - 77)) & ((1 << (ABLParser.BOOL - 77)) | (1 << (ABLParser.NULL - 77)) | (1 << (ABLParser.TYPE - 77)) | (1 << (ABLParser.CHARS - 77)) | (1 << (ABLParser.FLOAT - 77)) | (1 << (ABLParser.INT - 77)) | (1 << (ABLParser.STRING - 77)))) !== 0)) {
@@ -1328,7 +1328,7 @@ ABLParser.prototype.param = function() {
             var la_ = this._interp.adaptivePredict(this._input,10,this._ctx);
             if(la_===1) {
                 this.state = 197;
-                this.match(ABLParser.TYPE);
+                this.name();
 
             }
             this.state = 200;

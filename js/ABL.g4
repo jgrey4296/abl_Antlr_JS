@@ -27,8 +27,9 @@ ablLiteral : INT | FLOAT | string | BOOL | NULL;
 
 //Generic parameters rule
 params : '(' param? (',' param)* ')';
-param : TYPE ablExpression?
-    | TYPE? ablExpression;
+param : name ablExpression?
+    | name ? ablExpression;
+
 
 javaMethod : BANG? name params;
 ablExpression : name | ablLiteral | javaMethod | conditionalExpression;

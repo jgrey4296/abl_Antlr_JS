@@ -21,9 +21,8 @@ exports.paramTests = {
 
         test.ok(result.length === 1);
         test.ok(result[0].type === "param");
-        test.ok(result[0].varType === undefined);
-        test.ok(result[0].value.type === "ablExpression");
-        test.ok(result[0].value.value === "aSimpleName");
+        test.ok(result[0].varType === "aSimpleName");
+        test.ok(result[0].value === undefined,result[0].value);
         
         test.done();
     },

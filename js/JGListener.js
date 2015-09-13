@@ -170,28 +170,21 @@ JGListener.prototype.enterWmeRegistration = function(ctx){
 JGListener.prototype.exitParam = function(ctx){
     var outObj = {
         type : "param",
-        //explicit TYPE name
+        //explicit type
         varType : undefined,
         //either a name or a literal
         value : undefined
     };
-    
-    if(ctx.TYPE()){
-        outObj.varType = ctx.TYPE().getText();
-    }
 
-    //Use an expression
-    //TODO: fold in?
-    if(ctx.ablExpression() && this.lastOnStack().type === "ablExpression"){
+    if(ctx.name() && ctx.ablExpression() && this.lastOnStack().type === "ablExpression"){
         outObj.value = this.parsedStack.pop();
-
-        //if a name:
-
-        //if a literal:
-        
+        outObj.varType = ctx.name().getText();
+    }else if(ctx.name()){
+        outObj.varType = ctx.name().getText();
+    }else if(ctx.ablExpression() && this.lastOnStack().type === "ablExpression"){
+        outObj.value = this.parsedStack.pop();
     }
 
-    
     if(outObj.varType !== undefined || outObj.value !== undefined){
         this.parsedStack.push(outObj);
     }

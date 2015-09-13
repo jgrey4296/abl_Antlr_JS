@@ -25,9 +25,10 @@ exports.conditionalExpressionTests = {
         test.ok(result[0].params instanceof Array);
         test.ok(result[0].params.length === 2);
         test.ok(result[0].params[0].type === "param");
-        test.ok(result[0].params[0].varType === undefined);
-        test.ok(result[0].params[0].value.type === "ablExpression");
-        test.ok(result[0].params[0].value.value === "x");
+        test.ok(result[0].params[0].varType === "x");
+        test.ok(result[0].params[0].value === undefined);
+        test.ok(result[0].params[1].varType === "y");
+        test.ok(result[0].params[1].value === undefined);
         
         test.done();
     },

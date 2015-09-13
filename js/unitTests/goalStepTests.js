@@ -37,10 +37,7 @@ exports.goalStepTests = {
         test.ok(result[0].params[1].varType === undefined);
         test.ok(result[0].params[1].value.type === "ablExpression");
         test.ok(result[0].params[1].value.varType === "ablLiteral");
-        test.ok(result[0].params[1].value.value.type === "ablLiteral");
         test.ok(result[0].params[1].value.value.varType === "int");
-        test.ok(result[0].params[1].value.value.value === "5");
-        
         test.done();
     },
 

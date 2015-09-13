@@ -376,10 +376,14 @@ JGListener.prototype.exitAblExpression = function(ctx){
     var outObj = {
         type : 'ablExpression',
         varType : undefined,
-        value : undefined        
+        value : undefined,
+        cast : undefined,
     };
 
     //TODO: fold ablLiteral into the expression
+    if(ctx.cast()){
+        outObj.cast = ctx.cast().name().getText();
+    }
     
     if(ctx.name()){
         outObj.value = ctx.name().getText();

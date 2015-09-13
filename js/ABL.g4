@@ -32,7 +32,8 @@ param : name ablExpression?
 
 
 javaMethod : BANG? name params;
-ablExpression : name | ablLiteral | javaMethod | conditionalExpression;
+cast : '(' name ')';
+ablExpression : cast? name | ablLiteral | javaMethod | conditionalExpression;
 
 
 //Action Registration:

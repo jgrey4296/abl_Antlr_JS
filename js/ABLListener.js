@@ -119,6 +119,15 @@ ABLListener.prototype.exitJavaMethod = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ABLParser#cast.
+ABLListener.prototype.enterCast = function(ctx) {
+};
+
+// Exit a parse tree produced by ABLParser#cast.
+ABLListener.prototype.exitCast = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ABLParser#ablExpression.
 ABLListener.prototype.enterAblExpression = function(ctx) {
 };

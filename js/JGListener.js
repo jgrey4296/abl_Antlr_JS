@@ -504,10 +504,16 @@ JGListener.prototype.exitBinaryOp = function(ctx){
     var outObj = {
         type : "binaryOp",
         expression : [],
-        operator : undefined
+        operator : undefined,
+        tailOperator : undefined,
+        tailBinaryOp : undefined
     };
 
-
+    if(ctx.binaryOp() && this.itemsOnStack() && this.lastOnStack().type === "binaryOp" && this.parsedStack[this.parsedStack.length-2].type === "operator"){
+        outObj.tailBinaryOp = this.parsedStack.pop();
+        outObj.tailOperator = this.parsedStack.pop();
+    }
+    
     if(ctx.ablExpression().length === 2 && this.itemsOnStack()
        && this.lastOnStack().type === "ablExpression"){
         outObj.expression.unshift(this.parsedStack.pop());

@@ -17,7 +17,6 @@ exports.wmeFieldTestTests = require('./WmeFieldTestTests');
 exports.wmeTestTests = require('./WMETestTest');
 exports.binaryOpTests = require('./binaryOpTests');
 exports.javaMethodTests = require('./javaMethodTests');
-exports.clauseTests = require('./clauseTests');
 exports.mixedCallTests = require('./mixedCallTests');
 exports.conditionalExpressionTests = require('./conditionalExpressionTests');
 exports.wmeTestSequenceTests = require('./wmeTestSequenceTests');

@@ -53,8 +53,8 @@ ADAPTIVE : 'adaptive';
 STAR : '*';
 BOOL : 'True' | 'False';
 NULL : 'Null';
-TYPE : [A-Z][a-zA-Z_\.\[\]]*;
-CHARS : [a-z][a-zA-Z_\.]*;
+TYPE : [A-Z][a-zA-Z_\.\[\]0-9]*;
+CHARS : [a-z][a-zA-Z_\.0-9]*;
 FLOAT : [0-9]+'.'[0-9]+;
 INT : '-'?[0-9]+;    
 

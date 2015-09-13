@@ -75,7 +75,7 @@ wmeFieldTest : name operator ablExpression;
 //TODO: on v2 change '=' to '::'
 wmeTest : (name ('=' | '::'))? BANG? '(' TYPE wmeFieldTest* ')';
 
-binaryOp :  ablExpression (operator ablExpression)?;
+binaryOp :  ablExpression (operator ablExpression)? (operator binaryOp)?;
 booleanHelper : AND | OR;
 mixedCall : binaryOp (booleanHelper binaryOp)*;
 

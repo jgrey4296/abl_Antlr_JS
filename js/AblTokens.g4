@@ -32,7 +32,7 @@ TEAMNEEDED: 'team_needed_for_success';
 ONENEEDED: 'one_needed_for_success';
 
 FAIL : 'fail';
-SUCCEED : 'succeed';
+SUCCEED : 'succeed' | 'succeed_step';
 WAIT : 'wait';
 
 MOVESTEP : 'move_step';
@@ -56,7 +56,7 @@ NULL : 'Null';
 TYPE : [A-Z][a-zA-Z_\.\[\]]*;
 CHARS : [a-z][a-zA-Z_\.]*;
 FLOAT : [0-9]+'.'[0-9]+;
-INT : [0-9]+;    
+INT : '-'?[0-9]+;    
 
 //note to self: lexing whitespace in strings means
 //a particular order of lexer rules:

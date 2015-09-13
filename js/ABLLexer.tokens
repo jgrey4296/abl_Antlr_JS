@@ -145,7 +145,6 @@ ANYTHING=87
 'team_needed_for_success'=58
 'one_needed_for_success'=59
 'fail'=60
-'succeed'=61
 'wait'=62
 'move_step'=63
 'delete_step'=64

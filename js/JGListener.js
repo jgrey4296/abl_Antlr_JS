@@ -1103,7 +1103,11 @@ JGListener.prototype.exitBehavingEntity = function(ctx){
         conflicts : [],
         declarations : [],
         behaviours : [],
-        intitialTree : undefined
+        intitialTree : undefined,
+        imports : [],
+        packageDec : undefined,
+        registeredWMEs : [],
+        
     };
 
     if(ctx.TYPE()){
@@ -1123,12 +1127,18 @@ JGListener.prototype.exitBehavingEntity = function(ctx){
             outObj.behaviours.unshift(current);
         }else if(current.type === "ablDeclaration"){
             outObj.declarations.unshift(current);
-        }else if(current.type === "conflictDecl"){
+        }else if(current.type === "conflictDecl" | current.type === "conflictDeclaration"){
             outObj.conflicts.unshift(current);
         }else if(current.type === "decisionCycleSMCallDeclaration"){
             outObj.decisionCycle = current;
         }else if(current.type === "teamNeeded"){
             outObj.teamNeeded = current;
+        }else if(current.type === "WMERegistration"){
+            outObj.registeredWMEs.push(current);
+        }else if(current.type === "importDeclaration"){
+            outObj.imports.push(current);
+        }else if(current.type === "package"){
+            outObj.packageDec = current;
         }else{
             //console.warn("Did not recognise:",current);
             if(!notRecognised[current.type]){

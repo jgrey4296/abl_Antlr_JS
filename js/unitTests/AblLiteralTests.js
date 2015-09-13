@@ -60,6 +60,18 @@ exports.ablLiteralTests = {
         
         test.done();
     },
+
+    exampleString : function(test){
+        var parseString = '";)"';
+        var startRule = "ablLiteral";
+        var result = ABLModule.parse(parseString,startRule);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "ablLiteral");
+        test.ok(result[0].varType === "string");
+        test.ok(result[0].value === '";)"');
+        test.done();
+    },
+    
     /**
        simpleBool
        @method simpleBool

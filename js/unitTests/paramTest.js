@@ -65,5 +65,19 @@ exports.paramTests = {
         test.done();
     },
 
+    stringTestFromExampleAbl : function(test){
+        var parseString = '";)"';
+        var startRule = "param";
+        var result = ABLModule.parse(parseString,startRule);
+        test.ok(result.length === 1);
+        test.ok(result[0].type === "param");
+        test.ok(result[0].varType === undefined);
+        test.ok(result[0].value.type === "ablExpression");
+        test.ok(result[0].value.varType === "ablLiteral",result[0].value.varType);
+        test.ok(result[0].value.value.varType === "string");
+        test.ok(result[0].value.value.value === '";)"',result[0].value.value.value);
+        test.done();
+    },
+    
     
 };

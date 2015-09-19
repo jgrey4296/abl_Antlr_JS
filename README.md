@@ -21,7 +21,7 @@ java -jar /path/to/antlr.jar -Dlanguage=JavaScript ABL.g4
 Generated files may need their import statements amended from:
 	import('./antlr4/index')
 to:
-	import('./antlr4/index')
+	import('./lib/antlr4/index')
 
 ## PREFFERED USAGE:
 use make. it will fix imports automatically.

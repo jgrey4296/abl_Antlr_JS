@@ -43,10 +43,10 @@ ABLModule.js is a wrapper to easily setup the parser.
 ##Mental Act Filter:
 fileFilter.js in mental_act_filter will preprocess an abl file to tranform all mental_acts into stock "mental_act{}" statements, so that the parser doesnt need to handle full java
 
-#Examples
+##Examples
 Example real abl files, simple abl files, preprocessed/mentalAct_Stripped files, and parsed to JSON files, can be found in the examples folder
 
-#Unit Tests
+##Unit Tests
 Can be found in js/unitTests. Written using nodeunit.
 
 

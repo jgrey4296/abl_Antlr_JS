@@ -2,29 +2,19 @@
 An ANTLR 4 based javascript parser for ABL
 
 ## Requirements:
-antlr4 javascript runtime
+antlr4 javascript runtime,
 nodeunit and amdefine
 
 ## Grammar Files:
 ABL.g4
 AblTokens.g4
 
-Possibly to be split up into:
-ABL.g4
-ABLTokens.g4
-ABLBehaviour.g4
-ABLPrecondition.g4
-StepModifiers.g4
 
-## Extraneous Files:
-Expr.g4 (a simple test grammar)
-abl-filtered.g4 (attempt to simplify the grammar)
+## Grammar Compilation notes:
+The Capital 'S' In JavaScript Is Important!!!!
+Antlr Must Be > v4.5
 
-## Grammar Compilation:
-THE CAPITAL 'S' IN JavaScript IS IMPORTANT!!!!
-ANTLR MUST BE > v4.5
-
-Command:
+Grammar compilation Command:
 java -jar /path/to/antlr.jar -Dlanguage=JavaScript ABL.g4
 
 ## Fixes:
@@ -37,7 +27,6 @@ to:
 use make. it will fix imports automatically.
 
 ## GENERATED FILES:
-This should generate:
 ABLLexer.js
 ABLLexer.tokens
 ABLListener.js
@@ -50,3 +39,14 @@ The Listener is written in CommonJS Module format
 
 ## USER FILES:
 ABLModule.js is a wrapper to easily setup the parser.
+
+##Mental Act Filter:
+fileFilter.js in mental_act_filter will preprocess an abl file to tranform all mental_acts into stock "mental_act{}" statements, so that the parser doesnt need to handle full java
+
+#Examples
+Example real abl files, simple abl files, preprocessed/mentalAct_Stripped files, and parsed to JSON files, can be found in the examples folder
+
+#Unit Tests
+Can be found in js/unitTests. Written using nodeunit.
+
+

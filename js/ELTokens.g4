@@ -16,5 +16,7 @@ UTILITY : '#';
 DIVIDOR : '/';
 ARROW : '->';
 
+PAIR : '%';
+
 //no whitespace, no internal .'s
 STRING : [a-zA-Z_0-9]+;

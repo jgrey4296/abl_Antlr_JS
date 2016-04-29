@@ -29,6 +29,15 @@ ELListener.prototype.exitDotBangPair = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ELParser#stringList.
+ELListener.prototype.enterStringList = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#stringList.
+ELListener.prototype.exitStringList = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ELParser#eL_Declaration.
 ELListener.prototype.enterEL_Declaration = function(ctx) {
 };

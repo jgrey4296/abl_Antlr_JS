@@ -37,7 +37,7 @@ define(['./lib/antlr4_runtime/index','./ELListener','./ELLexer','./ELParser','./
  
 
         let tree = parser[startRule](),
-            printer = new EL_custom_listener.CustomisedListener();
+            printer = new EL_custom_listener();
 
         antlr4.tree.ParseTreeWalker.DEFAULT.walk(printer,tree);
 

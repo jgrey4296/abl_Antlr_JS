@@ -69,4 +69,47 @@ exports.runtime_tests = {
         test.done();                
     },
 
+    retract_simple : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob");
+        rt.parse(".characters.bill");
+        test.ok(rt.parse(".characters.bob?") === true);
+        test.ok(rt.parse(".characters.bill?") === true);
+        //retract:
+        rt.parse("!!.characters.bob");
+        test.ok(rt.parse(".characters.bob?") === false);
+        test.ok(rt.parse(".characters.bill?") === true);
+        test.done();
+    },
+
+    retract_with_children : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        rt.parse(".characters.bill.location!cellar");
+        test.ok(rt.parse(".characters.bob.location!kitchen?") === true);
+        test.ok(rt.parse(".characters.bill.location!cellar?") === true);
+        rt.parse("!!.characters.bob.location!kitchen");
+        test.ok(rt.parse(".characters.bob.location!kitchen?") === false);
+        test.ok(rt.parse(".characters.bob.location?") === true);
+        test.ok(rt.parse(".characters.bill.location!cellar?") === true);
+        test.done();
+    },
+
+    retract_fail : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        rt.parse(".characters.bill.location!cellar");
+        test.ok(rt.parse(".characters.bob.location!kitchen?") === true);
+        test.ok(rt.parse(".characters.bill.location!cellar?") === true);
+        //bad retract:
+        let result = rt.parse("!!.characters.bob.location!cellar");
+        test.ok(result === false);
+        test.ok(rt.parse(".characters.bob.location!kitchen?") === true);
+        
+
+        
+        test.done();
+    },
+
+    
 };

@@ -1,16 +1,16 @@
 
-GEN_FILES = ABLLexer.js ABLLexer.tokens ABLListener.js ABLParser.js ABL.tokens
+GEN_FILES = ELLexer.js ELLexer.tokens ELListener.js ELParser.js EL.tokens
+WRITTEN_FILES = EL_custom_listener.js ELModule.js
+GRAMMAR = EL.g4
 
-WRITTEN_FILES = JGListener.js ABLModule.js
-
-all : $(GEN_FILES) test
+all : $(GEN_FILES)
 
 compileGrammar :
-	java -jar ./lib/antlr-4.5-complete.jar -Dlanguage=JavaScript ABL.g4
+	java -jar ./lib/antlr-4.5.3-complete.jar -Dlanguage=JavaScript $(GRAMMAR)
 
 $(GEN_FILES) : compileGrammar
 	@echo Cleaning $@
-	perl -pi -e "s/\'antlr4\/index/\'.\/lib\/antlr4\/index/g" $@
+	perl -pi -e "s/\'antlr4\/index/\'.\/lib\/antlr4_runtime\/index/g" $@
 
 test : FORCE 
 	nodeunit ./unitTests/unitTests.js

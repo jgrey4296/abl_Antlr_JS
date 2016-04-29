@@ -8,13 +8,13 @@
    @class nodeMain
  */
 var fs = require('fs');
-var ABLModule = require('./ABLModule');
+var ELModule = require('./ELModule');
 
 
 fs.readFile(process.argv[2],'utf8',function(err,data){
     console.log("File Loaded");
     console.log("Selection: ",data.slice(0,300));
-    var result = ABLModule.parse(data);
+    var result = ELModule.parse(data);
     console.log("Result:",result);
 
     //save the data to json:

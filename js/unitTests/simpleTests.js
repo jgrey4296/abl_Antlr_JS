@@ -17,7 +17,6 @@ exports.importDeclarationTests = {
     simpleDeclaration : function(test){
         let parseString = ".this.is.a.test",
             result = ELModule.parse(parseString);
-        console.log(result);
         test.ok(result.type === 'declaration');
         test.ok(result.action === 'assert');
         test.ok(result.data instanceof Array);
@@ -28,7 +27,7 @@ exports.importDeclarationTests = {
     simpleQuery : function(test){
         let queryString = ".this.is.a.test?",
             result = ELModule.parse(queryString);
-        console.log(result);
+        //console.log(result);
         test.ok(result.type === "query");
         test.ok(result.data instanceof Array);
         test.ok(result.data.length === 4);
@@ -38,7 +37,7 @@ exports.importDeclarationTests = {
     simpleExclusion : function(test){
         let declarationString = ".this.is!a.test",
             result = ELModule.parse(declarationString);
-        console.log(result);
+        //console.log(result);
         test.ok(result.type === 'declaration');
         test.ok(result.data instanceof Array);
         test.ok(result.data.length === 4);
@@ -50,7 +49,8 @@ exports.importDeclarationTests = {
     retract_declaration : function(test){
         let s = "!!.this.is.a.test",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
+        test.ok(result.type === 'declaraction');
         test.ok(result.action === 'retract');
         test.done();
     },
@@ -58,7 +58,7 @@ exports.importDeclarationTests = {
     negated_query : function(test){
         let s = "!!.this.is.a.test?",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
         test.ok(result.type === 'query');
         test.ok(result.negated === true);
         
@@ -72,28 +72,28 @@ exports.importDeclarationTests = {
     bind_at_end : function(test){
         let s = ".this.is.a.test.x->blah",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
         test.ok(result.data.length === 5);
         test.ok(result.data[4].type === 'DOT');
         test.ok(result.data[4].value === 'x');
-        test.ok(result.data[4].bind === 'blah');
+        test.ok(result.data[4].bind[0] === 'blah');
         test.done();
     },
 
     multiple_bind : function(test){
         let s = ".this.is->x.a.test->y",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
         test.ok(result.data.length === 4);
-        test.ok(result.data[1].bind === 'x');
-        test.ok(result.data[3].bind === 'y');        
+        test.ok(result.data[1].bind[0] === 'x');
+        test.ok(result.data[3].bind[0] === 'y');        
         test.done();
     },
 
     recall_bind : function(test){
         let s = "${x}.is.a.test",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
         test.ok(result.data[0].type === 'recall');
         test.ok(result.data[0].value === 'x');
         test.done();
@@ -103,7 +103,7 @@ exports.importDeclarationTests = {
     utility_test : function(test){
         let s = ".this.is.a.test?#2/5",
             result = ELModule.parse(s);
-        console.log(result);
+        //console.log(result);
         test.ok(result.utilityTrue === '2');
         test.ok(result.utilityFalse === '5');        
         test.done();

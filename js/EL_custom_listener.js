@@ -15,6 +15,9 @@ define(['./ELListener'],function(ELListener){
     var Listener = function(){
         //Not ABLListener.call:
         ELListener.ELListener.call(this);
+        //used to build up info
+        this.parseStack = [];
+        //The main object being created:
         this.parseObj = {
             data : []
         };
@@ -52,9 +55,16 @@ define(['./ELListener'],function(ELListener){
             type : "recall",
             value : ctx.STRING().getText()
         });
-
     };
 
+    Listener.prototype.enterStringList = function(ctx){
+        let strings = ctx.STRING();
+        if(strings instanceof Array){
+            this.parseStack.push(ctx.STRING().map(d=>d.getText()));
+        }else{
+            this.parseStack.push(strings.getText());
+        }
+    };
     
     Listener.prototype.enterDotBangPair = function(ctx){
         let dotBang = ctx.DOT() !== null ? 'DOT' : 'BANG',
@@ -62,19 +72,29 @@ define(['./ELListener'],function(ELListener){
                 type : dotBang,
                 value : ctx.STRING(0).getText()
             };
-        if(ctx.ARROW() !== null){
-            obj.bind = ctx.STRING(1).getText();
-        }
-            
-        this.parseObj.data.push(obj);
+        this.parseStack.push(obj);
     };
 
+    Listener.prototype.exitDotBangPair = function(ctx){
+        let obj,bindArray;
+        if(ctx.ARROW() !== null){
+            bindArray = this.parseStack.pop();
+        }        
+        obj = this.parseStack.pop();
+        obj.bind = bindArray;
+        this.parseObj.data.push(obj);
+        
+    };
+        
     Listener.prototype.enterEL_Query = function(ctx){
         if(this.parseObj.type === undefined){
             this.parseObj.type = 'query';
         }
         if(ctx.BANG(0) !== null && ctx.BANG(1) !== null){
             this.parseObj.negated = true;
+        }
+        if(ctx.PAIR() !== null){
+            this.parseObj.pair = true;
         }
     };
 

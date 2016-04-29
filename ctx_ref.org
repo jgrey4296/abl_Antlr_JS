@@ -1,0 +1,21 @@
+* The ctx Object
+
+ctx is passed into each enter and exit function on the listener.
+
+On it, you can get rules that are sub elements of the current rule by calling that sub-rule as a function:
+eg: in 'enterG_package', ctx.name() will get the name rule, then calling 'getText()' will get the 
+text that encompasses that subrule.
+
+The same goes for Tokens, eg: 'ctx.TYPE()'. 
+
+For cases where there are multiple elements of a token/rule,
+the getter will return an array. eg: 'ctx.TYPE()[x]'
+
+You can specify a particular element to get. eg: 'ctx.TYPE(0)'
+
+The methods that can be defined are enter[rulename] and exit[rulename].
+CAPITALISATION IS IMPORTANT. capitalisation will be preserved, with the addition of the first letter after enter 
+and exit being capitalised.
+eg: rule 'name' will become 'enterName' and 'exitName';
+
+ 

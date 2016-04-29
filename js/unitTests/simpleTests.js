@@ -50,7 +50,7 @@ exports.importDeclarationTests = {
         let s = "!!.this.is.a.test",
             result = ELModule.parse(s);
         //console.log(result);
-        test.ok(result.type === 'declaraction');
+        test.ok(result.type === 'declaration');
         test.ok(result.action === 'retract');
         test.done();
     },

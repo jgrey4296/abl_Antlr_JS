@@ -6,7 +6,10 @@ import ELTokens;
 eL_Program : (eL_Declaration | eL_Query) EOF;
 
 //eg: .this.is.a.test
-dotBangPair : (DOT | BANG) STRING (ARROW STRING)?;
+dotBangPair : (DOT | BANG) STRING (ARROW stringList)?;
+stringList : STRING
+    | STRING (COMMA STRING)*;
+
 eL_Declaration : (BANG BANG)? (startPoint)? dotBangPair (dotBangPair)*;
 
 startPoint : SELECTOR LBRACE STRING RBRACE;
@@ -17,7 +20,8 @@ option : LBRACKET STRING (COMMA STRING)+ RBRACKET;
 
 //eg: .this.is.a.test?
 //and .this.is.a.test?#2/0
-eL_Query : (BANG BANG)? eL_Declaration QUESTION utility?;
+//and %.this.is.a.pair
+eL_Query : (BANG BANG)? PAIR? eL_Declaration QUESTION utility?;
 
 utility : UTILITY STRING DIVIDOR STRING;
 

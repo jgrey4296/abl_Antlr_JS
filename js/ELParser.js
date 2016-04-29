@@ -5,36 +5,35 @@ var ELListener = require('./ELListener').ELListener;
 var grammarFileName = "EL.g4";
 
 var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
-    "\u0003\u000f1\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004\u0004\t",
+    "\u0003\u000f/\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004\u0004\t",
     "\u0004\u0004\u0005\t\u0005\u0004\u0006\t\u0006\u0003\u0002\u0003\u0002",
     "\u0005\u0002\u000f\n\u0002\u0003\u0002\u0003\u0002\u0003\u0003\u0003",
-    "\u0003\u0003\u0004\u0003\u0004\u0003\u0004\u0003\u0004\u0003\u0004\u0007",
-    "\u0004\u001a\n\u0004\f\u0004\u000e\u0004\u001d\u000b\u0004\u0003\u0005",
-    "\u0003\u0005\u0003\u0005\u0003\u0005\u0006\u0005#\n\u0005\r\u0005\u000e",
-    "\u0005$\u0003\u0005\u0003\u0005\u0003\u0006\u0003\u0006\u0003\u0006",
-    "\u0003\u0006\u0003\u0006\u0003\u0006\u0005\u0006/\n\u0006\u0003\u0006",
-    "\u0002\u0002\u0007\u0002\u0004\u0006\b\n\u0002\u0003\u0003\u0002\u0004",
-    "\u0005/\u0002\u000e\u0003\u0002\u0002\u0002\u0004\u0012\u0003\u0002",
-    "\u0002\u0002\u0006\u0014\u0003\u0002\u0002\u0002\b\u001e\u0003\u0002",
-    "\u0002\u0002\n(\u0003\u0002\u0002\u0002\f\u000f\u0005\u0006\u0004\u0002",
-    "\r\u000f\u0005\n\u0006\u0002\u000e\f\u0003\u0002\u0002\u0002\u000e\r",
-    "\u0003\u0002\u0002\u0002\u000f\u0010\u0003\u0002\u0002\u0002\u0010\u0011",
-    "\u0007\u0002\u0002\u0003\u0011\u0003\u0003\u0002\u0002\u0002\u0012\u0013",
-    "\t\u0002\u0002\u0002\u0013\u0005\u0003\u0002\u0002\u0002\u0014\u0015",
-    "\u0005\u0004\u0003\u0002\u0015\u001b\u0007\u000f\u0002\u0002\u0016\u0017",
-    "\u0005\u0004\u0003\u0002\u0017\u0018\u0007\u000f\u0002\u0002\u0018\u001a",
-    "\u0003\u0002\u0002\u0002\u0019\u0016\u0003\u0002\u0002\u0002\u001a\u001d",
-    "\u0003\u0002\u0002\u0002\u001b\u0019\u0003\u0002\u0002\u0002\u001b\u001c",
-    "\u0003\u0002\u0002\u0002\u001c\u0007\u0003\u0002\u0002\u0002\u001d\u001b",
-    "\u0003\u0002\u0002\u0002\u001e\u001f\u0007\u0007\u0002\u0002\u001f\"",
-    "\u0007\u000f\u0002\u0002 !\u0007\u0006\u0002\u0002!#\u0007\u000f\u0002",
-    "\u0002\" \u0003\u0002\u0002\u0002#$\u0003\u0002\u0002\u0002$\"\u0003",
-    "\u0002\u0002\u0002$%\u0003\u0002\u0002\u0002%&\u0003\u0002\u0002\u0002",
-    "&\'\u0007\b\u0002\u0002\'\t\u0003\u0002\u0002\u0002()\u0005\u0006\u0004",
-    "\u0002).\u0007\u0003\u0002\u0002*+\u0007\r\u0002\u0002+,\u0007\u000f",
-    "\u0002\u0002,-\u0007\u000e\u0002\u0002-/\u0007\u000f\u0002\u0002.*\u0003",
-    "\u0002\u0002\u0002./\u0003\u0002\u0002\u0002/\u000b\u0003\u0002\u0002",
-    "\u0002\u0006\u000e\u001b$."].join("");
+    "\u0003\u0003\u0003\u0003\u0004\u0003\u0004\u0007\u0004\u0018\n\u0004",
+    "\f\u0004\u000e\u0004\u001b\u000b\u0004\u0003\u0005\u0003\u0005\u0003",
+    "\u0005\u0003\u0005\u0006\u0005!\n\u0005\r\u0005\u000e\u0005\"\u0003",
+    "\u0005\u0003\u0005\u0003\u0006\u0003\u0006\u0003\u0006\u0003\u0006\u0003",
+    "\u0006\u0003\u0006\u0005\u0006-\n\u0006\u0003\u0006\u0002\u0002\u0007",
+    "\u0002\u0004\u0006\b\n\u0002\u0003\u0003\u0002\u0004\u0005-\u0002\u000e",
+    "\u0003\u0002\u0002\u0002\u0004\u0012\u0003\u0002\u0002\u0002\u0006\u0015",
+    "\u0003\u0002\u0002\u0002\b\u001c\u0003\u0002\u0002\u0002\n&\u0003\u0002",
+    "\u0002\u0002\f\u000f\u0005\u0006\u0004\u0002\r\u000f\u0005\n\u0006\u0002",
+    "\u000e\f\u0003\u0002\u0002\u0002\u000e\r\u0003\u0002\u0002\u0002\u000f",
+    "\u0010\u0003\u0002\u0002\u0002\u0010\u0011\u0007\u0002\u0002\u0003\u0011",
+    "\u0003\u0003\u0002\u0002\u0002\u0012\u0013\t\u0002\u0002\u0002\u0013",
+    "\u0014\u0007\u000f\u0002\u0002\u0014\u0005\u0003\u0002\u0002\u0002\u0015",
+    "\u0019\u0005\u0004\u0003\u0002\u0016\u0018\u0005\u0004\u0003\u0002\u0017",
+    "\u0016\u0003\u0002\u0002\u0002\u0018\u001b\u0003\u0002\u0002\u0002\u0019",
+    "\u0017\u0003\u0002\u0002\u0002\u0019\u001a\u0003\u0002\u0002\u0002\u001a",
+    "\u0007\u0003\u0002\u0002\u0002\u001b\u0019\u0003\u0002\u0002\u0002\u001c",
+    "\u001d\u0007\u0007\u0002\u0002\u001d \u0007\u000f\u0002\u0002\u001e",
+    "\u001f\u0007\u0006\u0002\u0002\u001f!\u0007\u000f\u0002\u0002 \u001e",
+    "\u0003\u0002\u0002\u0002!\"\u0003\u0002\u0002\u0002\" \u0003\u0002\u0002",
+    "\u0002\"#\u0003\u0002\u0002\u0002#$\u0003\u0002\u0002\u0002$%\u0007",
+    "\b\u0002\u0002%\t\u0003\u0002\u0002\u0002&\'\u0005\u0006\u0004\u0002",
+    "\',\u0007\u0003\u0002\u0002()\u0007\r\u0002\u0002)*\u0007\u000f\u0002",
+    "\u0002*+\u0007\u000e\u0002\u0002+-\u0007\u000f\u0002\u0002,(\u0003\u0002",
+    "\u0002\u0002,-\u0003\u0002\u0002\u0002-\u000b\u0003\u0002\u0002\u0002",
+    "\u0006\u000e\u0019\","].join("");
 
 
 var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
@@ -50,7 +49,7 @@ var symbolicNames = [ null, "QUESTION", "DOT", "BANG", "COMMA", "LBRACKET",
                       "RBRACKET", "SELECTOR", "LBRACE", "RBRACE", "RETURN", 
                       "UTILITY", "DIVIDOR", "STRING" ];
 
-var ruleNames =  [ "eL_Program", "dotbang", "eL_Declaration", "option", 
+var ruleNames =  [ "eL_Program", "dotBangPair", "eL_Declaration", "option", 
                    "eL_Query" ];
 
 function ELParser (input) {
@@ -87,7 +86,7 @@ ELParser.DIVIDOR = 12;
 ELParser.STRING = 13;
 
 ELParser.RULE_eL_Program = 0;
-ELParser.RULE_dotbang = 1;
+ELParser.RULE_dotBangPair = 1;
 ELParser.RULE_eL_Declaration = 2;
 ELParser.RULE_option = 3;
 ELParser.RULE_eL_Query = 4;
@@ -174,7 +173,7 @@ ELParser.prototype.eL_Program = function() {
     return localctx;
 };
 
-function DotbangContext(parser, parent, invokingState) {
+function DotBangPairContext(parser, parent, invokingState) {
 	if(parent===undefined) {
 	    parent = null;
 	}
@@ -183,42 +182,46 @@ function DotbangContext(parser, parent, invokingState) {
 	}
 	antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
-    this.ruleIndex = ELParser.RULE_dotbang;
+    this.ruleIndex = ELParser.RULE_dotBangPair;
     return this;
 }
 
-DotbangContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
-DotbangContext.prototype.constructor = DotbangContext;
+DotBangPairContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
+DotBangPairContext.prototype.constructor = DotBangPairContext;
 
-DotbangContext.prototype.DOT = function() {
+DotBangPairContext.prototype.STRING = function() {
+    return this.getToken(ELParser.STRING, 0);
+};
+
+DotBangPairContext.prototype.DOT = function() {
     return this.getToken(ELParser.DOT, 0);
 };
 
-DotbangContext.prototype.BANG = function() {
+DotBangPairContext.prototype.BANG = function() {
     return this.getToken(ELParser.BANG, 0);
 };
 
-DotbangContext.prototype.enterRule = function(listener) {
+DotBangPairContext.prototype.enterRule = function(listener) {
     if(listener instanceof ELListener ) {
-        listener.enterDotbang(this);
+        listener.enterDotBangPair(this);
 	}
 };
 
-DotbangContext.prototype.exitRule = function(listener) {
+DotBangPairContext.prototype.exitRule = function(listener) {
     if(listener instanceof ELListener ) {
-        listener.exitDotbang(this);
+        listener.exitDotBangPair(this);
 	}
 };
 
 
 
 
-ELParser.DotbangContext = DotbangContext;
+ELParser.DotBangPairContext = DotBangPairContext;
 
-ELParser.prototype.dotbang = function() {
+ELParser.prototype.dotBangPair = function() {
 
-    var localctx = new DotbangContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 2, ELParser.RULE_dotbang);
+    var localctx = new DotBangPairContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 2, ELParser.RULE_dotBangPair);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
@@ -230,6 +233,8 @@ ELParser.prototype.dotbang = function() {
         else {
             this.consume();
         }
+        this.state = 17;
+        this.match(ELParser.STRING);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
 	        localctx.exception = re;
@@ -260,28 +265,16 @@ function EL_DeclarationContext(parser, parent, invokingState) {
 EL_DeclarationContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 EL_DeclarationContext.prototype.constructor = EL_DeclarationContext;
 
-EL_DeclarationContext.prototype.dotbang = function(i) {
+EL_DeclarationContext.prototype.dotBangPair = function(i) {
     if(i===undefined) {
         i = null;
     }
     if(i===null) {
-        return this.getTypedRuleContexts(DotbangContext);
+        return this.getTypedRuleContexts(DotBangPairContext);
     } else {
-        return this.getTypedRuleContext(DotbangContext,i);
+        return this.getTypedRuleContext(DotBangPairContext,i);
     }
 };
-
-EL_DeclarationContext.prototype.STRING = function(i) {
-	if(i===undefined) {
-		i = null;
-	}
-    if(i===null) {
-        return this.getTokens(ELParser.STRING);
-    } else {
-        return this.getToken(ELParser.STRING, i);
-    }
-};
-
 
 EL_DeclarationContext.prototype.enterRule = function(listener) {
     if(listener instanceof ELListener ) {
@@ -307,19 +300,15 @@ ELParser.prototype.eL_Declaration = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 18;
-        this.dotbang();
         this.state = 19;
-        this.match(ELParser.STRING);
-        this.state = 25;
+        this.dotBangPair();
+        this.state = 23;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         while(_la===ELParser.DOT || _la===ELParser.BANG) {
             this.state = 20;
-            this.dotbang();
-            this.state = 21;
-            this.match(ELParser.STRING);
-            this.state = 27;
+            this.dotBangPair();
+            this.state = 25;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         }
@@ -409,23 +398,23 @@ ELParser.prototype.option = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 28;
+        this.state = 26;
         this.match(ELParser.LBRACKET);
-        this.state = 29;
+        this.state = 27;
         this.match(ELParser.STRING);
-        this.state = 32; 
+        this.state = 30; 
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
-            this.state = 30;
+            this.state = 28;
             this.match(ELParser.COMMA);
-            this.state = 31;
+            this.state = 29;
             this.match(ELParser.STRING);
-            this.state = 34; 
+            this.state = 32; 
             this._errHandler.sync(this);
             _la = this._input.LA(1);
         } while(_la===ELParser.COMMA);
-        this.state = 36;
+        this.state = 34;
         this.match(ELParser.RBRACKET);
     } catch (re) {
     	if(re instanceof antlr4.error.RecognitionException) {
@@ -509,20 +498,20 @@ ELParser.prototype.eL_Query = function() {
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 38;
+        this.state = 36;
         this.eL_Declaration();
-        this.state = 39;
+        this.state = 37;
         this.match(ELParser.QUESTION);
-        this.state = 44;
+        this.state = 42;
         _la = this._input.LA(1);
         if(_la===ELParser.UTILITY) {
-            this.state = 40;
+            this.state = 38;
             this.match(ELParser.UTILITY);
-            this.state = 41;
+            this.state = 39;
             this.match(ELParser.STRING);
-            this.state = 42;
+            this.state = 40;
             this.match(ELParser.DIVIDOR);
-            this.state = 43;
+            this.state = 41;
             this.match(ELParser.STRING);
         }
 

@@ -15,7 +15,7 @@ exports.importDeclarationTests = {
        @method stub
      */
     stub : function(test){
-        let parseString = ".this.is.a.test",
+        let parseString = ".this",
             result = ELModule.parse(parseString);
         console.log(result);
         test.ok(result[0] === 'entered EL Program');

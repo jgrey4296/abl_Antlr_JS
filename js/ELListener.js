@@ -20,12 +20,12 @@ ELListener.prototype.exitEL_Program = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ELParser#dotbang.
-ELListener.prototype.enterDotbang = function(ctx) {
+// Enter a parse tree produced by ELParser#dotBangPair.
+ELListener.prototype.enterDotBangPair = function(ctx) {
 };
 
-// Exit a parse tree produced by ELParser#dotbang.
-ELListener.prototype.exitDotbang = function(ctx) {
+// Exit a parse tree produced by ELParser#dotBangPair.
+ELListener.prototype.exitDotBangPair = function(ctx) {
 };
 
 

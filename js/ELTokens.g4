@@ -16,4 +16,4 @@ UTILITY : '#';
 DIVIDOR : '/';
 
 //no whitespace, no internal .'s
-STRING : [a-zA-Z_0-9];
+STRING : [a-zA-Z_0-9]+;

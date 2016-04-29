@@ -11,12 +11,48 @@ function ELListener() {
 ELListener.prototype = Object.create(antlr4.tree.ParseTreeListener.prototype);
 ELListener.prototype.constructor = ELListener;
 
+// Enter a parse tree produced by ELParser#eL_Program.
+ELListener.prototype.enterEL_Program = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#eL_Program.
+ELListener.prototype.exitEL_Program = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#dotbang.
+ELListener.prototype.enterDotbang = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#dotbang.
+ELListener.prototype.exitDotbang = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#eL_Declaration.
+ELListener.prototype.enterEL_Declaration = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#eL_Declaration.
+ELListener.prototype.exitEL_Declaration = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ELParser#option.
 ELListener.prototype.enterOption = function(ctx) {
 };
 
 // Exit a parse tree produced by ELParser#option.
 ELListener.prototype.exitOption = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#eL_Query.
+ELListener.prototype.enterEL_Query = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#eL_Query.
+ELListener.prototype.exitEL_Query = function(ctx) {
 };
 
 

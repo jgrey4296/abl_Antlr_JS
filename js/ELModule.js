@@ -16,12 +16,11 @@ define(['./lib/antlr4_runtime/index','./ELListener','./ELLexer','./ELParser','./
        @param startRule The rule of the grammar to start on
        @static
 
-       Grammar to be found in ABL.g4 and ABLTokens.g4
+       Grammar to be found in EL.g4 and ELTokens.g4
      */
     let parseInput = function(input,startRule){
-        if(startRule === undefined){
-            startRule = "EL_Program";
-        }
+        startRule = startRule || "eL_Program";
+        
         if(input.length <= 0){
             throw new Error("Parser given no input");
         };
@@ -29,12 +28,11 @@ define(['./lib/antlr4_runtime/index','./ELListener','./ELLexer','./ELParser','./
         let chars = new antlr4.InputStream(input),
             lexer = new ELLexer.ELLexer(chars),
             tokens  = new antlr4.CommonTokenStream(lexer),
-            parser = new ELParser.ELLParser(tokens);
+            parser = new ELParser.ELParser(tokens);
         parser.buildParseTrees = true;
-
+        
         if(parser[startRule] === undefined){
-            throw new Error("Parser does not have a rule:" +
-                            startRule);
+            throw new Error("Parser does not have a rule:" + startRule);
         }        
  
 

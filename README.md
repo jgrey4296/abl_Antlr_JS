@@ -50,3 +50,6 @@ Example real abl files, simple abl files, preprocessed/mentalAct_Stripped files,
 Can be found in js/unitTests. Written using nodeunit.
 
 
+## Misc ANTLR Notes
+rules must start with a non-capital letter
+listener rules will capitalise the first letter of a rule for entry and exit

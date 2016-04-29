@@ -2,7 +2,7 @@
 /**
    @module ABLParser
  */
-var ELListener = require('./ELList');
+var ELListener = require('./ELListener');
 
 
 /**
@@ -10,7 +10,7 @@ var ELListener = require('./ELList');
    @class JGListener
    @constructor
  */
-var CustomisedListener = function(){
+var Listener = function(){
     //Not ABLListener.call:
     ELListener.ELListener.call(this);
     this.parsedStack = [];
@@ -19,14 +19,17 @@ var CustomisedListener = function(){
 
 //Not ABLListener.prototype, just ABLListener
 //Setup the prototype chain:
-CustomisedListener.prototype = Object.create(ELListener.ELListener.prototype);
-CustomisedListener.prototype.constructor = CustomisedListener;
+Listener.prototype = Object.create(ELListener.ELListener.prototype);
+Listener.prototype.constructor = Listener;
 
 //------------------------------
 //PARSING METHODS:
 
+Listener.prototype.enterEL_Program = function(ctx){
+    console.log("ctx tostring:",ctx.getText());
+    this.parsedStack.push("entered EL Program");
+};
 
 
 
-
-exports.CustomisedListener = CustomisedListener;
+exports.CustomisedListener = Listener;

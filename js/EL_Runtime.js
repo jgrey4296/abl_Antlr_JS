@@ -163,7 +163,12 @@ define(['lodash','./ELModule'],function(_,ELModule){
                 queryStatus = false;
             }
         }
-        return queryStatus;
+
+        if(queryObj.negated === true){
+            return !queryStatus;
+        }else{
+            return queryStatus;
+        }
     };
 
     ELBase.prototype.clearState = function(){

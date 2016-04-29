@@ -105,11 +105,43 @@ exports.runtime_tests = {
         let result = rt.parse("!!.characters.bob.location!cellar");
         test.ok(result === false);
         test.ok(rt.parse(".characters.bob.location!kitchen?") === true);
-        
+        test.done();
+    },
 
+    utility_success_parse : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        let result = rt.parse(".characters.bob.location!kitchen?#2/5");
+        test.ok(result === '2');
+        test.done();
+    },
+
+    utility_fail_parse : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        let result = rt.parse(".characters.bob.location!cellar?#2/5");
+        test.ok(result === '5');
+        test.done();
+    },
+
+    negated_query : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        let resultNormal = rt.parse(".characters.bob.location!kitchen?"),
+            resultNegated = rt.parse("!!.characters.bob.location!kitchen?");
+        test.ok(resultNormal !== resultNegated);
         
         test.done();
     },
 
+    negated_utility : function(test){
+        let rt = new ELRuntime();
+        rt.parse(".characters.bob.location!kitchen");
+        let resultNormal = rt.parse(".characters.bob.location!kitchen?#2/5"),
+            resultNegated = rt.parse("!!.characters.bob.location!kitchen?#2/5");
+        test.ok(resultNormal === '2');
+        test.ok(resultNegated === '5');        
+        test.done();
+    },
     
 };

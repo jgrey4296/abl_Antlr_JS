@@ -38,6 +38,15 @@ ELListener.prototype.exitEL_Declaration = function(ctx) {
 };
 
 
+// Enter a parse tree produced by ELParser#startPoint.
+ELListener.prototype.enterStartPoint = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#startPoint.
+ELListener.prototype.exitStartPoint = function(ctx) {
+};
+
+
 // Enter a parse tree produced by ELParser#option.
 ELListener.prototype.enterOption = function(ctx) {
 };
@@ -53,6 +62,15 @@ ELListener.prototype.enterEL_Query = function(ctx) {
 
 // Exit a parse tree produced by ELParser#eL_Query.
 ELListener.prototype.exitEL_Query = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#utility.
+ELListener.prototype.enterUtility = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#utility.
+ELListener.prototype.exitUtility = function(ctx) {
 };
 
 

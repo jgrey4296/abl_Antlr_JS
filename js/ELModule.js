@@ -41,7 +41,7 @@ define(['./lib/antlr4_runtime/index','./ELListener','./ELLexer','./ELParser','./
 
         antlr4.tree.ParseTreeWalker.DEFAULT.walk(printer,tree);
 
-        return printer.parsedStack;
+        return printer.finish();
     };
 
 

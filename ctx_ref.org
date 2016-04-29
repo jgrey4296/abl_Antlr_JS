@@ -18,4 +18,5 @@ CAPITALISATION IS IMPORTANT. capitalisation will be preserved, with the addition
 and exit being capitalised.
 eg: rule 'name' will become 'enterName' and 'exitName';
 
+sub-elements of the ctx will exist or be NULL
  

@@ -5,23 +5,34 @@ import ELTokens;
 //top level. user can either declare, or query
 eL_Program : (eL_Declaration | eL_Query) EOF;
 
-//eg: .this.is.a.test
-dotBangPair : (DOT | BANG) STRING (ARROW stringList)?;
+//eg: !! ${x}.is.a->y.test
+eL_Declaration : (negation)? (selector)? dotBangPair (dotBangPair)*;
+negation : BANG BANG;
+
+//eg: .this!is.a.test->something
+dotBangPair : (DOT | BANG) selection (ARROW stringList)?;
+
+//${blah}
+selector : SELECTOR LBRACE stringList RBRACE;
+
+//[2] | test
+selection : LBRACKET NUMBER RBRACKET
+    | selector
+    | STRING;
+
+//something,else
 stringList : STRING
     | STRING (COMMA STRING)*;
 
-eL_Declaration : (BANG BANG)? (startPoint)? dotBangPair (dotBangPair)*;
-
-startPoint : SELECTOR LBRACE STRING RBRACE;
-
 //eg: .this.is.a.[test,test2]
-option : LBRACKET STRING (COMMA STRING)+ RBRACKET;
+option : LBRACKET stringList RBRACKET;
 
-
-//eg: .this.is.a.test?
+//eg: !!.this.is.a.test?
 //and .this.is.a.test?#2/0
 //and %.this.is.a.pair
-eL_Query : (BANG BANG)? PAIR? eL_Declaration QUESTION utility?;
+eL_Query : (negation)? PAIR? eL_Declaration QUESTION utility?;
 
-utility : UTILITY STRING DIVIDOR STRING;
+utility : UTILITY stringOrNum DIVIDOR stringOrNum;
+
+stringOrNum : STRING | NUMBER;
 

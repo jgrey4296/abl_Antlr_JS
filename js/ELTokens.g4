@@ -19,4 +19,5 @@ ARROW : '->';
 PAIR : '%';
 
 //no whitespace, no internal .'s
-STRING : [a-zA-Z_0-9]+;
+STRING : [a-zA-Z_][a-zA-Z_0-9]*;
+NUMBER : [0-9]+;

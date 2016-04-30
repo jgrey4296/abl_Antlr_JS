@@ -1,3 +1,4 @@
+/* jshint esversion : 6 */
 /**
    @module ABLParser
 */
@@ -5,7 +6,7 @@ if(typeof define !== 'function'){
     var define = require('amdefine')(module);
 }
 
-define(['./ELListener'],function(ELListener){
+define(['lodash','./ELListener'],function(_,ELListener){
     "use strict";
     /**
        The custom listener constructor
@@ -43,20 +44,33 @@ define(['./ELListener'],function(ELListener){
         if(this.parseObj.type === undefined){
             this.parseObj.type = 'declaration';
         }
-        if(ctx.BANG(0) !== null && ctx.BANG(1) !== null){
+        if(ctx.negation() !== null){
             this.parseObj.action = "retract";
         }else{
             this.parseObj.action = "assert";
         }
+        //store the current size of the parseStack
+        ctx.parseStackSize = this.parseStack.length;
     };
 
-    Listener.prototype.enterStartPoint = function(ctx){
-        this.parseObj.data.unshift({
-            type : "recall",
-            value : ctx.STRING().getText()
+    Listener.prototype.exitEL_Declaration = function(ctx){
+        while(this.parseStack.length > ctx.parseStackSize){
+            this.parseObj.data.unshift(this.parseStack.pop());
+        }
+        
+    };
+    
+    Listener.prototype.enterSelector = function(ctx){
+        this.parseStack.push({
+            type : "recall"
         });
     };
 
+    Listener.prototype.exitSelector = function(ctx){
+        let stringList = this.parseStack.pop();
+        _.last(this.parseStack).value = stringList;
+    };
+    
     Listener.prototype.enterStringList = function(ctx){
         let strings = ctx.STRING();
         if(strings instanceof Array){
@@ -70,19 +84,38 @@ define(['./ELListener'],function(ELListener){
         let dotBang = ctx.DOT() !== null ? 'DOT' : 'BANG',
             obj = {
                 type : dotBang,
-                value : ctx.STRING(0).getText()
             };
         this.parseStack.push(obj);
     };
 
+    Listener.prototype.enterSelection = function(ctx){
+        if(ctx.NUMBER() !== null){
+            _.last(this.parseStack).value = Number(ctx.NUMBER().getText());
+            _.last(this.parseStack).selection = true;
+        }else if(ctx.STRING() !== null){
+            _.last(this.parseStack).value = ctx.STRING().getText();
+        }
+    };
+
+    Listener.prototype.exitSelection = function(ctx){
+        if(ctx.selector() !== null){
+            let selector = this.parseStack.pop();
+            _.last(this.parseStack).selection = true;
+            _.last(this.parseStack).value = selector.value;
+        }
+    };
+    
     Listener.prototype.exitDotBangPair = function(ctx){
         let obj,bindArray;
         if(ctx.ARROW() !== null){
             bindArray = this.parseStack.pop();
-        }        
-        obj = this.parseStack.pop();
+        }
+        obj = _.last(this.parseStack);
         obj.bind = bindArray;
-        this.parseObj.data.push(obj);
+        //this.parseObj.data.push(obj);
+        if(obj.selection === true && obj.type === 'BANG'){
+            throw new Error("Invalid combination of selection and BANG");
+        }
         
     };
         
@@ -90,7 +123,7 @@ define(['./ELListener'],function(ELListener){
         if(this.parseObj.type === undefined){
             this.parseObj.type = 'query';
         }
-        if(ctx.BANG(0) !== null && ctx.BANG(1) !== null){
+        if(ctx.negation() !== null){
             this.parseObj.negated = true;
         }
         if(ctx.PAIR() !== null){
@@ -98,9 +131,10 @@ define(['./ELListener'],function(ELListener){
         }
     };
 
+    
     Listener.prototype.enterUtility = function(ctx){
-        this.parseObj.utilityTrue = ctx.STRING(0).getText();
-        this.parseObj.utilityFalse = ctx.STRING(1).getText();
+        this.parseObj.utilityTrue = ctx.stringOrNum(0).getText();
+        this.parseObj.utilityFalse = ctx.stringOrNum(1).getText();
 
     };
     

@@ -30,29 +30,32 @@ define(['lodash','./ELModule'],function(_,ELModule){
     /**
        @param string : A String to parse for actions
     */
-    ELBase.prototype.parse = function(string){
+    ELBase.prototype.parse = function(string,log){
         let parseObj = parser(string),
-            successStatus = false;
+            result = false;
+        if(log){
+            console.log(parseObj);
+        }        
         if(parseObj.type === 'declaration'){
             //DECLARATIONS
             if(parseObj.action === 'retract'){
-                successStatus = this.retract(parseObj);
+                result = this.retract(parseObj);
             }else if(parseObj.action === 'assert'){
-                successStatus = this.assert(parseObj);
+                result = this.assert(parseObj);
             }
         }else if(parseObj.type === 'query'){
             //QUERIES
-            successStatus = this.query(parseObj);
+            result = this.query(parseObj);
         }
 
         //todo: return bindings
-        if(parseObj.utilityTrue && successStatus){
+        if(parseObj.utilityTrue && result){
             return parseObj.utilityTrue;
-        }else if(parseObj.utilityFalse && !successStatus){
+        }else if(parseObj.utilityFalse && result === false){
             return parseObj.utilityFalse;
         }
         //default return:
-        return successStatus;
+        return result;
     };
     
     ELBase.prototype.assert = function(assertObj){
@@ -63,13 +66,15 @@ define(['lodash','./ELModule'],function(_,ELModule){
         while(successStatus && data.length > 0){
             let next = data.shift();
             //if starting from a bound point
-            if(next.type === 'recall' && this.currentState.has(next.value)){
-                current = this.currentState.get(next.value);
+            if(next.type === 'recall'){
+                let selected = _.sample(next.value);
+                if(!this.currentState.has(selected)){
+                    throw new Error('unrecognised binding');
+                }
+                current = this.currentState.get(selected);
             }else if(elState.get(next.type) === current.exclusive){
                 //ex type matches, check for value
-                if(current.has(next.value)){
-                    current = current.get(next.value);
-                }else{
+                if(!current.has(next.value)){
                     //no value, create
                     if(elState.get(next.type) === BANG){
                         current.clear();
@@ -77,8 +82,10 @@ define(['lodash','./ELModule'],function(_,ELModule){
                     let newMap = new Map();
                     newMap.exclusive = DOT;
                     current.set(next.value,newMap);
-                    current = newMap;
                 }
+                    this.bindToCurrentState(next.bind,current.get(next.value));
+
+                    current = current.get(next.value);
             }else if(elState.get(next.type) !== current.exclusive){
                 //ex type mismatch
                 if(elState.get(next.type) === BANG){
@@ -119,8 +126,12 @@ define(['lodash','./ELModule'],function(_,ELModule){
         while(successStatus && data.length > 1){
             let next = data.shift();
             //RECALL a location:
-            if(next.type === 'recall' && this.currentState.has(next.value)){
-                current = this.currentState.get(next.value);
+            if(next.type === 'recall'){
+                let selected = _.sample(next.value);
+                if(!this.currentState.has(selected)){
+                    throw new Error('unrecognised binding');
+                }
+                current = this.currentState.get(selected);
             }else if(elState.get(next.type) === current.exclusive){
                 if(current.has(next.value)){
                     current = current.get(next.value);
@@ -145,20 +156,55 @@ define(['lodash','./ELModule'],function(_,ELModule){
         return successStatus;
     };
 
+    /**
+       Query the EL Fact base for the given sequence
+     */
     ELBase.prototype.query = function(queryObj){
         let queryStatus = true,
             data = _.clone(queryObj.data),
-            current = this.root;
+            current = this.root,
+            bindings = {};
         while(queryStatus && data.length > 0){
             let next = data.shift();
+            if(next.type === 'recall'){
+                let selected = _.sample(_.shuffle(next.value));
+                if(!this.currentState.has(selected)){
+                    throw new Error('unrecognised binding');
+                }
+                current = this.currentState.get(selected);
+                continue;//to the next iteration
+            }
+            //----------
             //Mismatch exclusion type:
             if(elState.get(next.type) !== current.exclusive){
                 queryStatus = false;
                 break;
             }
-            //value containment:
-            if(current.has(next.value)){
+            //selection:
+            if(next.selection && next.bind !== undefined && next.bind.length === next.value){
+                let selectionAmnt = next.value,
+                    potentialAmnt = current.size;
+                if(selectionAmnt > potentialAmnt){
+                    queryStatus = false;
+                    break;
+                }else{
+                    //bind them:
+                    let selection = _.sampleSize(Array.from(current.keys()),selectionAmnt),
+                        selectionObj = _.zipObject(next.bind,selection);
+                    bindings = _.assign(bindings,selectionObj);
+                    this.bindObjToCurrentState(selectionObj,current);
+                }
+                //----------
+            }else if(current.has(next.value)){
+                //value containment:
                 current = current.get(next.value);
+                this.bindToCurrentState(next.bind,current);
+                if(next.bind !== undefined){
+                    next.bind.forEach(d=>{
+                        bindings[d] = next.value;
+                        this.currentState.set(d,current);
+                    });
+                }
             }else{
                 queryStatus = false;
             }
@@ -166,14 +212,26 @@ define(['lodash','./ELModule'],function(_,ELModule){
 
         if(queryObj.negated === true){
             return !queryStatus;
-        }else{
-            return queryStatus;
         }
+        if(queryStatus && _.keys(bindings).length > 0){
+            return bindings;
+        }
+        return queryStatus;        
     };
 
     ELBase.prototype.clearState = function(){
         this.currentState = {};
     };
 
+    ELBase.prototype.bindToCurrentState = function(bindValues,node){
+        if(bindValues){
+            bindValues.forEach(d=>this.currentState.set(d,node));
+        }
+    };
+
+    ELBase.prototype.bindObjToCurrentState = function(bindObj,current){
+        _.toPairs(bindObj).forEach(d=>this.currentState.set(d[0],current.get(d[1])));
+    };
+    
     return ELBase;
 });

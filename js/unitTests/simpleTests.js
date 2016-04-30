@@ -95,7 +95,7 @@ exports.importDeclarationTests = {
             result = ELModule.parse(s);
         //console.log(result);
         test.ok(result.data[0].type === 'recall');
-        test.ok(result.data[0].value === 'x');
+        test.ok(result.data[0].value[0] === 'x');
         test.done();
     },
     

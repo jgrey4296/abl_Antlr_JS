@@ -20,24 +20,6 @@ ELListener.prototype.exitEL_Program = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ELParser#dotBangPair.
-ELListener.prototype.enterDotBangPair = function(ctx) {
-};
-
-// Exit a parse tree produced by ELParser#dotBangPair.
-ELListener.prototype.exitDotBangPair = function(ctx) {
-};
-
-
-// Enter a parse tree produced by ELParser#stringList.
-ELListener.prototype.enterStringList = function(ctx) {
-};
-
-// Exit a parse tree produced by ELParser#stringList.
-ELListener.prototype.exitStringList = function(ctx) {
-};
-
-
 // Enter a parse tree produced by ELParser#eL_Declaration.
 ELListener.prototype.enterEL_Declaration = function(ctx) {
 };
@@ -47,12 +29,48 @@ ELListener.prototype.exitEL_Declaration = function(ctx) {
 };
 
 
-// Enter a parse tree produced by ELParser#startPoint.
-ELListener.prototype.enterStartPoint = function(ctx) {
+// Enter a parse tree produced by ELParser#negation.
+ELListener.prototype.enterNegation = function(ctx) {
 };
 
-// Exit a parse tree produced by ELParser#startPoint.
-ELListener.prototype.exitStartPoint = function(ctx) {
+// Exit a parse tree produced by ELParser#negation.
+ELListener.prototype.exitNegation = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#dotBangPair.
+ELListener.prototype.enterDotBangPair = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#dotBangPair.
+ELListener.prototype.exitDotBangPair = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#selector.
+ELListener.prototype.enterSelector = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#selector.
+ELListener.prototype.exitSelector = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#selection.
+ELListener.prototype.enterSelection = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#selection.
+ELListener.prototype.exitSelection = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#stringList.
+ELListener.prototype.enterStringList = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#stringList.
+ELListener.prototype.exitStringList = function(ctx) {
 };
 
 
@@ -80,6 +98,15 @@ ELListener.prototype.enterUtility = function(ctx) {
 
 // Exit a parse tree produced by ELParser#utility.
 ELListener.prototype.exitUtility = function(ctx) {
+};
+
+
+// Enter a parse tree produced by ELParser#stringOrNum.
+ELListener.prototype.enterStringOrNum = function(ctx) {
+};
+
+// Exit a parse tree produced by ELParser#stringOrNum.
+ELListener.prototype.exitStringOrNum = function(ctx) {
 };
 
 
